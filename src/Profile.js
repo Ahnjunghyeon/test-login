@@ -1,9 +1,8 @@
-// Profile.js
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
-import { Form, Button, Container, Image } from "react-bootstrap";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Form, Button, Container, Image } from "react-bootstrap";
+import Navbar from "./components/CustomNavbar"; // Navbar 컴포넌트를 import합니다.
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -12,6 +11,13 @@ const Profile = () => {
 
   const auth = getAuth();
   const user = auth.currentUser;
+
+  useEffect(() => {
+    if (user) {
+      setDisplayName(user.displayName || "");
+      setPhotoURL(user.photoURL || "");
+    }
+  }, [user]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -25,23 +31,11 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 프로필 업데이트
-    updateProfile(user, {
-      displayName,
-      photoURL: imageFile ? URL.createObjectURL(imageFile) : user.photoURL,
-    })
-      .then(() => {
-        alert("프로필이 업데이트되었습니다.");
-      })
-      .catch((error) => {
-        alert("프로필 업데이트에 실패했습니다: " + error.message);
-      });
-  };
+    let downloadURL = photoURL;
 
-  const uploadImage = async () => {
     if (imageFile) {
       const storage = getStorage();
       const storageRef = ref(
@@ -51,43 +45,56 @@ const Profile = () => {
 
       try {
         await uploadBytes(storageRef, imageFile);
-        const downloadURL = await getDownloadURL(storageRef);
-        console.log("이미지가 성공적으로 업로드되었습니다.", downloadURL);
+        downloadURL = await getDownloadURL(storageRef);
       } catch (error) {
-        console.error("이미지 업로드 실패:", error);
+        console.error("Failed to upload image:", error);
       }
     }
+
+    updateProfile(user, {
+      displayName,
+      photoURL: downloadURL,
+    })
+      .then(() => {
+        alert("Profile updated successfully");
+      })
+      .catch((error) => {
+        alert("Failed to update profile: " + error.message);
+      });
   };
 
   return (
-    <Container className="mt-5">
-      <h2>프로필 수정</h2>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="formDisplayName">
-          <Form.Label>이름</Form.Label>
-          <Form.Control
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-          />
-        </Form.Group>
-        <Form.Group controlId="formPhotoURL" className="mt-3">
-          <Form.Label>프로필 사진</Form.Label>
-          <br />
-          {photoURL && (
-            <Image src={photoURL} rounded className="mb-3" width={200} />
-          )}
-          <Form.Control
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
-        </Form.Group>
-        <Button variant="primary" type="submit" className="mt-3">
-          저장
-        </Button>
-      </Form>
-    </Container>
+    <>
+      <Navbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
+      <Container className="mt-5">
+        <h2>Edit Profile</h2>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group controlId="formDisplayName">
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group controlId="formPhotoURL" className="mt-3">
+            <Form.Label>Profile Photo</Form.Label>
+            <br />
+            {photoURL && (
+              <Image src={photoURL} rounded className="mb-3" width={200} />
+            )}
+            <Form.Control
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </Form.Group>
+          <Button variant="primary" type="submit" className="mt-3">
+            Save
+          </Button>
+        </Form>
+      </Container>
+    </>
   );
 };
 

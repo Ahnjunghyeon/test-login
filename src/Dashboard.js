@@ -1,12 +1,14 @@
 // src/Dashboard.js
 
 import React from "react";
+import CustomNavbar from "./components/CustomNavbar"; // Import the CustomNavbar component
 
-const Dashboard = () => {
+const Dashboard = ({ user }) => {
   return (
     <div>
-      <h1>대시보드</h1>
-      <p>이 페이지는 로그인된 사용자만 접근할 수 있습니다.</p>
+      <CustomNavbar user={user} />
+      <h1>Dashboard</h1>
+      {/* Dashboard content */}
     </div>
   );
 };
