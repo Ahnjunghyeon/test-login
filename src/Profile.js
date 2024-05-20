@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Form, Button, Container, Image } from "react-bootstrap";
-import Navbar from "./components/CustomNavbar"; // Navbar 컴포넌트를 import합니다.
+import CustomNavbar from "./components/CustomNavbar"; // Import the CustomNavbar component
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -65,7 +65,7 @@ const Profile = () => {
 
   return (
     <>
-      <Navbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
+      <CustomNavbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
       <Container className="mt-5">
         <h2>Edit Profile</h2>
         <Form onSubmit={handleSubmit}>

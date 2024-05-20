@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 import {
   getAuth,
@@ -11,13 +20,23 @@ import {
 
 const CustomNavbar = ({ currentUser }) => {
   const [user, setUser] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const signOutUser = () => {
     signOut(auth)
       .then(() => {
         console.log("Logged out successfully");
+        handleMenuClose();
       })
       .catch((error) => {
         console.error("Error logging out: ", error);
@@ -47,55 +66,65 @@ const CustomNavbar = ({ currentUser }) => {
   }, [auth]);
 
   return (
-    <Navbar bg="dark" variant="dark">
-      <Container>
-        <Navbar.Brand as={Link} to="/">
+    <AppBar position="static" color="primary">
+      <Toolbar style={{ justifyContent: "space-between" }}>
+        <Typography
+          variant="h6"
+          component={Link}
+          to="/"
+          style={{
+            color: "inherit",
+            textDecoration: "none",
+            display: "inline-block",
+          }}
+        >
           React-Firebase Auth
-        </Navbar.Brand>
-        <Nav className="me-auto">
-          <Nav.Link as={Link} to="/">
+        </Typography>
+
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Button component={Link} to="/" color="inherit">
             Home
-          </Nav.Link>
-          <Nav.Link as={Link} to="/dashboard">
+          </Button>
+          <Button component={Link} to="/dashboard" color="inherit">
             Dashboard
-          </Nav.Link>
+          </Button>
           {user && (
-            <>
-              <Nav.Link as={Link} to="/profile">
-                Profile
-              </Nav.Link>
-            </>
+            <Button component={Link} to="/profile" color="inherit">
+              Profile
+            </Button>
           )}
-        </Nav>
-        <Nav.Item>
-          <Nav.Link as={Link} to="/profile">
-            {user && (
-              <div style={{ color: "white" }}>
-                <img
-                  src={user.photoURL}
-                  alt="User"
-                  style={{
-                    width: "30px",
-                    borderRadius: "50%",
-                    marginRight: "5px",
-                  }}
-                />
-                {user.displayName}
-              </div>
-            )}
-          </Nav.Link>
-        </Nav.Item>
-        {!user ? (
-          <Button variant="outline-info" onClick={signInWithGoogle}>
-            Google Login
-          </Button>
-        ) : (
-          <Button variant="outline-info" onClick={signOutUser}>
-            Logout
-          </Button>
-        )}
-      </Container>
-    </Navbar>
+          {user ? (
+            <>
+              <IconButton onClick={handleMenuOpen} color="inherit">
+                <Avatar src={user.photoURL} alt="User" />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem
+                  onClick={handleMenuClose}
+                  component={Link}
+                  to="/profile"
+                >
+                  {user.displayName}
+                </MenuItem>
+                <MenuItem onClick={signOutUser}>Logout</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={signInWithGoogle}
+            >
+              Google Login
+            </Button>
+          )}
+        </div>
+      </Toolbar>
+    </AppBar>
   );
 };
 
