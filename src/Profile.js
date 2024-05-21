@@ -1,66 +1,67 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Form, Button, Container, Image } from "react-bootstrap";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getFirestore,
+} from "firebase/firestore";
+import { Form, Button, Container } from "react-bootstrap";
+import "./Profile.css";
 import CustomNavbar from "./components/CustomNavbar"; // Import the CustomNavbar component
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
-  const [photoURL, setPhotoURL] = useState("");
-  const [imageFile, setImageFile] = useState(null);
-
+  const [loading, setLoading] = useState(false); // 로딩 상태 추가
   const auth = getAuth();
+  const db = getFirestore(); // Firestore 초기화
   const user = auth.currentUser;
 
   useEffect(() => {
     if (user) {
       setDisplayName(user.displayName || "");
-      setPhotoURL(user.photoURL || "");
     }
   }, [user]);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPhotoURL(reader.result);
-        setImageFile(file);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let downloadURL = photoURL;
+    // 로딩 상태 시작
+    setLoading(true);
 
-    if (imageFile) {
-      const storage = getStorage();
-      const storageRef = ref(
-        storage,
-        "user-profiles/" + user.uid + "/profile.jpg"
-      );
+    // Firebase에 중복된 닉네임이 있는지 확인
+    const isNicknameAvailable = await checkNicknameAvailability(displayName);
 
-      try {
-        await uploadBytes(storageRef, imageFile);
-        downloadURL = await getDownloadURL(storageRef);
-      } catch (error) {
-        console.error("Failed to upload image:", error);
-      }
+    if (!isNicknameAvailable) {
+      alert("The nickname is already taken. Please choose a different one.");
+      setLoading(false); // 로딩 상태 종료
+      return;
     }
 
+    // 닉네임 변경
     updateProfile(user, {
       displayName,
-      photoURL: downloadURL,
     })
       .then(() => {
         alert("Profile updated successfully");
       })
       .catch((error) => {
         alert("Failed to update profile: " + error.message);
+      })
+      .finally(() => {
+        setLoading(false); // 로딩 상태 종료
       });
+  };
+
+  // Firebase에 중복된 닉네임이 있는지 확인하는 함수
+  const checkNicknameAvailability = async (displayName) => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("displayName", "==", displayName));
+    const querySnapshot = await getDocs(q);
+
+    // 중복된 닉네임이 존재하면 false 반환
+    return querySnapshot.empty;
   };
 
   return (
@@ -68,31 +69,38 @@ const Profile = () => {
       <CustomNavbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
       <Container className="mt-5">
         <h2>Edit Profile</h2>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="formDisplayName">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group controlId="formPhotoURL" className="mt-3">
-            <Form.Label>Profile Photo</Form.Label>
-            <br />
-            {photoURL && (
-              <Image src={photoURL} rounded className="mb-3" width={200} />
-            )}
-            <Form.Control
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-          </Form.Group>
-          <Button variant="primary" type="submit" className="mt-3">
-            Save
-          </Button>
-        </Form>
+        <div className="Mains">
+          <div id="Mains-left">
+            <h3> Left Side </h3>
+          </div>
+
+          <div>
+            <Form onSubmit={handleSubmit}>
+              <Form.Group controlId="formDisplayName">
+                <Form.Label>Nickname</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  disabled={loading} // 로딩 중에는 입력 비활성화
+                />
+              </Form.Group>
+              <Button
+                variant="primary"
+                type="submit"
+                className="mt-3"
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save"}{" "}
+                {/* 로딩 상태에 따른 버튼 텍스트 변경 */}
+              </Button>
+            </Form>{" "}
+          </div>
+
+          <div id="Mains-right">
+            <h3> Right Side </h3>
+          </div>
+        </div>
       </Container>
     </>
   );
