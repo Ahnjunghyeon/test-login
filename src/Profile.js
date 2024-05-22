@@ -66,42 +66,34 @@ const Profile = () => {
 
   return (
     <>
-      <CustomNavbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
-      <Container className="mt-5">
-        <h2>Edit Profile</h2>
-        <div className="Mains">
-          <div id="Mains-left">
-            <h3> Left Side </h3>
-          </div>
-
-          <div>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group controlId="formDisplayName">
-                <Form.Label>Nickname</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  disabled={loading} // 로딩 중에는 입력 비활성화
-                />
-              </Form.Group>
-              <Button
-                variant="primary"
-                type="submit"
-                className="mt-3"
-                disabled={loading}
-              >
-                {loading ? "Saving..." : "Save"}{" "}
-                {/* 로딩 상태에 따른 버튼 텍스트 변경 */}
-              </Button>
-            </Form>{" "}
-          </div>
-
-          <div id="Mains-right">
-            <h3> Right Side </h3>
-          </div>
+      <div>
+        <CustomNavbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
+      </div>
+      <div className="App">
+        <div className="A1">gsdgasd</div>
+        <div className="Profile">
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="formDisplayName">
+              <Form.Label>Nickname</Form.Label>
+              <Form.Control
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                disabled={loading} // 로딩 중에는 입력 비활성화
+              />
+            </Form.Group>
+            <Button
+              variant="primary"
+              type="submit"
+              className="mt-3"
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save"}{" "}
+              {/* 로딩 상태에 따른 버튼 텍스트 변경 */}
+            </Button>
+          </Form>{" "}
         </div>
-      </Container>
+      </div>
     </>
   );
 };

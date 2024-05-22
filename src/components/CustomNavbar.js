@@ -14,8 +14,8 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Box,
 } from "@mui/material";
-import Box from "@mui/material/Box";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import { Link } from "react-router-dom";
@@ -184,6 +184,7 @@ const CustomNavbar = ({ currentUser }) => {
       </List>
     </Box>
   );
+
   // ------------- Material Ui color
   const colors = {
     lightRed: red[300],
@@ -196,23 +197,22 @@ const CustomNavbar = ({ currentUser }) => {
     darkPurple: purple[700],
     whiteindigo: indigo[50],
   };
-  // ---------------- 컬러
-  // inherit 흰색 primary 파랑
 
   return (
     <>
-      <div className="Main">
+      <div className="Top">
         <AppBar position="static" color="inherit">
-          <Toolbar style={{ justifyContent: "space-between" }}>
-            <Typography
-              variant="h6"
-              component={Link}
-              to="/"
-              style={{
-                color: "inherit",
-                textDecoration: "none",
-                display: "inline-block",
-              }}
+          <Toolbar
+            style={{
+              justifyContent: "space-between",
+              marginLeft: "100px",
+              marginRight: "100px",
+              display: "flex",
+            }}
+          >
+            <div
+              className="TopWebName"
+              style={{ display: "flex", alignItems: "center" }}
             >
               <IconButton
                 size="large"
@@ -224,18 +224,34 @@ const CustomNavbar = ({ currentUser }) => {
               >
                 <MenuIcon />
               </IconButton>
-              React
-            </Typography>
-            <Search sx={{ display: { xs: "none", sm: "block" } }}>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-              />
-            </Search>
-            <div style={{ display: "flex", alignItems: "center" }}>
+              <Typography
+                variant="h6"
+                component={Link}
+                to="/"
+                style={{
+                  color: "inherit",
+                  textDecoration: "none",
+                  display: "inline-block",
+                }}
+              >
+                React
+              </Typography>
+            </div>
+            <div className="Topsearch">
+              <Search sx={{ display: { xs: "none", sm: "block" } }}>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  placeholder="Search…"
+                  inputProps={{ "aria-label": "search" }}
+                />
+              </Search>
+            </div>
+            <div
+              className="Topmenu"
+              style={{ display: "flex", alignItems: "center" }}
+            >
               <Button
                 component={Link}
                 to="/"

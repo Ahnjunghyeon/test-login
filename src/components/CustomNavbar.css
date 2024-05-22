@@ -1,11 +1,15 @@
-.Mains {
-  display: grid;
-  grid-template-columns: 15% 70% 15%;
+.Top {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
-#Mains-left {
-  border-right: solid 1px #aabbaa;
+.TopWebName {
+  display: flex;
+  align-items: center;
 }
-#Mains-right {
-  border-left: solid 1px #aabbaa;
+
+.Topsearch {
+  margin-left: 150px;
 }
