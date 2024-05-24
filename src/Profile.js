@@ -7,7 +7,7 @@ import {
   getDocs,
   getFirestore,
 } from "firebase/firestore";
-import { Form, Button, Container } from "react-bootstrap";
+import { Form, Button, Container, Row, Col, Image } from "react-bootstrap";
 import "./Profile.css";
 import CustomNavbar from "./components/CustomNavbar"; // Import the CustomNavbar component
 
@@ -66,32 +66,51 @@ const Profile = () => {
 
   return (
     <>
-      <div>
-        <CustomNavbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
-      </div>
-      <div className="App">
-        <div className="A1">gsdgasd</div>
-        <div className="Profile">
-          <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="formDisplayName">
-              <Form.Label>Nickname</Form.Label>
-              <Form.Control
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                disabled={loading} // 로딩 중에는 입력 비활성화
-              />
-            </Form.Group>
-            <Button
-              variant="primary"
-              type="submit"
-              className="mt-3"
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Save"}{" "}
-              {/* 로딩 상태에 따른 버튼 텍스트 변경 */}
-            </Button>
-          </Form>{" "}
+      <CustomNavbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
+      <div className="Profile">
+        <div className="P-main">
+          <Container className="mt-4">
+            <Row className="justify-content-center">
+              <Col md={6} className="text-center">
+                {user && (
+                  <>
+                    <Image
+                      src={user.photoURL}
+                      roundedCircle
+                      width="150"
+                      height="150"
+                      alt="User profile"
+                    />
+                    <h2 className="mt-3">{user.displayName}</h2>
+                  </>
+                )}
+              </Col>
+            </Row>
+            <Row className="justify-content-center">
+              <Col md={6}>
+                <Form onSubmit={handleSubmit}>
+                  <Form.Group controlId="formDisplayName">
+                    <Form.Label>Nickname</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      disabled={loading} // 로딩 중에는 입력 비활성화
+                    />
+                  </Form.Group>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    className="mt-3"
+                    disabled={loading}
+                  >
+                    {loading ? "Saving..." : "Save"}{" "}
+                    {/* 로딩 상태에 따른 버튼 텍스트 변경 */}
+                  </Button>
+                </Form>
+              </Col>
+            </Row>
+          </Container>
         </div>
       </div>
     </>

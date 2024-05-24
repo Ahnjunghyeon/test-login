@@ -1,25 +1,12 @@
-.App {
-  margin-left: 100px;
-  margin-right: 100px;
+.Profile {
+  display: flex;
+
+  width: 100%;
+  height: 1000px;
+  margin-top: 30px;
   justify-content: center;
-  text-align: center;
-  align-items: center;
-
-  display: grid;
-  /* 1fr을 4번 반복해서 지정한다는 의미입니다. */
-  grid-template-columns: repeat(4, 1fr);
-  /* column의 간격을 20px로 */
-  column-gap: 20px;
-  grid-template-rows: repeat(5, 1fr);
-
-  /* 위에 Rows와 Coloums를 예로들면 4행 5열이 됨. */
-  /* fr은 fraction의 약자이며 숫자 비율대로 트랙을 나눔 */
 }
 
-.A1 {
-  background-color: red;
-  /* 가로 4분의 1 공간 */
-  grid-column: 1/4;
-  /* 세로 2분의 1공간 */
-  grid-row: 1/2;
+.Profile .P-main {
+  width: 1050px;
 }

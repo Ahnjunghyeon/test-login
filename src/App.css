@@ -1,24 +1,12 @@
-/* src/App.css */
-/* 
-.App {
-  text-align: center;
-}
-
-.App-header {
-  background-color: #0055ff;
-  min-height: 100vh;
+.App .Home {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+
+  width: 100%;
+  height: 1000px;
+  margin-top: 30px;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.Home .HomeHeader {
+  width: 1050px;
 }
-
-.App .navbar .d-flex .me-2 {
-  margin-right: 10px;
-} */

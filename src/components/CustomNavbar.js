@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  AppBar,
+  // AppBar,
   Toolbar,
   Typography,
   Button,
@@ -32,10 +32,12 @@ import {
   blue,
   green,
   purple,
-  deepPurple,
+  // deepPurple,
   indigo,
 } from "@mui/material/colors";
 import "./CustomNavbar.css";
+import "../Layout.js";
+import "../App.js";
 
 const CustomNavbar = ({ currentUser }) => {
   const [user, setUser] = useState(null);
@@ -201,19 +203,15 @@ const CustomNavbar = ({ currentUser }) => {
   return (
     <>
       <div className="Top">
-        <AppBar position="static" color="inherit">
+        <div className="Top2">
           <Toolbar
             style={{
-              justifyContent: "space-between",
-              marginLeft: "100px",
-              marginRight: "100px",
               display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            <div
-              className="TopWebName"
-              style={{ display: "flex", alignItems: "center" }}
-            >
+            <div style={{ display: "flex", alignItems: "center" }}>
               <IconButton
                 size="large"
                 edge="start"
@@ -231,13 +229,12 @@ const CustomNavbar = ({ currentUser }) => {
                 style={{
                   color: "inherit",
                   textDecoration: "none",
-                  display: "inline-block",
                 }}
               >
                 React
               </Typography>
             </div>
-            <div className="Topsearch">
+            <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
               <Search sx={{ display: { xs: "none", sm: "block" } }}>
                 <SearchIconWrapper>
                   <SearchIcon />
@@ -248,10 +245,7 @@ const CustomNavbar = ({ currentUser }) => {
                 />
               </Search>
             </div>
-            <div
-              className="Topmenu"
-              style={{ display: "flex", alignItems: "center" }}
-            >
+            <div style={{ display: "flex", alignItems: "center" }}>
               <Button
                 component={Link}
                 to="/"
@@ -312,10 +306,10 @@ const CustomNavbar = ({ currentUser }) => {
               )}
             </div>
           </Toolbar>
-        </AppBar>
-        <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-          {drawerList()}
-        </Drawer>
+          <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
+            {drawerList()}
+          </Drawer>
+        </div>
       </div>
     </>
   );

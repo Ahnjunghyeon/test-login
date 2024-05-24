@@ -1,57 +1,12 @@
-Main {
-  padding: 0;
-}
-.wrapper {
+.Dashboard {
   display: flex;
-  margin-left: 100px;
-  margin-right: 100px;
+
+  width: 100%;
+  height: 1000px;
+  margin-top: 30px;
+  justify-content: center;
 }
 
-.wrapper {
-  display: grid;
-  /* columns 행 = 가로 */
-  grid-template-columns: repeat(3, 1fr);
-  /* rows 열 = 세로 */
-  grid-template-rows: repeat(6, 200px);
+.Dashboard .D-main {
+  width: 1050px;
 }
-
-.wrapper > div:nth-child(1) {
-  margin-top: 25px;
-  height: 150px;
-  background-color: red;
-  /* 가로 4분의 1 공간 */
-  grid-column: 1/4;
-  /* 세로 2분의 1공간 */
-  grid-row: 1/2;
-}
-
-/* 
-.wrapper > div:nth-child(2) {
-  height: 300px;
-  background-color: green;
-  grid-column: 1/2;
-  grid-row: 2/4;
-}
-.wrapper > div:nth-child(3) {
-  height: 300px;
-  background-color: purple;
-  가로 2 부터 / 4까지
-  grid-column: 2/4;
-  세로 2부터 / 4까지
-  grid-row: 2/4;
-}
-.wrapper > div:nth-child(4) {
-  background-color: blue;
-  grid-column: 1/3;
-  grid-row: 4/5;
-}
-.wrapper > div:nth-child(5) {
-  background-color: orange;
-  grid-column: 3/4;
-  grid-row: 4/5;
-}
-.wrapper > div:nth-child(6) {
-  background-color: orange;
-  grid-column: 3/4;
-  grid-row: 4/5;
-} */
