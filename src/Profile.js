@@ -67,9 +67,10 @@ const Profile = () => {
   return (
     <>
       <CustomNavbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
+      <hr className="Line"></hr>
       <div className="Profile">
         <div className="P-main">
-          <Container className="mt-4">
+          <Container className="mt-4" style={{}}>
             <Row className="justify-content-center">
               <Col md={6} className="text-center">
                 {user && (
@@ -77,20 +78,24 @@ const Profile = () => {
                     <Image
                       src={user.photoURL}
                       roundedCircle
-                      width="150"
-                      height="150"
+                      width="100"
+                      height="100"
                       alt="User profile"
                     />
-                    <h2 className="mt-3">{user.displayName}</h2>
+
+                    <h3 className="usname">{user.displayName}</h3>
                   </>
                 )}
               </Col>
-            </Row>
-            <Row className="justify-content-center">
               <Col md={6}>
-                <Form onSubmit={handleSubmit}>
+                <Form
+                  onSubmit={handleSubmit}
+                  style={{
+                    height: "206.59px",
+                  }}
+                >
                   <Form.Group controlId="formDisplayName">
-                    <Form.Label>Nickname</Form.Label>
+                    <Form.Label> Your Name </Form.Label>
                     <Form.Control
                       type="text"
                       value={displayName}
@@ -105,12 +110,12 @@ const Profile = () => {
                     disabled={loading}
                   >
                     {loading ? "Saving..." : "Save"}{" "}
-                    {/* 로딩 상태에 따른 버튼 텍스트 변경 */}
                   </Button>
                 </Form>
               </Col>
             </Row>
           </Container>
+          <div className="service">gsadgs</div>
         </div>
       </div>
     </>

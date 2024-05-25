@@ -1,12 +1,39 @@
 .Profile {
   display: flex;
-
   width: 100%;
   height: 1000px;
   margin-top: 30px;
   justify-content: center;
 }
 
+.Profile .Line {
+  border: 1px;
+  color: silver;
+  width: 90%;
+}
+
 .Profile .P-main {
   width: 1050px;
+  display: flex;
+  justify-content: center;
+}
+
+/* 내정보 칸 */
+.Profile .P-main .mt-4 {
+  width: 500px;
+  margin-right: 50px;
+  height: 200px;
+}
+
+/* 내정보에 추가될 내용들 */
+.Profile .P-main .service {
+  width: 500px;
+}
+
+.Profile .P-main .mt-4 .usname {
+  margin-top: 15px;
+}
+
+.Profile .P-main .formDisplayName {
+  justify-content: center;
 }
