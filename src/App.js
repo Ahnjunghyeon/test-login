@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import CustomNavbar from "./components/CustomNavbar";
 import { db, storage } from "./firebase";
@@ -16,9 +16,7 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
-
 import { styled } from "@mui/material/styles";
-import { Image } from "react-bootstrap";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
@@ -42,6 +40,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import ImageGallery from "react-image-gallery"; // react-image-gallery import
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -62,9 +61,11 @@ function App() {
   const [editDialogOpen, setEditDialogOpen] = useState(false); // 수정 다이얼로그 상태
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
-  const [editImage, setEditImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState("");
+  const [editImages, setEditImages] = useState([]);
+  const [imageUrls, setImageUrls] = useState([]);
   const [uploading, setUploading] = useState(false);
+
+  const imageGalleryRef = useRef(null); // imageGalleryRef 변수 정의
 
   useEffect(() => {
     const auth = getAuth();
@@ -109,16 +110,26 @@ function App() {
   const handleEditPost = () => {
     setEditTitle(selectedPost.title);
     setEditContent(selectedPost.content);
-    setImageUrl(selectedPost.imageUrl);
+    setImageUrls(selectedPost.imageUrls || []);
     setEditDialogOpen(true);
     handleMenuClose();
   };
 
   const handleDeletePost = async () => {
     if (selectedPost) {
-      if (selectedPost.imageUrl) {
-        const imageRef = ref(storage, selectedPost.imageUrl);
-        await deleteObject(imageRef);
+      if (selectedPost.imageUrls && selectedPost.imageUrls.length > 0) {
+        for (const imageUrl of selectedPost.imageUrls) {
+          const imageRef = ref(storage, imageUrl);
+          try {
+            // 이미지가 존재하는지 확인
+            await getDownloadURL(imageRef);
+            // 이미지가 존재하는 경우에만 삭제 진행
+            await deleteObject(imageRef);
+          } catch (error) {
+            console.error("Error deleting image:", error);
+            // 이미지가 존재하지 않거나 삭제할 수 없는 경우 오류 처리
+          }
+        }
       }
       await deleteDoc(doc(db, `users/${user.uid}/posts`, selectedPost.id));
       setPosts(posts.filter((post) => post.id !== selectedPost.id));
@@ -129,45 +140,49 @@ function App() {
   const handleEditDialogClose = () => {
     setEditDialogOpen(false);
     setSelectedPost(null);
-    setEditImage(null);
+    setEditImages([]);
   };
 
   const handleEditDialogSave = async () => {
-    let updatedImageUrl = imageUrl;
+    let updatedImageUrls = [...imageUrls];
 
-    if (editImage) {
+    if (editImages.length > 0) {
       setUploading(true);
-      const storageRef = ref(storage, `images/${editImage.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, editImage);
+      const uploadPromises = editImages.map((image) => {
+        // 게시물 제목을 기준으로 폴더 생성
+        const folderRef = ref(storage, `images/${editTitle}`);
+        const storageRef = ref(folderRef, image.name);
+        const uploadTask = uploadBytesResumable(storageRef, image);
 
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
-        },
-        (error) => {
-          console.error("Error uploading image:", error);
-          setUploading(false);
-        },
-        async () => {
-          updatedImageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          setUploading(false);
-          await updatePostData(updatedImageUrl);
-        }
-      );
-    } else {
-      await updatePostData(updatedImageUrl);
+        return new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            null,
+            (error) => {
+              console.error("Error uploading image:", error);
+              reject(error);
+            },
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(downloadURL);
+            }
+          );
+        });
+      });
+
+      updatedImageUrls = await Promise.all(uploadPromises);
+      setUploading(false);
     }
+
+    await updatePostData(updatedImageUrls);
   };
 
-  const updatePostData = async (imageUrl) => {
+  const updatePostData = async (updatedImageUrls) => {
     if (selectedPost) {
       await updateDoc(doc(db, `users/${user.uid}/posts`, selectedPost.id), {
         title: editTitle,
         content: editContent,
-        imageUrl: imageUrl,
+        imageUrls: updatedImageUrls,
       });
       setPosts(
         posts.map((post) =>
@@ -176,7 +191,7 @@ function App() {
                 ...post,
                 title: editTitle,
                 content: editContent,
-                imageUrl: imageUrl,
+                imageUrls: updatedImageUrls,
               }
             : post
         )
@@ -186,39 +201,21 @@ function App() {
   };
 
   const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    setEditImage(file);
+    const files = Array.from(event.target.files);
+    setEditImages(files);
   };
 
-  const handleRemoveImage = () => {
-    setEditImage(null);
-    setImageUrl("");
+  const handleRemoveImage = (index) => {
+    const updatedImages = [...editImages];
+    updatedImages.splice(index, 1);
+    setEditImages(updatedImages);
+
+    const updatedUrls = [...imageUrls];
+    updatedUrls.splice(index, 1);
+    setImageUrls(updatedUrls);
   };
 
-  const handleUploadImage = async () => {
-    if (editImage) {
-      const storageRef = ref(storage, `images/${editImage.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, editImage);
-
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          // 업로드 상태 변화 처리
-        },
-        (error) => {
-          // 업로드 오류 처리
-          console.error("Error uploading image:", error);
-        },
-        async () => {
-          // 업로드 완료 처리
-          const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          setImageUrl(imageUrl);
-        }
-      );
-    }
-  };
-
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -248,15 +245,11 @@ function App() {
                             aria-label="recipe"
                           >
                             {user && (
-                              <>
-                                <Image
-                                  src={user.photoURL}
-                                  roundedCircle
-                                  width="50"
-                                  height="50"
-                                  alt="User profile"
-                                />
-                              </>
+                              <img
+                                src={user.photoURL}
+                                alt="User profile"
+                                style={{ width: "100%", height: "100%" }}
+                              />
                             )}
                           </Avatar>
                         }
@@ -285,24 +278,7 @@ function App() {
                         title={post.title}
                         subheader={user.displayName}
                       />
-                      <CardMedia
-                        className="insertimage"
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        {post.imageUrl && (
-                          <img
-                            src={post.imageUrl}
-                            alt={post.title}
-                            component="img"
-                            height="300"
-                            width="auto"
-                          />
-                        )}
-                      </CardMedia>
+                      <CardMedia></CardMedia>
 
                       <CardContent>
                         <Typography variant="body2" color="text.secondary">
@@ -363,33 +339,37 @@ function App() {
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
           />
-          {imageUrl && (
+          {imageUrls.length > 0 && (
             <div>
-              <img
-                src={imageUrl}
-                alt="Current"
-                height="100"
-                style={{ marginTop: "10px" }}
-              />
-              <Button onClick={handleRemoveImage} color="secondary">
-                Remove Image
-              </Button>
+              {imageUrls.map((url, index) => (
+                <div key={index} style={{ marginTop: "10px" }}>
+                  <img
+                    src={url}
+                    alt="Current"
+                    height="100"
+                    style={{ marginRight: "10px" }}
+                  />
+                  <Button
+                    onClick={() => handleRemoveImage(index)}
+                    color="secondary"
+                  >
+                    Remove Image
+                  </Button>
+                </div>
+              ))}
             </div>
           )}
-          {imageUrl && (
-            <div>
-              <input
-                accept="image/*"
-                id="image-input"
-                type="file"
-                onChange={handleImageChange}
-                style={{ display: "none" }}
-              />
-              <label htmlFor="image-input">
-                <Button component="span">Upload Image</Button>
-              </label>
-            </div>
-          )}
+          <input
+            accept="image/*"
+            id="image-input"
+            type="file"
+            onChange={handleImageChange}
+            multiple
+            style={{ display: "none" }}
+          />
+          <label htmlFor="image-input">
+            <Button component="span">Upload Image</Button>
+          </label>
           {uploading && (
             <CircularProgress size={24} style={{ marginTop: "10px" }} />
           )}

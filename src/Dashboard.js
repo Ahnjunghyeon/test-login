@@ -9,17 +9,18 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
-import { storage, db } from "./firebase"; // Firebase 초기화 파일에서 storage와 db를 import 합니다.
+import { storage, db } from "./firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { collection, addDoc } from "firebase/firestore"; // Firestore 모듈 추가
+import { collection, addDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 function Dashboard() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null); // 사용자 정보 상태
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -48,57 +49,84 @@ function Dashboard() {
   };
 
   const handleImageChange = (event) => {
-    setImage(event.target.files[0]);
-  };
+    const files = Array.from(event.target.files);
+    setImages(files);
 
+    const filePreviews = files.map((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviews((prevPreviews) => [...prevPreviews, reader.result]);
+      };
+      reader.readAsDataURL(file);
+      return null;
+    });
+    setPreviews([]);
+    Promise.all(filePreviews);
+  };
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
 
-    let imageUrl = "";
-    if (image) {
-      const storageRef = ref(storage, `images/${image.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, image);
+    const folderRef = ref(storage, `images/${title}`);
+    const imageUrls = await Promise.all(
+      images.map(async (image) => {
+        const fileRef = ref(folderRef, image.name);
+        const uploadTask = uploadBytesResumable(fileRef, image);
 
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
-        },
-        (error) => {
-          console.error("Error uploading image:", error);
-          setLoading(false);
-        },
-        async () => {
-          imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          savePostData(imageUrl); // 이미지 업로드가 완료된 후에 데이터 저장
-        }
-      );
-    } else {
-      savePostData(imageUrl); // 이미지가 없으면 빈 문자열을 전달
-    }
+        return new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log(`Upload is ${progress}% done`);
+            },
+            (error) => {
+              console.error("Error uploading image:", error);
+              setLoading(false);
+              reject(error);
+            },
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(downloadURL);
+            }
+          );
+        });
+      })
+    );
+
+    savePostData(imageUrls);
   };
 
-  const savePostData = async (imageUrl) => {
+  const savePostData = async (imageUrls) => {
     try {
       // 사용자의 UID를 이용하여 데이터를 저장합니다.
       await addDoc(collection(db, `users/${user.uid}/posts`), {
         title: title,
         content: content,
-        imageUrl: imageUrl,
+        imageUrls: imageUrls, // 여러 이미지 URL을 저장
         createdAt: new Date(),
       });
       setTitle("");
       setContent("");
-      setImage(null);
+      setImages([]);
+      setPreviews([]);
       setLoading(false);
       console.log("Document successfully written!");
     } catch (error) {
       console.error("Error writing document: ", error);
       setLoading(false);
     }
+  };
+
+  const handleRemoveImage = (index) => {
+    const updatedImages = [...images];
+    updatedImages.splice(index, 1);
+    setImages(updatedImages);
+
+    const updatedPreviews = [...previews];
+    updatedPreviews.splice(index, 1);
+    setPreviews(updatedPreviews);
   };
 
   return (
@@ -133,16 +161,40 @@ function Dashboard() {
             <input
               accept="image/*"
               type="file"
+              multiple
               onChange={handleImageChange}
               id="upload-button"
               style={{ display: "none" }}
             />
             <label htmlFor="upload-button">
               <Button variant="contained" component="span">
-                Upload Image
+                Upload Images
               </Button>
             </label>
-            {image && <Typography>{image.name}</Typography>}
+          </Box>
+          <Box mb={2} style={{ display: "flex", flexWrap: "wrap" }}>
+            {previews.map((preview, index) => (
+              <div key={index} style={{ alignItems: "center", margin: "10px" }}>
+                <img
+                  src={preview}
+                  alt={`preview-${index}`}
+                  style={{
+                    display: "flex",
+                    maxWidth: "100%",
+                    maxHeight: "100px",
+                    marginRight: "10px",
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="small"
+                  onClick={() => handleRemoveImage(index)}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
           </Box>
           {loading ? (
             <CircularProgress />
