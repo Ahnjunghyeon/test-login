@@ -29,7 +29,6 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import CircularProgress from "@mui/material/CircularProgress";
 import { red } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
@@ -60,6 +59,7 @@ function App() {
   const [editImages, setEditImages] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -116,6 +116,7 @@ function App() {
           const imageRef = ref(storage, imageUrl);
           try {
             await getDownloadURL(imageRef);
+            // 이미지가 존재할 경우에만 삭제를 시도합니다.
             await deleteObject(imageRef);
           } catch (error) {
             console.error("Error deleting image:", error);
@@ -156,56 +157,6 @@ function App() {
       handleEditDialogClose();
     }
   };
-
-  // const handleEditDialogSave = async () => {
-  //   let updatedImageUrls = [...imageUrls];
-
-  //   if (editImages.length > 0) {
-  //     setUploading(true);
-  //     const uploadPromises = editImages.map((image) => {
-  //       const folderRef = ref(storage, `images/${editTitle}`);
-  //       const storageRef = ref(folderRef, image.name);
-  //       const uploadTask = uploadBytesResumable(storageRef, image);
-
-  //       return new Promise((resolve, reject) => {
-  //         uploadTask.on(
-  //           "state_changed",
-  //           null,
-  //           (error) => {
-  //             console.error("Error uploading image:", error);
-  //             reject(error);
-  //           },
-  //           async () => {
-  //             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-  //             resolve(downloadURL);
-  //           }
-  //         );
-  //       });
-  //     });
-
-  //     updatedImageUrls = await Promise.all(uploadPromises);
-  //     setUploading(false);
-  //   }
-
-  //   await updatePostData(updatedImageUrls);
-  // };
-
-  // const handleImageChange = (event) => {
-  //   const files = Array.from(event.target.files);
-  //   setEditImages(files);
-  // };
-
-  // const handleRemoveImage = (index) => {
-  //   const updatedImages = [...editImages];
-  //   updatedImages.splice(index, 1);
-  //   setEditImages(updatedImages);
-
-  //   const updatedUrls = [...imageUrls];
-  //   updatedUrls.splice(index, 1);
-  //   setImageUrls(updatedUrls);
-  // };
-
-  const [expanded, setExpanded] = useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -291,11 +242,11 @@ function App() {
                           <ExpandMoreIcon />
                         </ExpandMore>
                       </CardActions>
-                      <Collapse
-                        in={expanded}
-                        timeout="auto"
-                        unmountOnExit
-                      ></Collapse>
+                      <Collapse in={expanded} timeout="auto" unmountOnExit>
+                        <CardContent>
+                          <Typography paragraph>Additional content</Typography>
+                        </CardContent>
+                      </Collapse>
                     </Card>
                   </div>
                 ))

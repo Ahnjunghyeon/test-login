@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
 
@@ -10,9 +10,14 @@ const firebaseConfig = {
   messagingSenderId: "1031009350397",
   appId: "1:1031009350397:web:4dd18150426112d2ddc494",
   measurementId: "G-F1M6ZNPB0H",
+  cookie: {
+    sameSite: "None",
+    secure: true,
+  },
 };
 
-const app = initializeApp(firebaseConfig);
+// Firebase 초기화 (이미 초기화된 앱이 있는지 확인)
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const storage = getStorage(app);
 const db = getFirestore(app); // Firestore 초기화
 

@@ -23,6 +23,12 @@ function EditPostDialog({
   onRemoveImage,
   onSave,
 }) {
+  const handleSave = () => {
+    // Save the changes to Firebase database
+    onSave(title, content, imageUrls);
+    onClose();
+  };
+
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>글 수정</DialogTitle>
@@ -80,7 +86,7 @@ function EditPostDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={onSave} disabled={uploading}>
+        <Button onClick={handleSave} disabled={uploading}>
           Save
         </Button>
       </DialogActions>
