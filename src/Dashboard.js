@@ -13,6 +13,7 @@ import { storage, db } from "./firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, addDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import UploadPost from "./UploadPost"; // UploadPost 컴포넌트 임포트
 
 function Dashboard() {
   const [title, setTitle] = useState("");
@@ -21,6 +22,7 @@ function Dashboard() {
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState([]); // 업로드된 이미지 URL 상태
 
   useEffect(() => {
     const auth = getAuth();
@@ -63,6 +65,7 @@ function Dashboard() {
     setPreviews([]);
     Promise.all(filePreviews);
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -95,6 +98,7 @@ function Dashboard() {
       })
     );
 
+    setUploadedImageUrls(imageUrls); // 업로드된 이미지 URL 상태 업데이트
     savePostData(imageUrls);
   };
 
@@ -204,6 +208,11 @@ function Dashboard() {
             </Button>
           )}
         </form>
+
+        {/* UploadPost 컴포넌트를 사용하여 업로드된 이미지 URL을 전달 */}
+        {uploadedImageUrls.length > 0 && (
+          <UploadPost imageUrls={uploadedImageUrls} />
+        )}
       </Container>
     </>
   );
