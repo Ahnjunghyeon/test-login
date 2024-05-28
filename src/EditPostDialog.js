@@ -21,10 +21,10 @@ function EditPostDialog({
   onContentChange,
   onImageChange,
   onRemoveImage,
-  onSave,
+  onSave, // onSave 함수 추가
 }) {
   const handleSave = () => {
-    // Save the changes to Firebase database
+    // 수정된 정보를 onSave 함수로 전달하여 Firebase에 업데이트합니다.
     onSave(title, content, imageUrls);
     onClose();
   };

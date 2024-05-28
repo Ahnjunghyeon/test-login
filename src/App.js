@@ -35,7 +35,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import UploadPost from "./UploadPost";
-import EditPostDialog from "./EditPostDialog"; // Import EditPostDialog
+import EditPostDialog from "./EditPostDialog";
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -95,7 +95,6 @@ function App() {
     setMenuAnchorEl(event.currentTarget);
     setSelectedPost(post);
   };
-
   const handleMenuClose = () => {
     setMenuAnchorEl(null);
     setSelectedPost(null);
@@ -260,7 +259,7 @@ function App() {
 
       <EditPostDialog
         open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
+        onClose={handleEditDialogClose}
         title={editTitle}
         content={editContent}
         imageUrls={imageUrls}
@@ -280,7 +279,7 @@ function App() {
           updatedUrls.splice(index, 1);
           setImageUrls(updatedUrls);
         }}
-        onSave={async () => {
+        onSave={async (title, content, imageUrls) => {
           let updatedImageUrls = [...imageUrls];
 
           if (editImages.length > 0) {
@@ -318,4 +317,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
