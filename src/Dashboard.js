@@ -208,10 +208,6 @@ function Dashboard() {
             </Button>
           )}
         </form>
-        {/* UploadPost 컴포넌트를 사용하여 업로드된 이미지 URL을 전달 */}
-        {/*         {uploadedImageUrls.length > 0 && ( */}
-        {/* <UploadPost imageUrls={uploadedImageUrls} /> */}
-        {/* )} */}
       </Container>
     </>
   );
