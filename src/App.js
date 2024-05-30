@@ -19,13 +19,6 @@ import PostList from "./PostList";
 function App() {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
-  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [Images, setImages] = useState([]);
-  const [imageUrls, setImageUrls] = useState([]);
-  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -57,75 +50,25 @@ function App() {
     }
   };
 
-  const handleMenuOpen = (event, post) => {
-    setMenuAnchorEl(event.currentTarget);
-    setSelectedPost(post);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-    setSelectedPost(null);
-  };
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
-
-  const handleEditPost = () => {
-    if (selectedPost) {
-      setTitle(selectedPost.title);
-      setContent(selectedPost.content);
-      setImageUrls(selectedPost.imageUrls || []);
-      handleMenuClose();
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    if (selectedPost) {
-      await updatePostData(selectedPost.id, imageUrls);
-      setTitle("");
-      setContent("");
-      setImageUrls([]);
-    }
-  };
-
-  const updatePostData = async (postId, updatedImageUrls) => {
+  const handleUpdatePost = async (postId, updatedData) => {
     try {
-      if (postId) {
-        await updateDoc(doc(db, `users/${user.uid}/posts`, postId), {
-          title: title,
-          content: content,
-          imageUrls: updatedImageUrls,
-        });
-        setPosts(
-          posts.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  title: title,
-                  content: content,
-                  imageUrls: updatedImageUrls,
-                }
-              : post
-          )
-        );
-        handleEditDialogClose();
-      }
+      const postDocRef = doc(db, `users/${user.uid}/posts`, postId);
+      await updateDoc(postDocRef, updatedData);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId ? { ...post, ...updatedData } : post
+        )
+      );
     } catch (error) {
       console.error("Error updating post data:", error);
     }
   };
 
-  const handleEditDialogClose = () => {
-    setSelectedPost(null);
-    setImages([]);
-  };
-
-  // 글 삭제함수.
-  const handleDeletePost = async () => {
-    if (selectedPost) {
-      if (selectedPost.imageUrls && selectedPost.imageUrls.length > 0) {
-        for (const imageUrl of selectedPost.imageUrls) {
+  const handleDeletePost = async (postId) => {
+    try {
+      const post = posts.find((post) => post.id === postId);
+      if (post.imageUrls && post.imageUrls.length > 0) {
+        for (const imageUrl of post.imageUrls) {
           const imageRef = ref(storage, imageUrl);
           try {
             await getDownloadURL(imageRef);
@@ -135,9 +78,10 @@ function App() {
           }
         }
       }
-      await deleteDoc(doc(db, `users/${user.uid}/posts`, selectedPost.id));
-      setPosts(posts.filter((post) => post.id !== selectedPost.id));
-      handleMenuClose();
+      await deleteDoc(doc(db, `users/${user.uid}/posts`, postId));
+      setPosts(posts.filter((post) => post.id !== postId));
+    } catch (error) {
+      console.error("Error deleting post:", error);
     }
   };
 
@@ -147,13 +91,8 @@ function App() {
       <PostList
         user={user}
         posts={posts}
-        menuAnchorEl={menuAnchorEl}
-        expanded={expanded}
-        handleMenuOpen={handleMenuOpen}
-        handleMenuClose={handleMenuClose}
-        handleEditPost={handleEditPost}
+        handleUpdatePost={handleUpdatePost}
         handleDeletePost={handleDeletePost}
-        handleExpandClick={handleExpandClick}
       />
     </div>
   );

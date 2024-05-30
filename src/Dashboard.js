@@ -11,9 +11,15 @@ import {
 } from "@mui/material";
 import { storage, db } from "./firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { collection, addDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  doc,
+  setDoc,
+  increment,
+  onSnapshot,
+} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-// import UploadPost from "./UploadPost"; // UploadPost 컴포넌트 임포트
 
 function Dashboard() {
   const [title, setTitle] = useState("");
@@ -22,25 +28,34 @@ function Dashboard() {
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [uploadedImageUrls, setUploadedImageUrls] = useState([]); // 업로드된 이미지 URL 상태
+  const [userPostsCount, setUserPostsCount] = useState(0); // 사용자의 게시물 수를 추적하는 상태 추가
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // 사용자가 로그인한 경우
         setUser(user);
       } else {
-        // 사용자가 로그아웃한 경우
         setUser(null);
       }
     });
 
     return () => {
-      // 컴포넌트가 언마운트될 때 이벤트 리스너 구독 해제
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      // 사용자가 로그인한 경우, 사용자의 게시물 수를 가져오고 업데이트합니다.
+      const userPostsRef = collection(db, `users/${user.uid}/posts`);
+      const unsubscribe = onSnapshot(userPostsRef, (snapshot) => {
+        setUserPostsCount(snapshot.size); // 문서의 수가 게시물 수와 동일합니다.
+      });
+
+      return unsubscribe;
+    }
+  }, [user]);
 
   const handleTitleChange = (event) => {
     setTitle(event.target.value);
@@ -98,17 +113,18 @@ function Dashboard() {
       })
     );
 
-    setUploadedImageUrls(imageUrls); // 업로드된 이미지 URL 상태 업데이트
     savePostData(imageUrls);
   };
 
   const savePostData = async (imageUrls) => {
     try {
-      // 사용자의 UID를 이용하여 데이터를 저장합니다.
-      await addDoc(collection(db, `users/${user.uid}/posts`), {
+      // 사용자 정의 ID 생성
+      const userPostId = `${user.uid}${userPostsCount + 1}`;
+      // 게시물 데이터 저장
+      await setDoc(doc(db, `users/${user.uid}/posts`, userPostId), {
         title: title,
         content: content,
-        imageUrls: imageUrls, // 여러 이미지 URL을 저장
+        imageUrls: imageUrls,
         createdAt: new Date(),
       });
       setTitle("");

@@ -1,3 +1,5 @@
+// PostList.js
+
 import React, { useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -23,7 +25,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import UploadPost from "./UploadPost";
 
-const PostList = ({ user, posts, handleEditPost, handleDeletePost }) => {
+const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [title, setTitle] = useState("");
@@ -58,10 +60,20 @@ const PostList = ({ user, posts, handleEditPost, handleDeletePost }) => {
     setSelectedPost(null);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (selectedPost) {
-      handleEditPost(selectedPost.id, title, content, imageUrls);
-      handleCloseEditDialog();
+      const updatedPost = {
+        title,
+        content,
+        imageUrls,
+      };
+
+      try {
+        await handleUpdatePost(selectedPost.id, updatedPost);
+        handleCloseEditDialog();
+      } catch (error) {
+        console.error("Error updating post:", error);
+      }
     }
   };
 
@@ -183,7 +195,7 @@ const PostList = ({ user, posts, handleEditPost, handleDeletePost }) => {
             <div key={index} style={{ position: "relative" }}>
               <img
                 src={url}
-                alt={`image-${index}`}
+                alt=""
                 style={{ width: "100%", marginTop: "10px" }}
               />
               <Button
