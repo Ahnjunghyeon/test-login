@@ -36,8 +36,8 @@ import {
   indigo,
 } from "@mui/material/colors";
 import "./CustomNavbar.css";
-import "../Layout.js";
 import "../App.js";
+import SearchBar from "./SearchBar"; // SearchBar 컴포넌트를 import
 
 const CustomNavbar = ({ currentUser }) => {
   const [user, setUser] = useState(null);
@@ -139,54 +139,6 @@ const CustomNavbar = ({ currentUser }) => {
     },
   }));
 
-  const drawerList = () => (
-    <Box
-      sx={{ width: 250 }}
-      role="presentation"
-      onClick={toggleDrawer(false)}
-      onKeyDown={toggleDrawer(false)}
-    >
-      <List>
-        <ListItem>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ "aria-label": "search" }}
-            />
-          </Search>
-        </ListItem>
-        <ListItem button component={Link} to="/">
-          <ListItemText primary="Home" />
-        </ListItem>
-        {user && (
-          <ListItem button component={Link} to="/dashboard">
-            <ListItemText primary="Dashboard" />
-          </ListItem>
-        )}
-        {user && (
-          <ListItem button component={Link} to="/profile">
-            <ListItemText primary="Profile" />
-          </ListItem>
-        )}
-      </List>
-      <Divider />
-      <List>
-        {user ? (
-          <ListItem button onClick={signOutUser}>
-            <ListItemText primary="Logout" />
-          </ListItem>
-        ) : (
-          <ListItem button onClick={signInWithGoogle}>
-            <ListItemText primary="Google Login" />
-          </ListItem>
-        )}
-      </List>
-    </Box>
-  );
-
   // ------------- Material Ui color
   const colors = {
     lightRed: red[300],
@@ -235,15 +187,7 @@ const CustomNavbar = ({ currentUser }) => {
               </Typography>
             </div>
             <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-              <Search sx={{ display: { xs: "none", sm: "block" } }}>
-                <SearchIconWrapper>
-                  <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search…"
-                  inputProps={{ "aria-label": "search" }}
-                />
-              </Search>
+              <SearchBar />
             </div>
             <div style={{ display: "flex", alignItems: "center" }}>
               <Button
@@ -287,6 +231,7 @@ const CustomNavbar = ({ currentUser }) => {
                     <MenuItem
                       onClick={handleMenuClose}
                       component={Link}
+                      // to={`/profile/${user.displayName}`}
                       to="/profile"
                     >
                       {user.displayName}
@@ -306,9 +251,6 @@ const CustomNavbar = ({ currentUser }) => {
               )}
             </div>
           </Toolbar>
-          <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-            {drawerList()}
-          </Drawer>
         </div>
       </div>
     </>

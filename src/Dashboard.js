@@ -11,14 +11,7 @@ import {
 } from "@mui/material";
 import { storage, db } from "./firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import {
-  collection,
-  addDoc,
-  doc,
-  setDoc,
-  increment,
-  onSnapshot,
-} from "firebase/firestore";
+import { collection, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 function Dashboard() {
@@ -194,7 +187,14 @@ function Dashboard() {
           </Box>
           <Box mb={2} style={{ display: "flex", flexWrap: "wrap" }}>
             {previews.map((preview, index) => (
-              <div key={index} style={{ alignItems: "center", margin: "10px" }}>
+              <div
+                key={index}
+                style={{
+                  alignItems: "center",
+                  margin: "10px",
+                  position: "relative",
+                }}
+              >
                 <img
                   src={preview}
                   alt={`preview-${index}`}
@@ -206,12 +206,21 @@ function Dashboard() {
                   }}
                 />
                 <Button
-                  variant="contained"
-                  color="secondary"
-                  size="small"
                   onClick={() => handleRemoveImage(index)}
+                  style={{
+                    position: "absolute",
+                    top: "0px",
+                    right: "10px",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    color: "white",
+                    width: "30px",
+                    height: "30px",
+                    minWidth: "30px",
+                    fontSize: "12px",
+                    padding: "0",
+                  }}
                 >
-                  Remove
+                  X
                 </Button>
               </div>
             ))}

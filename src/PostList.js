@@ -85,7 +85,7 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
     <>
       {user && (
         <div className="Posts">
-          <h2>{user.email}님의 게시물</h2>
+          <h2>{user.displayName} 님의 게시물</h2>
           {posts.length > 0 ? (
             posts.map((post) => (
               <div
@@ -140,7 +140,7 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                     </Typography>
                   </CardContent>
                   <CardActions disableSpacing>
-                    <IconButton aria-label="add to favorites">
+                    <IconButton aria-label="like">
                       <FavoriteIcon />
                     </IconButton>
                     <IconButton aria-label="share">
@@ -203,12 +203,17 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                 style={{
                   position: "absolute",
                   top: "10px",
-                  right: "10px",
+                  right: "0px",
                   backgroundColor: "rgba(0, 0, 0, 0.5)",
                   color: "white",
+                  width: "50px",
+                  height: "50px",
+                  minWidth: "30px",
+                  fontSize: "12px",
+                  padding: "0",
                 }}
               >
-                제거
+                X
               </Button>
             </div>
           ))}

@@ -10,6 +10,7 @@ import {
 import { Form, Button, Container, Row, Col, Image } from "react-bootstrap";
 import "./Profile.css";
 import CustomNavbar from "./components/CustomNavbar"; // Import the CustomNavbar component
+import { useParams } from "react-router-dom"; // useParams 추가
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -17,12 +18,13 @@ const Profile = () => {
   const auth = getAuth();
   const db = getFirestore(); // Firestore 초기화
   const user = auth.currentUser;
+  const { displayName: displayNameParam } = useParams(); // useParams를 사용하여 URL에서 displayName 매개변수 추출
 
   useEffect(() => {
     if (user) {
-      setDisplayName(user.displayName || "");
+      setDisplayName(displayNameParam || user.displayName || ""); // displayName을 URL에서 추출한 값 또는 현재 사용자의 displayName으로 설정
     }
-  }, [user]);
+  }, [user, displayNameParam]); // user 또는 displayNameParam이 변경될 때마다 실행
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,7 +85,7 @@ const Profile = () => {
                       alt="User profile"
                     />
 
-                    <h3 className="usname">{user.displayName}</h3>
+                    <h3 className="usname">{displayName}</h3>
                   </>
                 )}
               </Col>
