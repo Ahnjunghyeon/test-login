@@ -1,3 +1,5 @@
+// Profile.js
+
 import React, { useState, useEffect } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
 import {
@@ -11,6 +13,7 @@ import { Form, Button, Container, Row, Col, Image } from "react-bootstrap";
 import "./Profile.css";
 import CustomNavbar from "../components/CustomNavbar"; // Import the CustomNavbar component
 import { useParams } from "react-router-dom"; // useParams 추가
+import { doc, setDoc } from "firebase/firestore";
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -18,13 +21,13 @@ const Profile = () => {
   const auth = getAuth();
   const db = getFirestore(); // Firestore 초기화
   const user = auth.currentUser;
-  const { displayName: displayNameParam } = useParams(); // useParams를 사용하여 URL에서 displayName 매개변수 추출
+  const { username } = useParams(); // useParams를 사용하여 URL에서 username 매개변수 추출
 
   useEffect(() => {
     if (user) {
-      setDisplayName(displayNameParam || user.displayName || ""); // displayName을 URL에서 추출한 값 또는 현재 사용자의 displayName으로 설정
+      setDisplayName(username || user.displayName || ""); // username을 URL에서 추출한 값 또는 현재 사용자의 displayName으로 설정
     }
-  }, [user, displayNameParam]); // user 또는 displayNameParam이 변경될 때마다 실행
+  }, [user, username]); // user 또는 username이 변경될 때마다 실행
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,12 +44,21 @@ const Profile = () => {
       return;
     }
 
-    // 닉네임 변경
+    // 사용자의 displayName 업데이트
     updateProfile(user, {
       displayName,
     })
       .then(() => {
         alert("Profile updated successfully");
+        // Firestore에 displayName 업데이트
+        const userRef = doc(db, "users", user.uid);
+        setDoc(userRef, { displayName }, { merge: true })
+          .then(() => {
+            console.log("DisplayName updated successfully in Firestore");
+          })
+          .catch((error) => {
+            console.error("Error updating displayName in Firestore: ", error);
+          });
       })
       .catch((error) => {
         alert("Failed to update profile: " + error.message);

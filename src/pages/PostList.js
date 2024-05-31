@@ -23,7 +23,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import UploadPost from "./UploadPost";
+import UploadPost from "../UploadPost";
 
 const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -83,91 +83,102 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
 
   return (
     <>
-      {user && (
-        <div className="Posts">
-          <h2>{user.displayName} 님의 게시물</h2>
-          {posts.length > 0 ? (
-            posts.map((post) => (
-              <div
-                key={post.id}
-                className="Post"
-                style={{ marginBottom: "20px" }}
-              >
-                <Card sx={{ maxWidth: 345 }}>
-                  <CardHeader
-                    avatar={
-                      <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                        {user && (
-                          <img
-                            src={user.photoURL}
-                            alt="User profile"
-                            style={{ width: "100%", height: "100%" }}
-                          />
-                        )}
-                      </Avatar>
-                    }
-                    action={
-                      <>
-                        <IconButton
-                          aria-label="settings"
-                          onClick={(event) => handleMenuOpen(event, post)}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                        <Menu
-                          anchorEl={menuAnchorEl[post.id]}
-                          open={Boolean(menuAnchorEl[post.id])}
-                          onClose={() => handleMenuClose(post)}
-                        >
-                          <MenuItem onClick={() => handleOpenEditDialog(post)}>
-                            글 수정
-                          </MenuItem>
-                          <MenuItem onClick={() => handleDeletePost(post.id)}>
-                            글 삭제
-                          </MenuItem>
-                        </Menu>
-                      </>
-                    }
-                    title={post.title}
-                    subheader={`게시물 번호: ${post.id}`}
-                  />
-                  <CardMedia>
-                    <UploadPost imageUrls={post.imageUrls || []} />
-                  </CardMedia>
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary">
-                      {post.content}
-                    </Typography>
-                  </CardContent>
-                  <CardActions disableSpacing>
-                    <IconButton aria-label="like">
-                      <FavoriteIcon />
-                    </IconButton>
-                    <IconButton aria-label="share">
-                      <ShareIcon />
-                    </IconButton>
-                    <IconButton
-                      aria-expanded={expanded[post.id]}
-                      aria-label="show more"
-                      onClick={() => handleExpandClick(post.id)}
-                    >
-                      <ExpandMoreIcon />
-                    </IconButton>
-                  </CardActions>
-
-                  <Collapse in={expanded[post.id]} timeout="auto" unmountOnExit>
+      <div className="Posts">
+        {user ? (
+          <>
+            <h2>{user.displayName} 님의 게시물</h2>
+            {posts.length > 0 ? (
+              posts.map((post) => (
+                <div
+                  key={post.id}
+                  className="Post"
+                  style={{ marginBottom: "20px" }}
+                >
+                  <Card sx={{ maxWidth: 345 }}>
+                    <CardHeader
+                      avatar={
+                        <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                          {user && (
+                            <img
+                              src={user.photoURL}
+                              alt="User profile"
+                              style={{ width: "100%", height: "100%" }}
+                            />
+                          )}
+                        </Avatar>
+                      }
+                      action={
+                        <>
+                          <IconButton
+                            aria-label="settings"
+                            onClick={(event) => handleMenuOpen(event, post)}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                          <Menu
+                            anchorEl={menuAnchorEl[post.id]}
+                            open={Boolean(menuAnchorEl[post.id])}
+                            onClose={() => handleMenuClose(post)}
+                          >
+                            <MenuItem
+                              onClick={() => handleOpenEditDialog(post)}
+                            >
+                              글 수정
+                            </MenuItem>
+                            <MenuItem onClick={() => handleDeletePost(post.id)}>
+                              글 삭제
+                            </MenuItem>
+                          </Menu>
+                        </>
+                      }
+                      title={post.title}
+                      subheader={`게시물 번호: ${post.id}`}
+                    />
+                    <CardMedia>
+                      <UploadPost imageUrls={post.imageUrls || []} />
+                    </CardMedia>
                     <CardContent>
-                      <Typography paragraph>Additional content</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {post.content}
+                      </Typography>
                     </CardContent>
-                  </Collapse>
-                </Card>
-              </div>
-            ))
-          ) : (
-            <p>게시물이 없습니다.</p>
-          )}
-        </div>
-      )}
+                    <CardActions disableSpacing>
+                      <IconButton aria-label="like">
+                        <FavoriteIcon />
+                      </IconButton>
+                      <IconButton aria-label="share">
+                        <ShareIcon />
+                      </IconButton>
+                      <IconButton
+                        aria-expanded={expanded[post.id]}
+                        aria-label="show more"
+                        onClick={() => handleExpandClick(post.id)}
+                      >
+                        <ExpandMoreIcon />
+                      </IconButton>
+                    </CardActions>
+
+                    <Collapse
+                      in={expanded[post.id]}
+                      timeout="auto"
+                      unmountOnExit
+                    >
+                      <CardContent>
+                        <Typography paragraph>Additional content</Typography>
+                      </CardContent>
+                    </Collapse>
+                  </Card>
+                </div>
+              ))
+            ) : (
+              <p>게시물이 없습니다.</p>
+            )}
+          </>
+        ) : (
+          <p>로그인 해주세요.</p>
+        )}
+      </div>
+
       <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
         <DialogTitle>게시물 수정</DialogTitle>
         <DialogContent>

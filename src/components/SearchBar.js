@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+// SearchBar.js
+
+import React, { useState, useEffect, useRef } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
@@ -51,7 +53,7 @@ const SearchBar = ({ user }) => {
       const querySnapshot = await getDocs(q);
       const users = [];
       querySnapshot.forEach((doc) => {
-        users.push(doc.data());
+        users.push({ ...doc.data(), uid: doc.id }); // UID를 함께 저장
       });
       if (users.length === 0) {
         setSearchError(true);
@@ -74,9 +76,8 @@ const SearchBar = ({ user }) => {
     }
   };
 
-  const handleDisplayNameClick = (displayName) => {
-    const encodedName = encodeURIComponent(displayName);
-    navigate(`/profile/${encodedName}`);
+  const handleProfileClick = (uid) => {
+    navigate(`/profile/${uid}`); // UID를 이용하여 프로필 페이지로 이동
   };
 
   return (
@@ -115,7 +116,7 @@ const SearchBar = ({ user }) => {
               <li key={index}>
                 <Button
                   variant="text"
-                  onClick={() => handleDisplayNameClick(user.displayName)}
+                  onClick={() => handleProfileClick(user.uid)} // UID를 전달
                 >
                   {user.displayName}
                 </Button>

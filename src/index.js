@@ -1,5 +1,5 @@
 import React from "react";
-import { createRoot } from "react-dom/client"; // createRoot를 가져옴
+import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
 import Profile from "./pages/Profile";
@@ -8,7 +8,6 @@ import Dashboard from "./pages/Dashboard";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
-// createRoot를 사용하여 루트 요소를 렌더링
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement);
 
@@ -26,7 +25,7 @@ root.render(
           }
         />
         <Route
-          path="/profile"
+          path="/profile/:uid"
           element={
             <ProtectedRoute>
               <Profile />

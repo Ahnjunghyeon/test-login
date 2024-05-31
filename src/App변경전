@@ -1,5 +1,6 @@
+// App.js
+
 import React, { useState, useEffect } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
 import CustomNavbar from "./components/CustomNavbar";
 import { storage, db } from "./Firebase/firebase";
@@ -18,7 +19,6 @@ import PostList from "./pages/PostList";
 function App() {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const auth = getAuth();
@@ -85,28 +85,15 @@ function App() {
     }
   };
 
-  const handleProfileNavigation = () => {
-    if (user) {
-      navigate(`/profile/${user.uid}`);
-    }
-  };
-
   return (
     <div className="App">
-      <CustomNavbar onProfileClick={handleProfileNavigation} />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <PostList
-              user={user}
-              posts={posts}
-              handleUpdatePost={handleUpdatePost}
-              handleDeletePost={handleDeletePost}
-            />
-          }
-        />
-      </Routes>
+      <CustomNavbar />
+      <PostList
+        user={user}
+        posts={posts}
+        handleUpdatePost={handleUpdatePost}
+        handleDeletePost={handleDeletePost}
+      />
     </div>
   );
 }

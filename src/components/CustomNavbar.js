@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  // AppBar,
   Toolbar,
   Typography,
   Button,
@@ -9,42 +8,29 @@ import {
   Menu,
   MenuItem,
   InputBase,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Box,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
   signOut,
   onAuthStateChanged,
-  GoogleAuthProvider,
   signInWithPopup,
+  GoogleAuthProvider,
+  updateProfile,
 } from "firebase/auth";
+
 import { styled, alpha } from "@mui/material/styles";
-import {
-  red,
-  blue,
-  green,
-  purple,
-  // deepPurple,
-  indigo,
-} from "@mui/material/colors";
 import "./CustomNavbar.css";
-import "../App.js";
 import SearchBar from "./SearchBar"; // SearchBar 컴포넌트를 import
 
-const CustomNavbar = ({ currentUser }) => {
+const CustomNavbar = () => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
+  const navigate = useNavigate();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -68,7 +54,25 @@ const CustomNavbar = ({ currentUser }) => {
   const signInWithGoogle = () => {
     signInWithPopup(auth, provider)
       .then((result) => {
-        console.log(result.user);
+        const user = result.user;
+        const googleName = user.displayName; // 구글 프로필에서 이름 가져오기
+        if (googleName) {
+          // 구글 이름이 존재하는 경우에만 업데이트
+          updateProfile(user, {
+            displayName: googleName,
+          })
+            .then(() => {
+              console.log("Profile updated successfully with Google name");
+            })
+            .catch((error) => {
+              console.error(
+                "Failed to update profile with Google name:",
+                error
+              );
+            });
+        } else {
+          console.log("Google name not available");
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -95,61 +99,6 @@ const CustomNavbar = ({ currentUser }) => {
       return;
     }
     setDrawerOpen(open);
-  };
-
-  const Search = styled("div")(({ theme }) => ({
-    position: "relative",
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.white, 0.15),
-    "&:hover": {
-      backgroundColor: alpha(theme.palette.common.white, 0.25),
-    },
-    marginLeft: 0,
-    width: "100%",
-    [theme.breakpoints.up("sm")]: {
-      marginLeft: theme.spacing(1),
-      width: "auto",
-    },
-  }));
-
-  const SearchIconWrapper = styled("div")(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  }));
-
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: "inherit",
-    width: "100%",
-    "& .MuiInputBase-input": {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-      transition: theme.transitions.create("width"),
-      [theme.breakpoints.up("sm")]: {
-        width: "12ch",
-        "&:focus": {
-          width: "20ch",
-        },
-      },
-    },
-  }));
-
-  // ------------- Material Ui color
-  const colors = {
-    lightRed: red[300],
-    darkRed: red[700],
-    lightBlue: blue[300],
-    darkBlue: blue[700],
-    lightGreen: green[300],
-    darkGreen: green[700],
-    lightPurple: purple[300],
-    darkPurple: purple[700],
-    whiteindigo: indigo[50],
   };
 
   return (
@@ -210,8 +159,7 @@ const CustomNavbar = ({ currentUser }) => {
               )}
               {user && (
                 <Button
-                  component={Link}
-                  to="/profile"
+                  onClick={() => navigate(`/profile/${user.uid}`)}
                   color="inherit"
                   sx={{ display: { xs: "none", sm: "block" } }}
                 >
@@ -229,10 +177,10 @@ const CustomNavbar = ({ currentUser }) => {
                     onClose={handleMenuClose}
                   >
                     <MenuItem
-                      onClick={handleMenuClose}
-                      component={Link}
-                      // to={`/profile/${user.displayName}`}
-                      to="/profile"
+                      onClick={() => {
+                        handleMenuClose();
+                        navigate(`/profile/${user.uid}`);
+                      }}
                     >
                       {user.displayName}
                     </MenuItem>
