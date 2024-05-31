@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import CustomNavbar from "./components/CustomNavbar";
-import { storage, db } from "./firebase";
+import { storage, db } from "./Firebase/firebase";
 import {
   collection,
   getDocs,
@@ -14,7 +14,7 @@ import {
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref, getDownloadURL, deleteObject } from "firebase/storage";
 
-import PostList from "./PostList";
+import PostList from "./pages/PostList";
 
 function App() {
   const [posts, setPosts] = useState([]);

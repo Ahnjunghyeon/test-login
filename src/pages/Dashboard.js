@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
-import CustomNavbar from "./components/CustomNavbar";
+import CustomNavbar from "../components/CustomNavbar";
 import {
   Container,
   TextField,
@@ -9,7 +9,7 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
-import { storage, db } from "./firebase";
+import { storage, db } from "../Firebase/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";

@@ -9,7 +9,7 @@ import {
 } from "firebase/firestore";
 import { Form, Button, Container, Row, Col, Image } from "react-bootstrap";
 import "./Profile.css";
-import CustomNavbar from "./components/CustomNavbar"; // Import the CustomNavbar component
+import CustomNavbar from "../components/CustomNavbar"; // Import the CustomNavbar component
 import { useParams } from "react-router-dom"; // useParams 추가
 
 const Profile = () => {

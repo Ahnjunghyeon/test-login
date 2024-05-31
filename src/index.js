@@ -2,9 +2,9 @@ import React from "react";
 import { createRoot } from "react-dom/client"; // createRoot를 가져옴
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
-import Profile from "./Profile";
-import ProtectedRoute from "./ProtectedRoute";
-import Dashboard from "./Dashboard";
+import Profile from "./pages/Profile";
+import ProtectedRoute from "./utill/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
