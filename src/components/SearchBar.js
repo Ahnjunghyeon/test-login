@@ -1,6 +1,4 @@
-// SearchBar.js
-
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
@@ -11,12 +9,10 @@ import {
   Paper,
   Typography,
   Button,
-  MenuItem,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
 const SearchBar = ({ user }) => {
-  // user 프로퍼티를 받아옴
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchError, setSearchError] = useState(false);
@@ -77,6 +73,7 @@ const SearchBar = ({ user }) => {
   };
 
   const handleProfileClick = (uid) => {
+    console.log(`Navigating to profile with UID: ${uid}`);
     navigate(`/profile/${uid}`); // UID를 이용하여 프로필 페이지로 이동
   };
 
@@ -116,9 +113,10 @@ const SearchBar = ({ user }) => {
               <li key={index}>
                 <Button
                   variant="text"
-                  onClick={() => handleProfileClick(user.uid)} // UID를 전달
+                  onClick={() => handleProfileClick(user.uid)}
                 >
-                  {user.displayName}
+                  {user.displayName} (통합 사용자ID: {user.uid.substring(0, 6)}){" "}
+                  {/* 식별자 표시 */}
                 </Button>
               </li>
             ))}

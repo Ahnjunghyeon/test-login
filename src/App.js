@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
-import CustomNavbar from "./components/CustomNavbar";
+import CustomNavbar from "./components/Header";
 import { storage, db } from "./Firebase/firebase";
 import {
   collection,
@@ -94,6 +94,7 @@ function App() {
   return (
     <div className="App">
       <CustomNavbar onProfileClick={handleProfileNavigation} />
+
       <Routes>
         <Route
           path="/"

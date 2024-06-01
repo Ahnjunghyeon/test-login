@@ -6,12 +6,6 @@
   justify-content: center;
 }
 
-.Profile .Line {
-  border: 1px;
-  color: silver;
-  width: 90%;
-}
-
 .Profile .P-main {
   width: 1050px;
   display: flex;
@@ -31,6 +25,9 @@
 }
 
 .Profile .P-main .mt-4 .usname {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-top: 15px;
 }
 

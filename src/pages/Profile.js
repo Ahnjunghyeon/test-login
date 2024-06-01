@@ -1,57 +1,67 @@
-// Profile.js
-
 import React, { useState, useEffect } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
 import {
   collection,
   query,
   where,
+  getDoc,
   getDocs,
+  doc,
   getFirestore,
+  setDoc,
 } from "firebase/firestore";
-import { Form, Button, Container, Row, Col, Image } from "react-bootstrap";
+import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import "./Profile.css";
-import CustomNavbar from "../components/CustomNavbar"; // Import the CustomNavbar component
-import { useParams } from "react-router-dom"; // useParams 추가
-import { doc, setDoc } from "firebase/firestore";
+import CustomNavbar from "../components/Header";
+import { useParams } from "react-router-dom";
+import ProfileImage from "../components/profileImage";
+import UploadImage from "../components/UploadImage"; // UploadImage 컴포넌트를 import
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
-  const [loading, setLoading] = useState(false); // 로딩 상태 추가
+  const [loading, setLoading] = useState(false);
+  const [profileUser, setProfileUser] = useState(null);
   const auth = getAuth();
-  const db = getFirestore(); // Firestore 초기화
-  const user = auth.currentUser;
-  const { username } = useParams(); // useParams를 사용하여 URL에서 username 매개변수 추출
+  const db = getFirestore();
+  const currentUser = auth.currentUser;
+  const { uid } = useParams();
 
   useEffect(() => {
-    if (user) {
-      setDisplayName(username || user.displayName || ""); // username을 URL에서 추출한 값 또는 현재 사용자의 displayName으로 설정
-    }
-  }, [user, username]); // user 또는 username이 변경될 때마다 실행
+    const fetchUserProfile = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (userDoc.exists()) {
+          setProfileUser(userDoc.data());
+          setDisplayName(userDoc.data().displayName);
+        } else {
+          console.log("No such user!");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile: ", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [uid, db]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // 로딩 상태 시작
     setLoading(true);
 
-    // Firebase에 중복된 닉네임이 있는지 확인
     const isNicknameAvailable = await checkNicknameAvailability(displayName);
 
     if (!isNicknameAvailable) {
       alert("The nickname is already taken. Please choose a different one.");
-      setLoading(false); // 로딩 상태 종료
+      setLoading(false);
       return;
     }
 
-    // 사용자의 displayName 업데이트
-    updateProfile(user, {
+    updateProfile(currentUser, {
       displayName,
     })
       .then(() => {
         alert("Profile updated successfully");
-        // Firestore에 displayName 업데이트
-        const userRef = doc(db, "users", user.uid);
+        const userRef = doc(db, "users", currentUser.uid);
         setDoc(userRef, { displayName }, { merge: true })
           .then(() => {
             console.log("DisplayName updated successfully in Firestore");
@@ -64,68 +74,61 @@ const Profile = () => {
         alert("Failed to update profile: " + error.message);
       })
       .finally(() => {
-        setLoading(false); // 로딩 상태 종료
+        setLoading(false);
       });
   };
 
-  // Firebase에 중복된 닉네임이 있는지 확인하는 함수
   const checkNicknameAvailability = async (displayName) => {
     const usersRef = collection(db, "users");
     const q = query(usersRef, where("displayName", "==", displayName));
     const querySnapshot = await getDocs(q);
-
-    // 중복된 닉네임이 존재하면 false 반환
     return querySnapshot.empty;
+  };
+
+  // 이미지가 업로드되면 페이지를 새로고침하는 함수
+  const handleImageUpload = () => {
+    window.location.reload();
   };
 
   return (
     <>
-      <CustomNavbar /> {/* Navbar 컴포넌트를 렌더링합니다. */}
-      <hr className="Line"></hr>
+      <CustomNavbar />
       <div className="Profile">
         <div className="P-main">
-          <Container className="mt-4" style={{}}>
+          <Container className="mt-4">
             <Row className="justify-content-center">
               <Col md={6} className="text-center">
-                {user && (
+                {profileUser && (
                   <>
-                    <Image
-                      src={user.photoURL}
-                      roundedCircle
-                      width="100"
-                      height="100"
-                      alt="User profile"
-                    />
-
+                    <ProfileImage uid={uid} />
                     <h3 className="usname">{displayName}</h3>
+                    {/* 이미지 업로드 컴포넌트 추가 */}
+                    <UploadImage uid={uid} onUpload={handleImageUpload} />
                   </>
                 )}
               </Col>
               <Col md={6}>
-                <Form
-                  onSubmit={handleSubmit}
-                  style={{
-                    height: "206.59px",
-                  }}
-                >
-                  <Form.Group controlId="formDisplayName">
-                    <Form.Label> Your Name </Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      disabled={loading} // 로딩 중에는 입력 비활성화
-                    />
-                  </Form.Group>
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    className="mt-3"
-                    disabled={loading}
-                  >
-                    {loading ? "Saving..." : "Save"}{" "}
-                  </Button>
-                </Form>
+                {currentUser && currentUser.uid === uid && (
+                  <Form onSubmit={handleSubmit} style={{ height: "206.59px" }}>
+                    <Form.Group controlId="formDisplayName">
+                      <Form.Label> Your Name </Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        disabled={loading}
+                      />
+                    </Form.Group>
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      className="mt-3"
+                      disabled={loading}
+                    >
+                      {loading ? "Saving..." : "Save"}{" "}
+                    </Button>
+                  </Form>
+                )}
               </Col>
             </Row>
           </Container>

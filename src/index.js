@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./utill/ProtectedRoute";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/Uploadpage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 

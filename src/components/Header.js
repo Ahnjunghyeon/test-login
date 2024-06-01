@@ -1,13 +1,13 @@
+// Header.js
+
 import React, { useState, useEffect } from "react";
 import {
   Toolbar,
   Typography,
   Button,
   IconButton,
-  Avatar,
   Menu,
   MenuItem,
-  InputBase,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link, useNavigate } from "react-router-dom";
@@ -20,14 +20,13 @@ import {
   updateProfile,
 } from "firebase/auth";
 
-import { styled, alpha } from "@mui/material/styles";
-import "./CustomNavbar.css";
-import SearchBar from "./SearchBar"; // SearchBar 컴포넌트를 import
+import "./Header.css";
+import SearchBar from "./searchBar"; // SearchBar 컴포넌트를 import
+import ProfileImage from "./profileImage"; // ProfileImage 컴포넌트를 import
 
-const CustomNavbar = () => {
+const Header = () => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
   const navigate = useNavigate();
@@ -91,16 +90,6 @@ const CustomNavbar = () => {
     return () => unsubscribe();
   }, [auth]);
 
-  const toggleDrawer = (open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-    setDrawerOpen(open);
-  };
-
   return (
     <>
       <div className="Top">
@@ -118,8 +107,6 @@ const CustomNavbar = () => {
                 edge="start"
                 color="inherit"
                 aria-label="open drawer"
-                sx={{ mr: 2 }}
-                onClick={toggleDrawer(true)}
               >
                 <MenuIcon />
               </IconButton>
@@ -132,44 +119,63 @@ const CustomNavbar = () => {
                   textDecoration: "none",
                 }}
               >
-                React
+                히
               </Typography>
             </div>
             <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
               <SearchBar />
             </div>
-            <div style={{ display: "flex", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               <Button
                 component={Link}
                 to="/"
                 color="inherit"
-                sx={{ display: { xs: "none", sm: "block" } }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  margin: "3px", // 마진 추가
+                }}
               >
-                Home
+                홈
               </Button>
+
               {user && (
                 <Button
                   component={Link}
                   to="/dashboard"
                   color="inherit"
-                  sx={{ display: { xs: "none", sm: "block" } }}
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    margin: "3px", // 마진 추가
+                  }}
                 >
-                  Dashboard
+                  업로드
                 </Button>
               )}
+
               {user && (
                 <Button
                   onClick={() => navigate(`/profile/${user.uid}`)}
                   color="inherit"
-                  sx={{ display: { xs: "none", sm: "block" } }}
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    margin: "3px", // 마진 추가
+                  }}
                 >
-                  Profile
+                  프로필
                 </Button>
               )}
+
               {user ? (
                 <>
                   <IconButton onClick={handleMenuOpen} color="inherit">
-                    <Avatar src={user.photoURL} alt="User" />
+                    {/* ProfileImage 컴포넌트를 사용하여 프로필 이미지 가져오기 */}
+                    <ProfileImage uid={user.uid} />
                   </IconButton>
                   <Menu
                     anchorEl={anchorEl}
@@ -201,8 +207,9 @@ const CustomNavbar = () => {
           </Toolbar>
         </div>
       </div>
+      <hr className="Line" />
     </>
   );
 };
 
-export default CustomNavbar;
+export default Header;
