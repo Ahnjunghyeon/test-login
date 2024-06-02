@@ -1,11 +1,9 @@
-// ProfileImage.js
-
 import React, { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import Avatar from "@mui/material/Avatar";
 import { db } from "../Firebase/firebase"; // firebase 설정 파일을 import
 
-const ProfileImage = ({ uid }) => {
+const ProfileImage = ({ uid, refresh }) => {
   const [photoURL, setPhotoURL] = useState(null);
 
   useEffect(() => {
@@ -24,7 +22,7 @@ const ProfileImage = ({ uid }) => {
     };
 
     fetchUserProfile();
-  }, [uid]);
+  }, [uid, refresh]);
 
   return (
     <Avatar

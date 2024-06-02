@@ -1,5 +1,3 @@
-// Header.js
-
 import React, { useState, useEffect } from "react";
 import {
   Toolbar,
@@ -24,7 +22,7 @@ import "./Header.css";
 import SearchBar from "./searchBar"; // SearchBar 컴포넌트를 import
 import ProfileImage from "./profileImage"; // ProfileImage 컴포넌트를 import
 
-const Header = () => {
+const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const auth = getAuth();
@@ -88,7 +86,7 @@ const Header = () => {
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, [auth, refreshProfileImage]);
 
   return (
     <>
@@ -175,7 +173,10 @@ const Header = () => {
                 <>
                   <IconButton onClick={handleMenuOpen} color="inherit">
                     {/* ProfileImage 컴포넌트를 사용하여 프로필 이미지 가져오기 */}
-                    <ProfileImage uid={user.uid} />
+                    <ProfileImage
+                      uid={user.uid}
+                      refresh={refreshProfileImage}
+                    />
                   </IconButton>
                   <Menu
                     anchorEl={anchorEl}

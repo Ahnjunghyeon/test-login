@@ -21,6 +21,9 @@ const Profile = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [profileUser, setProfileUser] = useState(null);
+  const [refreshProfileImage, setRefreshProfileImage] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState(""); // 프로필 이미지 URL 상태 추가
+  const [userEmail, setUserEmail] = useState(""); // 사용자 이메일 상태 추가
   const auth = getAuth();
   const db = getFirestore();
   const currentUser = auth.currentUser;
@@ -33,6 +36,10 @@ const Profile = () => {
         if (userDoc.exists()) {
           setProfileUser(userDoc.data());
           setDisplayName(userDoc.data().displayName);
+          setProfileImageUrl(userDoc.data().profileImageUrl); // 프로필 이미지 URL 설정
+          if (currentUser && currentUser.uid === uid) {
+            setUserEmail(currentUser.email); // 현재 사용자와 프로필 소유자가 같은 경우에만 사용자 이메일 설정
+          }
         } else {
           console.log("No such user!");
         }
@@ -42,7 +49,7 @@ const Profile = () => {
     };
 
     fetchUserProfile();
-  }, [uid, db]);
+  }, [uid, db, refreshProfileImage, currentUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,14 +92,13 @@ const Profile = () => {
     return querySnapshot.empty;
   };
 
-  // 이미지가 업로드되면 페이지를 새로고침하는 함수
   const handleImageUpload = () => {
-    window.location.reload();
+    setRefreshProfileImage(!refreshProfileImage);
   };
 
   return (
     <>
-      <CustomNavbar />
+      <CustomNavbar refreshProfileImage={refreshProfileImage} />
       <div className="Profile">
         <div className="P-main">
           <Container className="mt-4">
@@ -100,10 +106,13 @@ const Profile = () => {
               <Col md={6} className="text-center">
                 {profileUser && (
                   <>
-                    <ProfileImage uid={uid} />
+                    <ProfileImage uid={uid} refresh={refreshProfileImage} />
                     <h3 className="usname">{displayName}</h3>
-                    {/* 이미지 업로드 컴포넌트 추가 */}
-                    <UploadImage uid={uid} onUpload={handleImageUpload} />
+                    {userEmail && <p>식별자 (이메일): {userEmail}</p>}
+                    <p>사용자 UID: {uid}</p>
+                    {currentUser && currentUser.uid === uid && (
+                      <UploadImage uid={uid} onUpload={handleImageUpload} />
+                    )}
                   </>
                 )}
               </Col>
@@ -132,6 +141,7 @@ const Profile = () => {
               </Col>
             </Row>
           </Container>
+
           <div className="service">gsadgs</div>
         </div>
       </div>

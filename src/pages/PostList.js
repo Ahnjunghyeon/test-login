@@ -1,6 +1,4 @@
-// PostList.js
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -23,7 +21,9 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import UploadPost from "../UploadPost";
+import ProfileImage from "../components/profileImage";
 
 const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -33,6 +33,20 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
   const [imageUrls, setImageUrls] = useState([]);
   const [menuAnchorEl, setMenuAnchorEl] = useState({});
   const [expanded, setExpanded] = useState({});
+  const [likedPosts, setLikedPosts] = useState({});
+  const db = getFirestore();
+
+  useEffect(() => {
+    const fetchLikedPosts = async () => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setLikedPosts(userDoc.data().likedPosts || {});
+        }
+      }
+    };
+    fetchLikedPosts();
+  }, [user, db]);
 
   const handleMenuOpen = (event, post) => {
     setMenuAnchorEl((prev) => ({ ...prev, [post.id]: event.currentTarget }));
@@ -81,6 +95,18 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleLikeClick = async (postId) => {
+    const updatedLikedPosts = { ...likedPosts, [postId]: !likedPosts[postId] };
+    setLikedPosts(updatedLikedPosts);
+
+    if (user) {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        likedPosts: updatedLikedPosts,
+      });
+    }
+  };
+
   return (
     <>
       <div className="Posts">
@@ -98,13 +124,7 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                     <CardHeader
                       avatar={
                         <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                          {user && (
-                            <img
-                              src={user.photoURL}
-                              alt="User profile"
-                              style={{ width: "100%", height: "100%" }}
-                            />
-                          )}
+                          {user && <ProfileImage uid={user.uid} />}
                         </Avatar>
                       }
                       action={
@@ -143,7 +163,13 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                       </Typography>
                     </CardContent>
                     <CardActions disableSpacing>
-                      <IconButton aria-label="like">
+                      <IconButton
+                        aria-label="like"
+                        onClick={() => handleLikeClick(post.id)}
+                        style={{
+                          color: likedPosts[post.id] ? "pink" : "inherit",
+                        }}
+                      >
                         <FavoriteIcon />
                       </IconButton>
                       <IconButton aria-label="share">
@@ -157,7 +183,6 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                         <ExpandMoreIcon />
                       </IconButton>
                     </CardActions>
-
                     <Collapse
                       in={expanded[post.id]}
                       timeout="auto"

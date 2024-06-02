@@ -11,6 +11,7 @@ import {
   Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import ProfileImage from "./profileImage"; // ProfileImage 컴포넌트를 import
 
 const SearchBar = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,7 +116,8 @@ const SearchBar = ({ user }) => {
                   variant="text"
                   onClick={() => handleProfileClick(user.uid)}
                 >
-                  {user.displayName} (통합 사용자ID: {user.uid.substring(0, 6)}){" "}
+                  <ProfileImage uid={user.uid} />
+                  {user.displayName} (ID: {user.uid.substring(0, 6)}){" "}
                   {/* 식별자 표시 */}
                 </Button>
               </li>
