@@ -8,6 +8,13 @@ import Dashboard from "./pages/Uploadpage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
+// DM Serif Text 웹 폰트 가져오기
+const link = document.createElement("link");
+link.href =
+  "https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap";
+link.rel = "stylesheet";
+document.head.appendChild(link);
+
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement);
 

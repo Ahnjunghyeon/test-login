@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBiq9APwd88zKoqCuQl28m-5DveGdVzZNY",
@@ -22,5 +23,6 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const storage = getStorage(app);
 const db = getFirestore(app); // Firestore 초기화
 const auth = getAuth(app);
+const functions = getFunctions(app);
 
-export { auth, storage, db }; // Firestore를 export
+export { auth, storage, db, functions }; // Firestore를 export

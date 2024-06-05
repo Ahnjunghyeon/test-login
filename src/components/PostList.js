@@ -23,7 +23,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import UploadPost from "../UploadPost";
-import ProfileImage from "../components/profileImage";
+import ProfileImage from "./profileImage";
 
 const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -153,6 +153,7 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                       }
                       title={post.title}
                       subheader={`게시물 번호: ${post.id}`}
+                      // 해당 부분에 글 작성 날짜 추가 년.월.일.시.초 로
                     />
                     <CardMedia>
                       <UploadPost imageUrls={post.imageUrls || []} />

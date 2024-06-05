@@ -13,7 +13,7 @@ import {
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref, getDownloadURL, deleteObject } from "firebase/storage";
 
-import PostList from "./pages/PostList";
+import PostList from "./components/PostList";
 
 function App() {
   const [posts, setPosts] = useState([]);

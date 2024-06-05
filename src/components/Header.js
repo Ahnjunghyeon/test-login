@@ -90,122 +90,91 @@ const Header = ({ refreshProfileImage }) => {
 
   return (
     <>
-      <div className="Top">
-        <div className="Top2">
-          <Toolbar
+      <div className="header">
+        <div className="mainlogo">
+          <IconButton
+            className="lsidelist"
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+          >
+            {" "}
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            className="logoicon"
+            component={Link}
+            to="/"
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              color: "inherit",
+              textDecoration: "none",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-              >
-                <MenuIcon />
-              </IconButton>
-              <Typography
-                variant="h6"
-                component={Link}
-                to="/"
-                style={{
-                  color: "inherit",
-                  textDecoration: "none",
-                }}
-              >
-                히
-              </Typography>
-            </div>
-            <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-              <SearchBar />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-              }}
+            JungHyeon
+          </Typography>
+        </div>
+        <div className="search">
+          <SearchBar />
+        </div>
+        <div className="menulist">
+          <Button className="homebt" component={Link} to="/">
+            <div className="menutext">Home</div>
+          </Button>
+
+          {user && (
+            <Button className="uploadbt" component={Link} to="/dashboard">
+              <div className="menutext">Upload</div>
+            </Button>
+          )}
+
+          {user && (
+            <Button
+              className="profilebt"
+              onClick={() => navigate(`/profile/${user.uid}`)}
             >
-              <Button
-                component={Link}
-                to="/"
-                color="inherit"
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  margin: "3px", // 마진 추가
-                }}
-              >
-                홈
-              </Button>
+              <div className="menutext">Profile</div>
+            </Button>
+          )}
 
-              {user && (
-                <Button
-                  component={Link}
-                  to="/dashboard"
-                  color="inherit"
-                  sx={{
-                    display: { xs: "none", sm: "block" },
-                    margin: "3px", // 마진 추가
-                  }}
+          {user ? (
+            <>
+              <div className="imgmenu">
+                <div className="text"> MyPage</div>
+                <IconButton className="imgbt" onClick={handleMenuOpen}>
+                  {/* ProfileImage 컴포넌트를 사용하여 프로필 이미지 가져오기 */}
+                  <ProfileImage
+                    className="MyPage"
+                    uid={user.uid}
+                    refresh={refreshProfileImage}
+                  />
+                </IconButton>
+                <Menu
+                  className="iconlist"
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
                 >
-                  업로드
-                </Button>
-              )}
-
-              {user && (
-                <Button
-                  onClick={() => navigate(`/profile/${user.uid}`)}
-                  color="inherit"
-                  sx={{
-                    display: { xs: "none", sm: "block" },
-                    margin: "3px", // 마진 추가
-                  }}
-                >
-                  프로필
-                </Button>
-              )}
-
-              {user ? (
-                <>
-                  <IconButton onClick={handleMenuOpen} color="inherit">
-                    {/* ProfileImage 컴포넌트를 사용하여 프로필 이미지 가져오기 */}
-                    <ProfileImage
-                      uid={user.uid}
-                      refresh={refreshProfileImage}
-                    />
-                  </IconButton>
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleMenuClose}
+                  <MenuItem
+                    className="iconprofile"
+                    onClick={() => {
+                      handleMenuClose();
+                      navigate(`/profile/${user.uid}`);
+                    }}
                   >
-                    <MenuItem
-                      onClick={() => {
-                        handleMenuClose();
-                        navigate(`/profile/${user.uid}`);
-                      }}
-                    >
-                      {user.displayName}
-                    </MenuItem>
-                    <MenuItem onClick={signOutUser}>Logout</MenuItem>
-                  </Menu>
-                </>
-              ) : (
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  onClick={signInWithGoogle}
-                  sx={{ display: { xs: "none", sm: "block" } }}
-                >
-                  Google Login
-                </Button>
-              )}
-            </div>
-          </Toolbar>
+                    {user.displayName}
+                  </MenuItem>
+                  <MenuItem className="logoutbt" onClick={signOutUser}>
+                    <div className="text">Log Out</div>
+                  </MenuItem>
+                </Menu>
+              </div>
+            </>
+          ) : (
+            <Button className="loginbutton" onClick={signInWithGoogle}>
+              <div className="text">Google Login</div>
+            </Button>
+          )}
         </div>
       </div>
       <hr className="Line" />

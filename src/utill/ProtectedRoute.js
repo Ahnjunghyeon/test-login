@@ -11,7 +11,11 @@ const ProtectedRoute = ({ children }) => {
   const auth = getAuth();
   const user = auth.currentUser;
 
-  return user ? children : <Navigate to="/" />;
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

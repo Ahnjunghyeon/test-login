@@ -1,51 +1,52 @@
-/* CustomNavbar.css */
-.Top {
-  width: 100%;
-  height: 64px;
-  display: flex;
-  justify-content: center; /* 수평 가운데 정렬 */
-  align-items: center; /* 수직 가운데 정렬 */
-}
-
-.MuiAppBar-root {
-  width: 100%;
-}
-
-.TopWebName {
-  display: flex;
-  align-items: center;
-}
-
-.Topsearch {
-  display: flex;
-  align-items: center;
-}
-
-.Topmenu {
-  display: flex;
-  align-items: center;
-}
-
-@media (max-width: 600px) {
-  .Top {
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  .TopWebName {
-    flex-grow: 1;
-  }
-
-  .Topsearch,
-  .Topmenu {
-    display: none;
-  }
-}
-
-.Top .Top2 {
-  width: 1050px;
-}
-
 .Line {
   margin-top: 0px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+}
+
+.header .lsidelist {
+  margin-left: 5px;
+  justify-content: center;
+  align-items: center;
+}
+.header .logoicon {
+  font-family: "DM Serif Text", serif;
+  font-weight: 400;
+  font-style: normal;
+  margin-left: 5px;
+  font-size: 20px;
+}
+.header .menulist {
+  display: flex;
+}
+
+.header .text {
+  font-family: "DM Serif Text", serif;
+  font-weight: 400;
+  font-style: normal;
+  color: black;
+}
+
+.header .menutext {
+  font-family: "DM Serif Text", serif;
+  font-weight: 400;
+  font-style: normal;
+  color: black;
+  font-size: 16px;
+}
+
+.menulist .imgmenu {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  margin-left: 15px;
+  margin-right: 10px;
+  background-color: rgb(238, 238, 238);
+  border-radius: 15px;
+  padding-left: 15px;
+  height: 50px;
 }
