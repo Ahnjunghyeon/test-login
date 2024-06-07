@@ -82,7 +82,8 @@ const SearchBar = ({ user }) => {
     <div ref={searchContainerRef}>
       <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
         <InputBase
-          placeholder="Search…"
+          className="text"
+          placeholder="Search"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}

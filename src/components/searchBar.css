@@ -1,12 +1,4 @@
-.App {
-}
-
-.App .main {
-  margin-left: 100px;
-  margin-right: 100px;
-}
-
-.App .text {
+.text {
   font-family: "DM Serif Text", serif;
   font-weight: 400;
   font-style: normal;

@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Toolbar,
-  Typography,
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import { Typography, Button, IconButton, Menu, MenuItem } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -150,13 +143,13 @@ const Header = ({ refreshProfileImage }) => {
                   />
                 </IconButton>
                 <Menu
-                  className="iconlist"
+                  className="text"
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
                   onClose={handleMenuClose}
                 >
                   <MenuItem
-                    className="iconprofile"
+                    className="text"
                     onClick={() => {
                       handleMenuClose();
                       navigate(`/profile/${user.uid}`);
@@ -178,6 +171,7 @@ const Header = ({ refreshProfileImage }) => {
         </div>
       </div>
       <hr className="Line" />
+      <div className="header2">빈공간~</div>
     </>
   );
 };

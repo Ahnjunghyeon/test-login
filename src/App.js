@@ -93,21 +93,27 @@ function App() {
 
   return (
     <div className="App">
-      <CustomNavbar onProfileClick={handleProfileNavigation} />
-
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <PostList
-              user={user}
-              posts={posts}
-              handleUpdatePost={handleUpdatePost}
-              handleDeletePost={handleDeletePost}
-            />
-          }
-        />
-      </Routes>
+      <CustomNavbar
+        className="header"
+        onProfileClick={handleProfileNavigation}
+      />
+      <div className="main">
+        <Routes>
+          <Route
+            className="main"
+            path="/"
+            element={
+              <PostList
+                user={user}
+                posts={posts}
+                handleUpdatePost={handleUpdatePost}
+                handleDeletePost={handleDeletePost}
+              />
+            }
+          />
+        </Routes>
+      </div>
+      <div className="footer"></div>
     </div>
   );
 }
