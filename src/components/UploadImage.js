@@ -1,9 +1,11 @@
+//profile 이미지 업로드
+
 import React, { useState } from "react";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, setDoc, getFirestore } from "firebase/firestore";
 import { Button, Form } from "react-bootstrap";
 
-const UploadImage = ({ uid, onUpload }) => {
+const ProfileImage = ({ uid, onUpload }) => {
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const storage = getStorage();
@@ -48,4 +50,4 @@ const UploadImage = ({ uid, onUpload }) => {
   );
 };
 
-export default UploadImage;
+export default ProfileImage;

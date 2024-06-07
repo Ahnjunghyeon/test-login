@@ -13,7 +13,7 @@ import {
 
 import "./Header.css";
 import SearchBar from "./searchBar"; // SearchBar 컴포넌트를 import
-import ProfileImage from "./profileImage"; // ProfileImage 컴포넌트를 import
+import ProfileImage from "./Profilelogo"; // ProfileImage 컴포넌트를 import
 
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
@@ -116,7 +116,7 @@ const Header = ({ refreshProfileImage }) => {
           </Button>
 
           {user && (
-            <Button className="uploadbt" component={Link} to="/dashboard">
+            <Button className="uploadbt" component={Link} to="/uploadpage">
               <div className="menutext">Upload</div>
             </Button>
           )}

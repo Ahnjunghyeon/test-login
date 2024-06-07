@@ -11,7 +11,7 @@ import {
   Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import ProfileImage from "./profileImage"; // ProfileImage 컴포넌트를 import
+import ProfileImage from "./Profilelogo"; // ProfileImage 컴포넌트를 import
 
 const SearchBar = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState("");

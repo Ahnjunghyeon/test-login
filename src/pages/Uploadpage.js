@@ -8,20 +8,25 @@ import {
   Typography,
   Box,
   CircularProgress,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel,
 } from "@mui/material";
 import { storage, db } from "../Firebase/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-function Dashboard() {
+function Uploadpage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [userPostsCount, setUserPostsCount] = useState(0); // 사용자의 게시물 수를 추적하는 상태 추가
+  const [userPostsCount, setUserPostsCount] = useState(0);
+  const [category, setCategory] = useState(""); // 카테고리 state 추가
 
   useEffect(() => {
     const auth = getAuth();
@@ -40,10 +45,9 @@ function Dashboard() {
 
   useEffect(() => {
     if (user) {
-      // 사용자가 로그인한 경우, 사용자의 게시물 수를 가져오고 업데이트합니다.
       const userPostsRef = collection(db, `users/${user.uid}/posts`);
       const unsubscribe = onSnapshot(userPostsRef, (snapshot) => {
-        setUserPostsCount(snapshot.size); // 문서의 수가 게시물 수와 동일합니다.
+        setUserPostsCount(snapshot.size);
       });
 
       return unsubscribe;
@@ -72,6 +76,10 @@ function Dashboard() {
     });
     setPreviews([]);
     Promise.all(filePreviews);
+  };
+
+  const handleCategoryChange = (event) => {
+    setCategory(event.target.value);
   };
 
   const handleSubmit = async (event) => {
@@ -111,13 +119,12 @@ function Dashboard() {
 
   const savePostData = async (imageUrls) => {
     try {
-      // 사용자 정의 ID 생성
       const userPostId = `${user.uid}${userPostsCount + 1}`;
-      // 게시물 데이터 저장
       await setDoc(doc(db, `users/${user.uid}/posts`, userPostId), {
         title: title,
         content: content,
         imageUrls: imageUrls,
+        category: category, // 카테고리 추가
         createdAt: new Date(),
       });
       setTitle("");
@@ -171,6 +178,27 @@ function Dashboard() {
             />
           </Box>
           <Box mb={2}>
+            <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
+              <InputLabel id="category-label">Category</InputLabel>
+              <Select
+                labelId="category-label"
+                value={category}
+                onChange={handleCategoryChange}
+                label="Category"
+              >
+                <MenuItem value="">Select Category</MenuItem>
+                <MenuItem value="Travel">Travel</MenuItem>
+                <MenuItem value="Food">Food</MenuItem>
+                <MenuItem value="Cooking">Cooking</MenuItem>
+                <MenuItem value="Culture">Culture</MenuItem>
+                <MenuItem value="Games">Games</MenuItem>
+                <MenuItem value="Music">Music</MenuItem>
+                <MenuItem value="Study">Study</MenuItem>{" "}
+                {/* 중복된 Music 대신 Study로 변경 */}
+              </Select>
+            </FormControl>
+          </Box>
+          <Box mb={2}>
             <input
               accept="image/*"
               type="file"
@@ -200,6 +228,7 @@ function Dashboard() {
                   alt={`preview-${index}`}
                   style={{
                     display: "flex",
+
                     maxWidth: "100%",
                     maxHeight: "100px",
                     marginRight: "10px",
@@ -238,4 +267,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default Uploadpage;
