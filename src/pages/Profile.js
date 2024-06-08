@@ -2,17 +2,16 @@ import React, { useState, useEffect } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
 import {
   collection,
-  query,
-  where,
+  doc,
   getDoc,
   getDocs,
-  doc,
-  getFirestore,
   setDoc,
-  updateDoc,
   deleteDoc,
+  query,
+  where,
+  getFirestore,
 } from "firebase/firestore";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import { Form, Button, Container, Row, Col, Card } from "react-bootstrap"; // Card import 추가
 import "./Profile.css";
 import CustomNavbar from "../components/Header";
 import { useParams } from "react-router-dom";
@@ -27,6 +26,7 @@ const Profile = () => {
   const [profileImageUrl, setProfileImageUrl] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
+  const [profilePosts, setProfilePosts] = useState([]); // 사용자가 작성한 글을 저장할 상태 추가
   const auth = getAuth();
   const db = getFirestore();
   const currentUser = auth.currentUser;
@@ -56,6 +56,12 @@ const Profile = () => {
             setIsFollowing(true);
           }
         }
+
+        // 사용자가 작성한 글을 가져오는 부분
+        if (uid) {
+          const userPosts = await fetchUserPosts(uid);
+          setProfilePosts(userPosts);
+        }
       } catch (error) {
         console.error("Error fetching user profile: ", error);
       }
@@ -63,6 +69,21 @@ const Profile = () => {
 
     fetchUserProfile();
   }, [uid, db, refreshProfileImage, currentUser]);
+
+  const fetchUserPosts = async (uid) => {
+    try {
+      const userPostsRef = collection(db, `users/${uid}/posts`);
+      const querySnapshot = await getDocs(userPostsRef);
+      const userPosts = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      return userPosts;
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      return [];
+    }
+  };
 
   const handleFollow = async () => {
     if (currentUser) {
@@ -92,14 +113,6 @@ const Profile = () => {
     e.preventDefault();
     setLoading(true);
 
-    const isNicknameAvailable = await checkNicknameAvailability(displayName);
-
-    if (!isNicknameAvailable) {
-      alert("The nickname is already taken. Please choose a different one.");
-      setLoading(false);
-      return;
-    }
-
     updateProfile(currentUser, {
       displayName,
     })
@@ -122,13 +135,6 @@ const Profile = () => {
       });
   };
 
-  const checkNicknameAvailability = async (displayName) => {
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("displayName", "==", displayName));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.empty;
-  };
-
   const handleImageUpload = () => {
     setRefreshProfileImage(!refreshProfileImage);
   };
@@ -143,7 +149,11 @@ const Profile = () => {
               <Col md={6} className="text-center">
                 {profileUser && (
                   <>
-                    <ProfileImage uid={uid} refresh={refreshProfileImage} />
+                    <ProfileImage
+                      uid={uid}
+                      displayName={displayName}
+                      refresh={refreshProfileImage}
+                    />
                     <h3 className="usname">{displayName}</h3>
                     {userEmail && <p>식별자 (이메일): {userEmail}</p>}
                     <p>사용자 UID: {uid}</p>
@@ -190,7 +200,37 @@ const Profile = () => {
             </Row>
           </Container>
 
-          <div className="service">gsadgs</div>
+          {/* 사용자가 작성한 글을 보여주는 부분 */}
+          <Container className="mt-4">
+            <Row className="justify-content-center">
+              <Col md={12}>
+                <h3 className="mt-4">User's Posts</h3>
+                <Row xs={1} md={2} lg={3} className="g-4">
+                  {profilePosts.map((post) => (
+                    <Col key={post.id}>
+                      <Card>
+                        <Card.Body>
+                          <Card.Title>{post.title}</Card.Title>
+                          <Card.Text>{post.content}</Card.Text>
+                          <Card.Text>Category: {post.category}</Card.Text>
+                          {/* 이미지를 표시하는 부분 */}
+                          {post.imageUrls &&
+                            post.imageUrls.map((imageUrl, index) => (
+                              <img
+                                key={index}
+                                src={imageUrl}
+                                alt={`Image ${index}`}
+                                style={{ maxWidth: "100%", maxHeight: "200px" }}
+                              />
+                            ))}
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </Col>
+            </Row>
+          </Container>
         </div>
       </div>
     </>

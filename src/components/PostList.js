@@ -1,31 +1,48 @@
 import React, { useState, useEffect } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
-import CardActions from "@mui/material/CardActions";
-import Collapse from "@mui/material/Collapse";
-import Avatar from "@mui/material/Avatar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Menu,
+  Typography,
+  IconButton,
+  Avatar,
+  Collapse,
+  Button,
+  TextField,
+} from "@mui/material";
+import {
+  CardActions,
+  CardContent,
+  CardMedia,
+  CardHeader,
+  Card,
+} from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import { red } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import UploadPost from "../UploadPost";
 import ProfileImage from "./Profilelogo";
 
-const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
+const PostList = ({
+  user,
+  posts,
+  displayName,
+  handleUpdatePost,
+  handleDeletePost,
+}) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [title, setTitle] = useState("");
@@ -34,6 +51,9 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState({});
   const [expanded, setExpanded] = useState({});
   const [likedPosts, setLikedPosts] = useState({});
+  const [category, setCategory] = useState(""); // 추가: 카테고리 state
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // 추가: 현재 이미지 인덱스
+
   const db = getFirestore();
 
   useEffect(() => {
@@ -65,6 +85,7 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
     setTitle(post.title);
     setContent(post.content);
     setImageUrls(post.imageUrls || []);
+    setCategory(post.category || ""); // 수정: 기존 카테고리를 선택하도록 설정
     setEditDialogOpen(true);
     handleMenuClose(post);
   };
@@ -80,6 +101,7 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
         title,
         content,
         imageUrls,
+        category, // 추가: 수정된 카테고리 저장
       };
 
       try {
@@ -107,6 +129,18 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
     }
   };
 
+  const handleNextImage = (post) => {
+    setCurrentImageIndex(
+      (prevIndex) => (prevIndex + 1) % post.imageUrls.length
+    );
+  };
+
+  const handlePreviousImage = (post) => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? post.imageUrls.length - 1 : prevIndex - 1
+    );
+  };
+
   return (
     <>
       <div className="Posts">
@@ -122,6 +156,7 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                 >
                   <Card sx={{ maxWidth: 345 }}>
                     <CardHeader
+                      className="cardheader"
                       avatar={
                         <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
                           {user && <ProfileImage uid={user.uid} />}
@@ -151,11 +186,52 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                           </Menu>
                         </>
                       }
-                      title={post.title}
+                      title={
+                        <Typography className="title">
+                          <Typography variant="subtitle1">
+                            {user.displayName}
+                          </Typography>
+                          <Typography variant="subtitle2">
+                            {" "}
+                            {post.title}
+                          </Typography>
+                        </Typography>
+                      }
                       subheader={post.category} // 여기서 카테고리를 표시합니다
                     />
                     <CardMedia>
-                      <UploadPost imageUrls={post.imageUrls || []} />
+                      <div style={{ position: "relative" }}>
+                        {post.imageUrls && post.imageUrls.length > 1 && (
+                          <>
+                            <IconButton
+                              style={{
+                                position: "absolute",
+                                top: "50%",
+                                left: 0,
+                                transform: "translateY(-50%)",
+                              }}
+                              onClick={() => handlePreviousImage(post)}
+                            >
+                              <ChevronLeftIcon />
+                            </IconButton>
+                            <IconButton
+                              style={{
+                                position: "absolute",
+                                top: "50%",
+                                right: 0,
+                                transform: "translateY(-50%)",
+                              }}
+                              onClick={() => handleNextImage(post)}
+                            >
+                              <ChevronRightIcon />
+                            </IconButton>
+                          </>
+                        )}
+                        <UploadPost
+                          imageUrls={post.imageUrls || []}
+                          currentImageIndex={currentImageIndex}
+                        />
+                      </div>
                     </CardMedia>
                     <CardContent>
                       <Typography variant="body2" color="text.secondary">
@@ -188,9 +264,7 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
                       timeout="auto"
                       unmountOnExit
                     >
-                      <CardContent>
-                        <Typography paragraph>Additional content</Typography>
-                      </CardContent>
+                      <CardContent>추가정보</CardContent>
                     </Collapse>
                   </Card>
                 </div>
@@ -227,32 +301,25 @@ const PostList = ({ user, posts, handleUpdatePost, handleDeletePost }) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
-          {imageUrls.map((url, index) => (
-            <div key={index} style={{ position: "relative" }}>
-              <img
-                src={url}
-                alt=""
-                style={{ width: "100%", marginTop: "10px" }}
-              />
-              <Button
-                onClick={() => handleRemoveImage(index)}
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "0px",
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                  color: "white",
-                  width: "50px",
-                  height: "50px",
-                  minWidth: "30px",
-                  fontSize: "12px",
-                  padding: "0",
-                }}
-              >
-                X
-              </Button>
-            </div>
-          ))}
+          {/* 카테고리 선택 */}
+          <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
+            <InputLabel id="category-label">Category</InputLabel>
+            <Select
+              labelId="category-label"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              label="Category"
+            >
+              <MenuItem value="">Select Category</MenuItem>
+              <MenuItem value="Travel">Travel</MenuItem>
+              <MenuItem value="Food">Food</MenuItem>
+              <MenuItem value="Cooking">Cooking</MenuItem>
+              <MenuItem value="Culture">Culture</MenuItem>
+              <MenuItem value="Games">Games</MenuItem>
+              <MenuItem value="Music">Music</MenuItem>
+              <MenuItem value="Study">Study</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseEditDialog}>취소</Button>
