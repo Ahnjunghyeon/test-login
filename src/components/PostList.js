@@ -187,15 +187,14 @@ const PostList = ({
                         </>
                       }
                       title={
-                        <Typography className="title">
+                        <>
                           <Typography variant="subtitle1">
                             {user.displayName}
                           </Typography>
                           <Typography variant="subtitle2">
-                            {" "}
                             {post.title}
                           </Typography>
-                        </Typography>
+                        </>
                       }
                       subheader={post.category} // 여기서 카테고리를 표시합니다
                     />

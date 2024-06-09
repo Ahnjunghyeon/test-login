@@ -94,7 +94,7 @@ const SearchBar = ({ user }) => {
         </IconButton>
       </div>
       {searchError ? (
-        <Typography variant="body1" style={{ textAlign: "center" }}>
+        <Typography variant="body1" align="center">
           None
         </Typography>
       ) : null}
@@ -113,14 +113,15 @@ const SearchBar = ({ user }) => {
           <ul>
             {searchResults.map((user, index) => (
               <li key={index}>
-                <Button
-                  variant="text"
-                  onClick={() => handleProfileClick(user.uid)}
-                >
-                  <ProfileImage uid={user.uid} />
-                  {user.displayName} (ID: {user.uid.substring(0, 6)}){" "}
-                  {/* 식별자 표시 */}
-                </Button>
+                <div>
+                  <Button
+                    variant="text"
+                    onClick={() => handleProfileClick(user.uid)}
+                  >
+                    <ProfileImage uid={user.uid} />
+                    {user.displayName} (ID: {user.uid.substring(0, 6)})
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>

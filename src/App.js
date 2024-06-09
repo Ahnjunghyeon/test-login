@@ -75,6 +75,8 @@ function App() {
             await deleteObject(imageRef);
           } catch (error) {
             console.error("Error deleting image:", error);
+            // 이미지 삭제 중 오류 발생 시 사용자에게 알림 표시
+            alert("Error deleting image. Please try again later.");
           }
         }
       }
@@ -82,6 +84,8 @@ function App() {
       setPosts(posts.filter((post) => post.id !== postId));
     } catch (error) {
       console.error("Error deleting post:", error);
+      // 게시물 삭제 중 오류 발생 시 사용자에게 알림 표시
+      alert("Error deleting post. Please try again later.");
     }
   };
 
@@ -93,14 +97,10 @@ function App() {
 
   return (
     <div className="App">
-      <CustomNavbar
-        className="header"
-        onProfileClick={handleProfileNavigation}
-      />
+      <CustomNavbar onProfileClick={handleProfileNavigation} />
       <div className="main">
         <Routes>
           <Route
-            className="main"
             path="/"
             element={
               <PostList

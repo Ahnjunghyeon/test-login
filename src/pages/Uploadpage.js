@@ -12,10 +12,22 @@ import {
   FormControl,
   Select,
   InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import { storage, db } from "../Firebase/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { collection, doc, setDoc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  setDoc,
+  onSnapshot,
+  getDoc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 function Uploadpage() {
@@ -25,14 +37,17 @@ function Uploadpage() {
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [userPostsCount, setUserPostsCount] = useState(0);
-  const [category, setCategory] = useState(""); // 카테고리 state 추가
+  const [category, setCategory] = useState("");
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [displayName, setDisplayName] = useState(""); // displayName 상태 추가
+  const [categoryPostsCount, setCategoryPostsCount] = useState(0); // 카테고리별 게시물 수 상태 추가
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
+        fetchUserDisplayName(user.uid);
       } else {
         setUser(null);
       }
@@ -44,15 +59,26 @@ function Uploadpage() {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      const userPostsRef = collection(db, `users/${user.uid}/posts`);
-      const unsubscribe = onSnapshot(userPostsRef, (snapshot) => {
-        setUserPostsCount(snapshot.size);
-      });
-
-      return unsubscribe;
+    if (user && category) {
+      fetchCategoryPostsCount(user.uid, category);
     }
-  }, [user]);
+  }, [user, category]);
+
+  const fetchUserDisplayName = async (uid) => {
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (userDoc.exists()) {
+      setDisplayName(userDoc.data().displayName);
+    }
+  };
+
+  const fetchCategoryPostsCount = async (uid, category) => {
+    const categoryPostsQuery = query(
+      collection(db, `users/${uid}/posts`),
+      where("category", "==", category)
+    );
+    const categoryPostsSnapshot = await getDocs(categoryPostsQuery);
+    setCategoryPostsCount(categoryPostsSnapshot.size);
+  };
 
   const handleTitleChange = (event) => {
     setTitle(event.target.value);
@@ -82,8 +108,13 @@ function Uploadpage() {
     setCategory(event.target.value);
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    setConfirmDialogOpen(false);
     setLoading(true);
 
     const folderRef = ref(storage, `images/${title}`);
@@ -117,14 +148,19 @@ function Uploadpage() {
     savePostData(imageUrls);
   };
 
+  const handleCancel = () => {
+    setConfirmDialogOpen(false);
+  };
+
   const savePostData = async (imageUrls) => {
     try {
-      const userPostId = `${user.uid}${userPostsCount + 1}`;
+      const postNumber = categoryPostsCount + 1;
+      const userPostId = `${displayName}_${category}_${postNumber}`;
       await setDoc(doc(db, `users/${user.uid}/posts`, userPostId), {
         title: title,
         content: content,
         imageUrls: imageUrls,
-        category: category, // 카테고리 추가
+        category: category,
         createdAt: new Date(),
       });
       setTitle("");
@@ -187,14 +223,14 @@ function Uploadpage() {
                 label="Category"
               >
                 <MenuItem value="">Select Category</MenuItem>
+                <MenuItem value="None"> </MenuItem>
                 <MenuItem value="Travel">Travel</MenuItem>
                 <MenuItem value="Food">Food</MenuItem>
                 <MenuItem value="Cooking">Cooking</MenuItem>
                 <MenuItem value="Culture">Culture</MenuItem>
                 <MenuItem value="Games">Games</MenuItem>
                 <MenuItem value="Music">Music</MenuItem>
-                <MenuItem value="Study">Study</MenuItem>{" "}
-                {/* 중복된 Music 대신 Study로 변경 */}
+                <MenuItem value="Study">Study</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -228,7 +264,6 @@ function Uploadpage() {
                   alt={`preview-${index}`}
                   style={{
                     display: "flex",
-
                     maxWidth: "100%",
                     maxHeight: "100px",
                     marginRight: "10px",
@@ -263,6 +298,17 @@ function Uploadpage() {
           )}
         </form>
       </Container>
+      <Dialog open={confirmDialogOpen} onClose={handleCancel}>
+        <DialogTitle>게시물을 등록하시겠습니까?</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleConfirm} color="primary">
+            Yes
+          </Button>
+          <Button onClick={handleCancel} color="primary">
+            No
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
