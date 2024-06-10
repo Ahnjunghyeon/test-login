@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import {
   FormControl,
   InputLabel,
@@ -53,6 +62,7 @@ const PostList = ({
   const [likedPosts, setLikedPosts] = useState({});
   const [category, setCategory] = useState(""); // 추가: 카테고리 state
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // 추가: 현재 이미지 인덱스
+  const [followedPosts, setFollowedPosts] = useState([]); // 추가: 팔로우한 유저의 게시물 상태
 
   const db = getFirestore();
 
@@ -66,6 +76,51 @@ const PostList = ({
       }
     };
     fetchLikedPosts();
+  }, [user, db]);
+
+  // 팔로우한 유저의 게시물 가져오기
+  useEffect(() => {
+    const fetchFollowedPosts = async () => {
+      if (user) {
+        // 현재 사용자의 팔로우 정보를 가져옵니다.
+        const followRef = collection(db, `users/${user.uid}/follow`);
+        const followSnapshot = await getDocs(followRef);
+
+        // 팔로우한 유저의 ID를 가져옵니다.
+        const followedUserIds = followSnapshot.docs.map((doc) => doc.id);
+
+        if (followedUserIds.length > 0) {
+          const followedPostsData = [];
+
+          for (const followedUserId of followedUserIds) {
+            // 팔로우한 유저의 게시물 컬렉션을 가져옵니다.
+            const postsRef = collection(db, `users/${followedUserId}/posts`);
+            const postsSnapshot = await getDocs(postsRef);
+
+            for (const postDoc of postsSnapshot.docs) {
+              const postData = postDoc.data();
+              const userDoc = await getDoc(doc(db, "users", followedUserId));
+              const userDisplayName = userDoc.exists()
+                ? userDoc.data().displayName
+                : "Unknown User";
+
+              followedPostsData.push({
+                id: postDoc.id,
+                userId: followedUserId,
+                userDisplayName,
+                ...postData,
+              });
+            }
+          }
+
+          // 팔로우한 유저의 게시물을 날짜를 기준으로 내림차순으로 정렬
+          followedPostsData.sort((a, b) => b.createdAt - a.createdAt);
+
+          setFollowedPosts(followedPostsData);
+        }
+      }
+    };
+    fetchFollowedPosts();
   }, [user, db]);
 
   const handleMenuOpen = (event, post) => {
@@ -194,6 +249,13 @@ const PostList = ({
                           <Typography variant="subtitle2">
                             {post.title}
                           </Typography>
+                          <Typography variant="subtitle3">
+                            {post.createdAt instanceof Date
+                              ? post.createdAt.toLocaleString()
+                              : new Date(
+                                  post.createdAt.seconds * 1000
+                                ).toLocaleString()}
+                          </Typography>
                         </>
                       }
                       subheader={post.category} // 여기서 카테고리를 표시합니다
@@ -271,12 +333,122 @@ const PostList = ({
             ) : (
               <p>게시물이 없습니다.</p>
             )}
+
+            <h2>팔로우한 유저의 게시물</h2>
+            {followedPosts.length > 0 ? (
+              followedPosts.map((post) => (
+                <div
+                  key={post.id}
+                  className="Post"
+                  style={{ marginBottom: "20px" }}
+                >
+                  <Card sx={{ maxWidth: 345 }}>
+                    <CardHeader
+                      className="cardheader"
+                      avatar={
+                        <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                          {/* Followed user profile image */}
+                          <ProfileImage uid={post.userId} />
+                        </Avatar>
+                      }
+                      title={
+                        <>
+                          <Typography variant="subtitle1">
+                            {post.userDisplayName}
+                          </Typography>
+                          <Typography variant="subtitle2">
+                            {post.title}
+                          </Typography>
+                          <Typography variant="subtitle3">
+                            {post.createdAt instanceof Date
+                              ? post.createdAt.toLocaleString()
+                              : new Date(
+                                  post.createdAt.seconds * 1000
+                                ).toLocaleString()}
+                          </Typography>
+                          {post.category}
+                        </>
+                      }
+                      subheader={post.category} // 여기서 카테고리를 표시합니다
+                    />
+                    <CardMedia>
+                      <div style={{ position: "relative" }}>
+                        {post.imageUrls && post.imageUrls.length > 1 && (
+                          <>
+                            <IconButton
+                              style={{
+                                position: "absolute",
+                                top: "50%",
+                                left: 0,
+                                transform: "translateY(-50%)",
+                              }}
+                              onClick={() => handlePreviousImage(post)}
+                            >
+                              <ChevronLeftIcon />
+                            </IconButton>
+                            <IconButton
+                              style={{
+                                position: "absolute",
+                                top: "50%",
+                                right: 0,
+                                transform: "translateY(-50%)",
+                              }}
+                              onClick={() => handleNextImage(post)}
+                            >
+                              <ChevronRightIcon />
+                            </IconButton>
+                          </>
+                        )}
+                        <UploadPost
+                          imageUrls={post.imageUrls || []}
+                          currentImageIndex={currentImageIndex}
+                        />
+                      </div>
+                    </CardMedia>
+                    <CardContent>
+                      <Typography variant="body2" color="text.secondary">
+                        {post.content}
+                      </Typography>
+                    </CardContent>
+                    <CardActions disableSpacing>
+                      <IconButton
+                        aria-label="like"
+                        onClick={() => handleLikeClick(post.id)}
+                        style={{
+                          color: likedPosts[post.id] ? "pink" : "inherit",
+                        }}
+                      >
+                        <FavoriteIcon />
+                      </IconButton>
+                      <IconButton aria-label="share">
+                        <ShareIcon />
+                      </IconButton>
+                      <IconButton
+                        aria-expanded={expanded[post.id]}
+                        aria-label="show more"
+                        onClick={() => handleExpandClick(post.id)}
+                      >
+                        <ExpandMoreIcon />
+                      </IconButton>
+                    </CardActions>
+                    <Collapse
+                      in={expanded[post.id]}
+                      timeout="auto"
+                      unmountOnExit
+                    >
+                      <CardContent>추가정보</CardContent>
+                    </Collapse>
+                  </Card>
+                </div>
+              ))
+            ) : (
+              <p>팔로우한 유저의 게시물이 없습니다.</p>
+            )}
           </>
         ) : (
           <p>로그인 해주세요.</p>
         )}
       </div>
-
       <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
         <DialogTitle>게시물 수정</DialogTitle>
         <DialogContent>
