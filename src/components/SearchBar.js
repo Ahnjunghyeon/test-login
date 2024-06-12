@@ -1,5 +1,12 @@
-import { useState, useEffect, useRef } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  limit,
+  orderBy,
+} from "firebase/firestore";
 import { db } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
 
@@ -22,6 +29,10 @@ const SearchBar = ({ user }) => {
 
   useEffect(() => {
     setSearchResults([]);
+    if (searchTerm.length > 0) {
+      // 검색어가 입력되면 연관된 사용자들을 가져옴
+      getRelatedUsers();
+    }
   }, [searchTerm]);
 
   useEffect(() => {
@@ -40,6 +51,29 @@ const SearchBar = ({ user }) => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, []);
+
+  const getRelatedUsers = async () => {
+    try {
+      const q = query(
+        collection(db, "users"),
+        where("displayName", ">=", searchTerm),
+        orderBy("displayName"),
+        limit(10)
+      );
+      const querySnapshot = await getDocs(q);
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        const displayName = doc.data().displayName;
+        // 검색어가 displayName에 포함되면 결과에 포함
+        if (displayName.includes(searchTerm)) {
+          users.push({ ...doc.data(), uid: doc.id }); // UID를 함께 저장
+        }
+      });
+      setSearchResults(users);
+    } catch (error) {
+      console.error("Error searching users:", error);
+    }
+  };
 
   const handleSearch = async () => {
     try {

@@ -12,15 +12,15 @@ import {
 } from "firebase/auth";
 
 import "./Header.css";
-import SearchBar from "./searchBar"; // SearchBar 컴포넌트를 import
-import ProfileImage from "./Profilelogo"; // ProfileImage 컴포넌트를 import
+import SearchBar from "./searchBar";
+import ProfileImage from "./Profilelogo";
 
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // useNavigate 훅 추가
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -45,9 +45,8 @@ const Header = ({ refreshProfileImage }) => {
     signInWithPopup(auth, provider)
       .then((result) => {
         const user = result.user;
-        const googleName = user.displayName; // 구글 프로필에서 이름 가져오기
+        const googleName = user.displayName;
         if (googleName) {
-          // 구글 이름이 존재하는 경우에만 업데이트
           updateProfile(user, {
             displayName: googleName,
           })
@@ -83,6 +82,9 @@ const Header = ({ refreshProfileImage }) => {
 
   return (
     <>
+      <div className="topheader">gasd</div>
+      <hr className="topline"></hr>
+
       <div className="header">
         <div className="mainlogo">
           <IconButton
@@ -92,13 +94,12 @@ const Header = ({ refreshProfileImage }) => {
             color="inherit"
             aria-label="open drawer"
           >
-            {" "}
             <MenuIcon />
           </IconButton>
           <Typography
             className="logoicon"
             component={Link}
-            to="/"
+            to="/logopage"
             style={{
               color: "inherit",
               textDecoration: "none",
@@ -111,8 +112,8 @@ const Header = ({ refreshProfileImage }) => {
           <SearchBar />
         </div>
         <div className="menulist">
-          <Button className="homebt" component={Link} to="/">
-            <div className="menutext">Home</div>
+          <Button className="homebt" onClick={() => navigate("/home")}>
+            <div className="menutext">MAIN</div>
           </Button>
 
           {user && (
@@ -121,21 +122,11 @@ const Header = ({ refreshProfileImage }) => {
             </Button>
           )}
 
-          {user && (
-            <Button
-              className="profilebt"
-              onClick={() => navigate(`/profile/${user.uid}`)}
-            >
-              <div className="menutext">Profile</div>
-            </Button>
-          )}
-
           {user ? (
             <>
               <div className="imgmenu">
                 <div className="text"> MyPage</div>
                 <IconButton className="imgbt" onClick={handleMenuOpen}>
-                  {/* ProfileImage 컴포넌트를 사용하여 프로필 이미지 가져오기 */}
                   <ProfileImage
                     className="MyPage"
                     uid={user.uid}
@@ -155,7 +146,7 @@ const Header = ({ refreshProfileImage }) => {
                       navigate(`/profile/${user.uid}`);
                     }}
                   >
-                    {user.displayName}
+                    <div className="menutext">Profile</div>
                   </MenuItem>
                   <MenuItem className="logoutbt" onClick={signOutUser}>
                     <div className="text">Log Out</div>
@@ -170,8 +161,8 @@ const Header = ({ refreshProfileImage }) => {
           )}
         </div>
       </div>
+      <div className="bottomheader">빈공간~</div>
       <hr className="Line" />
-      <div className="header2">빈공간~</div>
     </>
   );
 };

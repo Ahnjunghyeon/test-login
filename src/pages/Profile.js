@@ -23,8 +23,8 @@ import {
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import CustomNavbar from "../components/Header";
-import ProfileImage from "../components/Profilelogo";
-import UploadImage from "../components/UploadImage";
+import Profilelogo from "../components/Profilelogo";
+import ProfileImage from "../components/ProfileImage";
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -157,7 +157,7 @@ const Profile = () => {
             <Grid item md={6} textAlign="center">
               {profileUser && (
                 <>
-                  <ProfileImage
+                  <Profilelogo
                     uid={uid}
                     displayName={displayName}
                     refresh={refreshProfileImage}
@@ -189,7 +189,7 @@ const Profile = () => {
                       </Button>
                     ))}
                   {currentUser && currentUser.uid === uid && (
-                    <UploadImage uid={uid} onUpload={handleImageUpload} />
+                    <ProfileImage uid={uid} onUpload={handleImageUpload} />
                   )}
                 </>
               )}

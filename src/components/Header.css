@@ -1,3 +1,18 @@
+.topline {
+  margin: 0px;
+  height: 0px;
+  color: rgb(185, 185, 185);
+}
+
+.topheader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30px;
+  margin-left: 100px;
+  margin-right: 100px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -27,6 +42,10 @@
 }
 .header .menulist {
   display: flex;
+}
+
+.header .menulist .homebt {
+  margin-left: 50px;
 }
 
 .header .text {
@@ -69,4 +88,8 @@
   height: 60px;
   margin-left: 100px;
   margin-right: 100px;
+}
+
+.header .imgmenu .loginbutton {
+  margin-left: 150px;
 }

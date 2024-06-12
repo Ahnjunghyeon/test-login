@@ -162,6 +162,7 @@ function Uploadpage() {
         imageUrls: imageUrls,
         category: category,
         createdAt: new Date(),
+        uid: user.uid, // 유저의 uid를 추가합니다.
       });
       setTitle("");
       setContent("");

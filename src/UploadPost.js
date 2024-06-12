@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Box, CardMedia, IconButton } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 function UploadPost({ imageUrls }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -44,13 +45,31 @@ function UploadPost({ imageUrls }) {
         alt={`image-${currentImageIndex}`}
       />
       {imageUrls.length > 1 && (
-        <IconButton onClick={handlePrevImage}>
-          <ArrowBackIcon />
+        <IconButton
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: 0,
+            transform: "translateY(-50%)",
+            color: "white",
+          }}
+          onClick={handlePrevImage}
+        >
+          <ChevronLeftIcon />
         </IconButton>
       )}
       {imageUrls.length > 1 && (
-        <IconButton onClick={handleNextImage}>
-          <ArrowForwardIcon />
+        <IconButton
+          style={{
+            position: "absolute",
+            top: "50%",
+            right: 0,
+            transform: "translateY(-50%)",
+            color: "white",
+          }}
+          onClick={handleNextImage}
+        >
+          <ChevronRightIcon />
         </IconButton>
       )}
     </Box>

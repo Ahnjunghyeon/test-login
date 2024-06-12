@@ -6,8 +6,6 @@ import {
   updateDoc,
   collection,
   getDocs,
-  query,
-  where,
 } from "firebase/firestore";
 import {
   FormControl,
@@ -40,8 +38,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
 import UploadPost from "../UploadPost";
 import ProfileImage from "./Profilelogo";
 
@@ -60,9 +57,11 @@ const PostList = ({
   const [menuAnchorEl, setMenuAnchorEl] = useState({});
   const [expanded, setExpanded] = useState({});
   const [likedPosts, setLikedPosts] = useState({});
-  const [category, setCategory] = useState(""); // 추가: 카테고리 state
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // 추가: 현재 이미지 인덱스
-  const [followedPosts, setFollowedPosts] = useState([]); // 추가: 팔로우한 유저의 게시물 상태
+  const [category, setCategory] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [followedPosts, setFollowedPosts] = useState([]);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryMenuAnchorEl, setCategoryMenuAnchorEl] = useState(null);
 
   const db = getFirestore();
 
@@ -78,42 +77,37 @@ const PostList = ({
     fetchLikedPosts();
   }, [user, db]);
 
-  // 팔로우한 유저의 게시물 가져오기
   useEffect(() => {
     const fetchFollowedPosts = async () => {
       if (user) {
-        // 현재 사용자의 팔로우 정보를 가져옵니다.
         const followRef = collection(db, `users/${user.uid}/follow`);
         const followSnapshot = await getDocs(followRef);
 
-        // 팔로우한 유저의 ID를 가져옵니다.
-        const followedUserIds = followSnapshot.docs.map((doc) => doc.id);
+        const uids = followSnapshot.docs.map((doc) => doc.id);
 
-        if (followedUserIds.length > 0) {
+        if (uids.length > 0) {
           const followedPostsData = [];
 
-          for (const followedUserId of followedUserIds) {
-            // 팔로우한 유저의 게시물 컬렉션을 가져옵니다.
-            const postsRef = collection(db, `users/${followedUserId}/posts`);
+          for (const uid of uids) {
+            const postsRef = collection(db, `users/${uid}/posts`);
             const postsSnapshot = await getDocs(postsRef);
 
             for (const postDoc of postsSnapshot.docs) {
               const postData = postDoc.data();
-              const userDoc = await getDoc(doc(db, "users", followedUserId));
+              const userDoc = await getDoc(doc(db, "users", uid));
               const userDisplayName = userDoc.exists()
                 ? userDoc.data().displayName
                 : "Unknown User";
 
               followedPostsData.push({
                 id: postDoc.id,
-                userId: followedUserId,
+                uid,
                 userDisplayName,
                 ...postData,
               });
             }
           }
 
-          // 팔로우한 유저의 게시물을 날짜를 기준으로 내림차순으로 정렬
           followedPostsData.sort((a, b) => b.createdAt - a.createdAt);
 
           setFollowedPosts(followedPostsData);
@@ -140,7 +134,7 @@ const PostList = ({
     setTitle(post.title);
     setContent(post.content);
     setImageUrls(post.imageUrls || []);
-    setCategory(post.category || ""); // 수정: 기존 카테고리를 선택하도록 설정
+    setCategory(post.category || "");
     setEditDialogOpen(true);
     handleMenuClose(post);
   };
@@ -156,7 +150,7 @@ const PostList = ({
         title,
         content,
         imageUrls,
-        category, // 추가: 수정된 카테고리 저장
+        category,
       };
 
       try {
@@ -184,16 +178,30 @@ const PostList = ({
     }
   };
 
-  const handleNextImage = (post) => {
-    setCurrentImageIndex(
-      (prevIndex) => (prevIndex + 1) % post.imageUrls.length
-    );
+  const filterPostsByCategory = (posts) => {
+    if (categoryFilter === "") {
+      return posts;
+    }
+    return posts.filter((post) => post.category === categoryFilter);
   };
 
-  const handlePreviousImage = (post) => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? post.imageUrls.length - 1 : prevIndex - 1
-    );
+  const combinedPosts = [...posts, ...followedPosts].sort(
+    (a, b) => b.createdAt - a.createdAt
+  );
+
+  const filteredPosts = filterPostsByCategory(combinedPosts);
+
+  const handleCategoryMenuOpen = (event) => {
+    setCategoryMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleCategoryMenuClose = () => {
+    setCategoryMenuAnchorEl(null);
+  };
+
+  const handleCategorySelect = (category) => {
+    setCategoryFilter(category);
+    handleCategoryMenuClose();
   };
 
   return (
@@ -201,9 +209,38 @@ const PostList = ({
       <div className="Posts">
         {user ? (
           <>
-            <h2>{user.displayName} 님의 게시물</h2>
-            {posts.length > 0 ? (
-              posts.map((post) => (
+            <h2>게시물 목록</h2>
+            <Button onClick={handleCategoryMenuOpen}>카테고리 필터</Button>
+            <Menu
+              anchorEl={categoryMenuAnchorEl}
+              open={Boolean(categoryMenuAnchorEl)}
+              onClose={handleCategoryMenuClose}
+            >
+              <MenuItem onClick={() => handleCategorySelect("")}>All</MenuItem>
+              <MenuItem onClick={() => handleCategorySelect("Travel")}>
+                Travel
+              </MenuItem>
+              <MenuItem onClick={() => handleCategorySelect("Food")}>
+                Food
+              </MenuItem>
+              <MenuItem onClick={() => handleCategorySelect("Cooking")}>
+                Cooking
+              </MenuItem>
+              <MenuItem onClick={() => handleCategorySelect("Culture")}>
+                Culture
+              </MenuItem>
+              <MenuItem onClick={() => handleCategorySelect("Games")}>
+                Games
+              </MenuItem>
+              <MenuItem onClick={() => handleCategorySelect("Music")}>
+                Music
+              </MenuItem>
+              <MenuItem onClick={() => handleCategorySelect("Study")}>
+                Study
+              </MenuItem>
+            </Menu>
+            {filteredPosts.length > 0 ? (
+              filteredPosts.map((post) => (
                 <div
                   key={post.id}
                   className="Post"
@@ -214,80 +251,53 @@ const PostList = ({
                       className="cardheader"
                       avatar={
                         <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                          {user && <ProfileImage uid={user.uid} />}
+                          <ProfileImage uid={post.uid} />
                         </Avatar>
                       }
                       action={
-                        <>
-                          <IconButton
-                            aria-label="settings"
-                            onClick={(event) => handleMenuOpen(event, post)}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
-                          <Menu
-                            anchorEl={menuAnchorEl[post.id]}
-                            open={Boolean(menuAnchorEl[post.id])}
-                            onClose={() => handleMenuClose(post)}
-                          >
-                            <MenuItem
-                              onClick={() => handleOpenEditDialog(post)}
+                        user &&
+                        post.uid === user.uid && (
+                          <>
+                            <IconButton
+                              aria-label="settings"
+                              onClick={(event) => handleMenuOpen(event, post)}
                             >
-                              글 수정
-                            </MenuItem>
-                            <MenuItem onClick={() => handleDeletePost(post.id)}>
-                              글 삭제
-                            </MenuItem>
-                          </Menu>
-                        </>
+                              <MoreVertIcon />
+                            </IconButton>
+                            <Menu
+                              anchorEl={menuAnchorEl[post.id]}
+                              open={Boolean(menuAnchorEl[post.id])}
+                              onClose={() => handleMenuClose(post)}
+                            >
+                              <MenuItem
+                                onClick={() => handleOpenEditDialog(post)}
+                              >
+                                글 수정
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => handleDeletePost(post.id)}
+                              >
+                                글 삭제
+                              </MenuItem>
+                            </Menu>
+                          </>
+                        )
                       }
                       title={
                         <>
                           <Typography variant="subtitle1">
-                            {user.displayName}
+                            {post.uid === user.uid
+                              ? user.displayName
+                              : post.userDisplayName}
                           </Typography>
                           <Typography variant="subtitle2">
                             {post.title}
                           </Typography>
-                          <Typography variant="subtitle3">
-                            {post.createdAt instanceof Date
-                              ? post.createdAt.toLocaleString()
-                              : new Date(
-                                  post.createdAt.seconds * 1000
-                                ).toLocaleString()}
-                          </Typography>
                         </>
                       }
-                      subheader={post.category} // 여기서 카테고리를 표시합니다
                     />
                     <CardMedia>
                       <div style={{ position: "relative" }}>
-                        {post.imageUrls && post.imageUrls.length > 1 && (
-                          <>
-                            <IconButton
-                              style={{
-                                position: "absolute",
-                                top: "50%",
-                                left: 0,
-                                transform: "translateY(-50%)",
-                              }}
-                              onClick={() => handlePreviousImage(post)}
-                            >
-                              <ChevronLeftIcon />
-                            </IconButton>
-                            <IconButton
-                              style={{
-                                position: "absolute",
-                                top: "50%",
-                                right: 0,
-                                transform: "translateY(-50%)",
-                              }}
-                              onClick={() => handleNextImage(post)}
-                            >
-                              <ChevronRightIcon />
-                            </IconButton>
-                          </>
-                        )}
                         <UploadPost
                           imageUrls={post.imageUrls || []}
                           currentImageIndex={currentImageIndex}
@@ -325,124 +335,22 @@ const PostList = ({
                       timeout="auto"
                       unmountOnExit
                     >
-                      <CardContent>추가정보</CardContent>
+                      <CardContent>
+                        <Typography>Category = {post.category}</Typography>
+                        <Typography variant="subtitle3">
+                          {post.createdAt instanceof Date
+                            ? post.createdAt.toLocaleString()
+                            : new Date(
+                                post.createdAt.seconds * 1000
+                              ).toLocaleString()}
+                        </Typography>
+                      </CardContent>
                     </Collapse>
                   </Card>
                 </div>
               ))
             ) : (
               <p>게시물이 없습니다.</p>
-            )}
-
-            <h2>팔로우한 유저의 게시물</h2>
-            {followedPosts.length > 0 ? (
-              followedPosts.map((post) => (
-                <div
-                  key={post.id}
-                  className="Post"
-                  style={{ marginBottom: "20px" }}
-                >
-                  <Card sx={{ maxWidth: 345 }}>
-                    <CardHeader
-                      className="cardheader"
-                      avatar={
-                        <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                          {/* Followed user profile image */}
-                          <ProfileImage uid={post.userId} />
-                        </Avatar>
-                      }
-                      title={
-                        <>
-                          <Typography variant="subtitle1">
-                            {post.userDisplayName}
-                          </Typography>
-                          <Typography variant="subtitle2">
-                            {post.title}
-                          </Typography>
-                          <Typography variant="subtitle3">
-                            {post.createdAt instanceof Date
-                              ? post.createdAt.toLocaleString()
-                              : new Date(
-                                  post.createdAt.seconds * 1000
-                                ).toLocaleString()}
-                          </Typography>
-                          {post.category}
-                        </>
-                      }
-                      subheader={post.category} // 여기서 카테고리를 표시합니다
-                    />
-                    <CardMedia>
-                      <div style={{ position: "relative" }}>
-                        {post.imageUrls && post.imageUrls.length > 1 && (
-                          <>
-                            <IconButton
-                              style={{
-                                position: "absolute",
-                                top: "50%",
-                                left: 0,
-                                transform: "translateY(-50%)",
-                              }}
-                              onClick={() => handlePreviousImage(post)}
-                            >
-                              <ChevronLeftIcon />
-                            </IconButton>
-                            <IconButton
-                              style={{
-                                position: "absolute",
-                                top: "50%",
-                                right: 0,
-                                transform: "translateY(-50%)",
-                              }}
-                              onClick={() => handleNextImage(post)}
-                            >
-                              <ChevronRightIcon />
-                            </IconButton>
-                          </>
-                        )}
-                        <UploadPost
-                          imageUrls={post.imageUrls || []}
-                          currentImageIndex={currentImageIndex}
-                        />
-                      </div>
-                    </CardMedia>
-                    <CardContent>
-                      <Typography variant="body2" color="text.secondary">
-                        {post.content}
-                      </Typography>
-                    </CardContent>
-                    <CardActions disableSpacing>
-                      <IconButton
-                        aria-label="like"
-                        onClick={() => handleLikeClick(post.id)}
-                        style={{
-                          color: likedPosts[post.id] ? "pink" : "inherit",
-                        }}
-                      >
-                        <FavoriteIcon />
-                      </IconButton>
-                      <IconButton aria-label="share">
-                        <ShareIcon />
-                      </IconButton>
-                      <IconButton
-                        aria-expanded={expanded[post.id]}
-                        aria-label="show more"
-                        onClick={() => handleExpandClick(post.id)}
-                      >
-                        <ExpandMoreIcon />
-                      </IconButton>
-                    </CardActions>
-                    <Collapse
-                      in={expanded[post.id]}
-                      timeout="auto"
-                      unmountOnExit
-                    >
-                      <CardContent>추가정보</CardContent>
-                    </Collapse>
-                  </Card>
-                </div>
-              ))
-            ) : (
-              <p>팔로우한 유저의 게시물이 없습니다.</p>
             )}
           </>
         ) : (
@@ -452,6 +360,26 @@ const PostList = ({
       <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
         <DialogTitle>게시물 수정</DialogTitle>
         <DialogContent>
+          {/* 이미지를 매핑하여 Dialog에 표시 */}
+          {imageUrls.map((imageUrl, index) => (
+            <div
+              key={index}
+              style={{ position: "relative", marginBottom: "10px" }}
+            >
+              <img
+                src={imageUrl}
+                alt={`image-${index}`}
+                style={{ maxWidth: "100%" }}
+              />
+              {/* 이미지 삭제 버튼 */}
+              <Button
+                onClick={() => handleRemoveImage(index)}
+                style={{ position: "absolute", top: 0, right: 0 }}
+              >
+                이미지 삭제
+              </Button>
+            </div>
+          ))}
           <TextField
             autoFocus
             margin="dense"
@@ -472,7 +400,6 @@ const PostList = ({
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
-          {/* 카테고리 선택 */}
           <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
             <InputLabel id="category-label">Category</InputLabel>
             <Select
@@ -492,6 +419,7 @@ const PostList = ({
             </Select>
           </FormControl>
         </DialogContent>
+
         <DialogActions>
           <Button onClick={handleCloseEditDialog}>취소</Button>
           <Button onClick={handleSaveEdit}>저장</Button>

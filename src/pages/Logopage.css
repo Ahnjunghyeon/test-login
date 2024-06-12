@@ -1,0 +1,36 @@
+/* Logopage.css */
+
+.logopage-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.logo-container {
+  margin-bottom: 20px;
+}
+
+.intro-text {
+  text-align: center;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
