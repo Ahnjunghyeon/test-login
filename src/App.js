@@ -12,12 +12,13 @@ function App() {
   return (
     <div>
       <Header /> {/* 헤더 추가 */}
-      <Logopage />
       <Routes>
+        <Route path="/" element={<Logopage />} />{" "}
+        {/* 기본 경로로 Logopage 설정 */}
         <Route path="/home" element={<Home />} /> {/* Home 컴포넌트 라우팅 */}
         <Route path="/uploadpage" element={<Uploadpage />} />
-        <Route path="/profile" element={<Profile />} />
-        {/* Logopage 컴포넌트 라우팅 */}
+        <Route path="/profile/:uid" element={<Profile />} />{" "}
+        {/* uid 파라미터 추가 */}
       </Routes>
     </div>
   );

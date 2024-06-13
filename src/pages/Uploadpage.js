@@ -117,35 +117,65 @@ function Uploadpage() {
     setConfirmDialogOpen(false);
     setLoading(true);
 
-    const folderRef = ref(storage, `images/${title}`);
-    const imageUrls = await Promise.all(
-      images.map(async (image) => {
-        const fileRef = ref(folderRef, image.name);
+    const folderRef = ref(storage, `users/${user.uid}/postimage/${title}/`);
+
+    // 이미지 업로드 및 저장을 위한 함수
+    const uploadImages = async () => {
+      const uploadedImageUrls = [];
+
+      // 각 이미지에 대해 순차적으로 업로드 처리
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        const imageName = `image${i}`; // 이미지 이름을 image0, image1, image2, ... 형태로 지정
+
+        const fileRef = ref(folderRef, imageName);
         const uploadTask = uploadBytesResumable(fileRef, image);
 
-        return new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log(`Upload is ${progress}% done`);
-            },
-            (error) => {
-              console.error("Error uploading image:", error);
-              setLoading(false);
-              reject(error);
-            },
-            async () => {
-              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve(downloadURL);
-            }
-          );
-        });
-      })
-    );
+        try {
+          // 업로드가 진행됨에 따라 발생하는 이벤트 처리
+          await new Promise((resolve, reject) => {
+            uploadTask.on(
+              "state_changed",
+              (snapshot) => {
+                const progress =
+                  (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log(`Upload is ${progress}% done`);
+              },
+              (error) => {
+                console.error("Error uploading image:", error);
+                setLoading(false);
+                reject(error);
+              },
+              async () => {
+                // 업로드 완료 후 이미지 다운로드 URL 획득
+                const downloadURL = await getDownloadURL(
+                  uploadTask.snapshot.ref
+                );
+                uploadedImageUrls.push(downloadURL);
+                resolve();
+              }
+            );
+          });
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          setLoading(false);
+          return;
+        }
+      }
 
-    savePostData(imageUrls);
+      return uploadedImageUrls;
+    };
+
+    try {
+      // 이미지 업로드 및 URL 획득
+      const imageUrls = await uploadImages();
+
+      // Firestore에 데이터 저장
+      await savePostData(imageUrls);
+    } catch (error) {
+      console.error("Error uploading images or saving data:", error);
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -155,12 +185,14 @@ function Uploadpage() {
   const savePostData = async (imageUrls) => {
     try {
       const postNumber = categoryPostsCount + 1;
-      const userPostId = `${displayName}_${category}_${postNumber}`;
+      const userPostId = category
+        ? `${displayName}_${category}_${postNumber}`
+        : `${displayName}_${postNumber}`;
       await setDoc(doc(db, `users/${user.uid}/posts`, userPostId), {
         title: title,
         content: content,
         imageUrls: imageUrls,
-        category: category,
+        category: category || "Uncategorized",
         createdAt: new Date(),
         uid: user.uid, // 유저의 uid를 추가합니다.
       });

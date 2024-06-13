@@ -177,7 +177,6 @@ const PostList = ({
       });
     }
   };
-
   const filterPostsByCategory = (posts) => {
     if (categoryFilter === "") {
       return posts;

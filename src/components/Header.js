@@ -10,7 +10,7 @@ import {
   GoogleAuthProvider,
   updateProfile,
 } from "firebase/auth";
-
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import "./Header.css";
 import SearchBar from "./searchBar";
 import ProfileImage from "./Profilelogo";
@@ -19,8 +19,9 @@ const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const auth = getAuth();
+  const db = getFirestore();
   const provider = new GoogleAuthProvider();
-  const navigate = useNavigate(); // useNavigate 훅 추가
+  const navigate = useNavigate();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -35,6 +36,7 @@ const Header = ({ refreshProfileImage }) => {
       .then(() => {
         console.log("Logged out successfully");
         handleMenuClose();
+        navigate("/");
       })
       .catch((error) => {
         console.error("Error logging out: ", error);
@@ -43,22 +45,27 @@ const Header = ({ refreshProfileImage }) => {
 
   const signInWithGoogle = () => {
     signInWithPopup(auth, provider)
-      .then((result) => {
+      .then(async (result) => {
         const user = result.user;
         const googleName = user.displayName;
+        const profileImageUrl = user.photoURL;
+
         if (googleName) {
-          updateProfile(user, {
+          await updateProfile(user, {
             displayName: googleName,
-          })
-            .then(() => {
-              console.log("Profile updated successfully with Google name");
-            })
-            .catch((error) => {
-              console.error(
-                "Failed to update profile with Google name:",
-                error
-              );
+          });
+
+          try {
+            await setDoc(doc(db, "users", user.uid), {
+              displayName: googleName,
+              email: user.email,
+              uid: user.uid,
+              profileImage: profileImageUrl,
             });
+            console.log("User profile saved successfully in Firestore");
+          } catch (error) {
+            console.error("Failed to save user profile in Firestore:", error);
+          }
         } else {
           console.log("Google name not available");
         }
@@ -98,11 +105,11 @@ const Header = ({ refreshProfileImage }) => {
           </IconButton>
           <Typography
             className="logoicon"
-            component={Link}
-            to="/logopage"
+            onClick={() => navigate("/")}
             style={{
               color: "inherit",
               textDecoration: "none",
+              cursor: "pointer",
             }}
           >
             JungHyeon

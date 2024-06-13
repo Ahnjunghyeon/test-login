@@ -23,15 +23,14 @@ import {
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import CustomNavbar from "../components/Header";
-import Profilelogo from "../components/Profilelogo";
-import ProfileImage from "../components/ProfileImage";
+import ProfileImage from "../components/ProfileImage"; // Import ProfileImage component
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [profileUser, setProfileUser] = useState(null);
   const [refreshProfileImage, setRefreshProfileImage] = useState(false);
-  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [profileImage, setProfileImage] = useState(""); // State to hold profile image URL
   const [userEmail, setUserEmail] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
   const [profilePosts, setProfilePosts] = useState([]);
@@ -39,16 +38,17 @@ const Profile = () => {
   const db = getFirestore();
   const currentUser = auth.currentUser;
   const { uid } = useParams();
-  const navigate = useNavigate(); // useNavigate 훅 가져오기
+  const navigate = useNavigate(); // useNavigate hook
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const userDoc = await getDoc(doc(db, "users", uid));
         if (userDoc.exists()) {
-          setProfileUser(userDoc.data());
-          setDisplayName(userDoc.data().displayName);
-          setProfileImageUrl(userDoc.data().profileImageUrl);
+          const userData = userDoc.data();
+          setProfileUser(userData);
+          setDisplayName(userData.displayName);
+          setProfileImage(userData.profileImage); // Set profile image URL from Firestore
           if (currentUser && currentUser.uid === uid) {
             setUserEmail(currentUser.email);
           }
@@ -76,6 +76,12 @@ const Profile = () => {
 
     fetchUserProfile();
   }, [uid, db, refreshProfileImage, currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setDisplayName(currentUser.displayName || "");
+    }
+  }, [currentUser]);
 
   const fetchUserPosts = async (uid) => {
     try {
@@ -145,7 +151,7 @@ const Profile = () => {
   };
 
   const handlePostClick = (postId) => {
-    navigate(`/post/${postId}`); // PostList 컴포넌트로 이동하도록 수정
+    navigate(`/post/${postId}`);
   };
 
   return (
@@ -157,11 +163,6 @@ const Profile = () => {
             <Grid item md={6} textAlign="center">
               {profileUser && (
                 <>
-                  <Profilelogo
-                    uid={uid}
-                    displayName={displayName}
-                    refresh={refreshProfileImage}
-                  />
                   <Typography variant="h5" className="usname">
                     {displayName}
                   </Typography>
@@ -190,6 +191,13 @@ const Profile = () => {
                     ))}
                   {currentUser && currentUser.uid === uid && (
                     <ProfileImage uid={uid} onUpload={handleImageUpload} />
+                  )}
+                  {profileImage && ( // Conditional rendering of profile image
+                    <img
+                      src={profileImage}
+                      alt="Profile"
+                      style={{ maxWidth: "100%", maxHeight: "200px" }}
+                    />
                   )}
                 </>
               )}
