@@ -10,7 +10,7 @@ import {
   GoogleAuthProvider,
   updateProfile,
 } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import "./Header.css";
 import SearchBar from "./searchBar";
 import ProfileImage from "./Profilelogo";
@@ -49,6 +49,9 @@ const Header = ({ refreshProfileImage }) => {
         const user = result.user;
         const googleName = user.displayName;
         const profileImageUrl = user.photoURL;
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        const isNewUser = !userDoc.exists();
 
         if (googleName) {
           await updateProfile(user, {
@@ -56,13 +59,17 @@ const Header = ({ refreshProfileImage }) => {
           });
 
           try {
-            await setDoc(doc(db, "users", user.uid), {
+            await setDoc(userDocRef, {
               displayName: googleName,
               email: user.email,
               uid: user.uid,
               profileImage: profileImageUrl,
             });
             console.log("User profile saved successfully in Firestore");
+
+            if (isNewUser) {
+              navigate(`/profile/${user.uid}`);
+            }
           } catch (error) {
             console.error("Failed to save user profile in Firestore:", error);
           }
