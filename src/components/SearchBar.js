@@ -29,6 +29,7 @@ const SearchBar = ({ user }) => {
 
   useEffect(() => {
     setSearchResults([]);
+    setSearchError(false); // 초기 검색 오류 상태를 false로 설정
     if (searchTerm.length > 0) {
       // 검색어가 입력되면 연관된 사용자들을 가져옴
       getRelatedUsers();
@@ -42,6 +43,7 @@ const SearchBar = ({ user }) => {
         !searchContainerRef.current.contains(event.target)
       ) {
         setSearchResults([]);
+        setSearchError(false); // 검색 결과가 없을 때 오류 상태를 초기화
       }
     };
 
@@ -70,6 +72,11 @@ const SearchBar = ({ user }) => {
         }
       });
       setSearchResults(users);
+      if (users.length === 0) {
+        setSearchError(true); // 검색 결과가 없을 때 searchError를 true로 설정
+      } else {
+        setSearchError(false);
+      }
     } catch (error) {
       console.error("Error searching users:", error);
     }
@@ -87,7 +94,7 @@ const SearchBar = ({ user }) => {
         users.push({ ...doc.data(), uid: doc.id }); // UID를 함께 저장
       });
       if (users.length === 0) {
-        setSearchError(true);
+        setSearchError(true); // 검색 결과가 없을 때 searchError를 true로 설정
       } else {
         setSearchError(false);
         setSearchResults(users);
@@ -127,23 +134,19 @@ const SearchBar = ({ user }) => {
           <SearchIcon />
         </IconButton>
       </div>
-      {searchError ? (
-        <Typography variant="body1" align="center">
-          None
-        </Typography>
-      ) : null}
       {searchResults.length > 0 && (
         <Paper
           style={{
             position: "absolute",
-            top: "50px", // Adjust as needed
-            left: "50%", // Adjust as needed
+            top: "80px", // Adjust as needed
+            left: "48%", // Adjust as needed
             transform: "translateX(-50%)",
             padding: "20px",
             zIndex: 9999,
+            maxHeight: "300px", // Adjust as needed
+            overflowY: "auto", // Enable vertical scrolling
           }}
         >
-          <Typography variant="h6">Search Results:</Typography>
           <ul>
             {searchResults.map((user, index) => (
               <li key={index}>

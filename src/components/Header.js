@@ -18,6 +18,7 @@ import ProfileImage from "./Profilelogo";
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [message, setMessage] = useState(""); // State to hold the message
   const auth = getAuth();
   const db = getFirestore();
   const provider = new GoogleAuthProvider();
@@ -94,6 +95,25 @@ const Header = ({ refreshProfileImage }) => {
     return () => unsubscribe();
   }, [auth, refreshProfileImage]);
 
+  const handleIconClick = (event) => {
+    event.stopPropagation();
+    setMessage((prevMessage) => (prevMessage ? "" : "구상중"));
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setMessage("");
+    };
+
+    if (message) {
+      window.addEventListener("click", handleClickOutside);
+    }
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [message]);
+
   return (
     <>
       <div className="topheader">gasd</div>
@@ -101,15 +121,6 @@ const Header = ({ refreshProfileImage }) => {
 
       <div className="header">
         <div className="mainlogo">
-          <IconButton
-            className="lsidelist"
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-          >
-            <MenuIcon />
-          </IconButton>
           <Typography
             className="logoicon"
             onClick={() => navigate("/")}
@@ -127,19 +138,19 @@ const Header = ({ refreshProfileImage }) => {
         </div>
         <div className="menulist">
           <Button className="homebt" onClick={() => navigate("/home")}>
-            <div className="menutext">MAIN</div>
+            <div className="menutext">메인</div>
           </Button>
 
           {user && (
             <Button className="uploadbt" component={Link} to="/uploadpage">
-              <div className="menutext">Upload</div>
+              <div className="menutext">업로드</div>
             </Button>
           )}
 
           {user ? (
             <>
               <div className="imgmenu">
-                <div className="text"> MyPage</div>
+                <div className="text"> 내 정보</div>
                 <IconButton className="imgbt" onClick={handleMenuOpen}>
                   <ProfileImage
                     className="MyPage"
@@ -160,22 +171,34 @@ const Header = ({ refreshProfileImage }) => {
                       navigate(`/profile/${user.uid}`);
                     }}
                   >
-                    <div className="menutext">Profile</div>
+                    <div className="menutext">프로필</div>
                   </MenuItem>
                   <MenuItem className="logoutbt" onClick={signOutUser}>
-                    <div className="text">Log Out</div>
+                    <div className="text">로그아웃</div>
                   </MenuItem>
                 </Menu>
               </div>
             </>
           ) : (
             <Button className="loginbutton" onClick={signInWithGoogle}>
-              <div className="text">Google Login</div>
+              <div className="menutext">로그인</div>
             </Button>
           )}
         </div>
       </div>
-      <div className="bottomheader">빈공간~</div>
+      <div className="header2">
+        <IconButton
+          className="lsidelist"
+          size="large"
+          edge="start"
+          color="inherit"
+          aria-label="open drawer"
+          onClick={handleIconClick}
+        >
+          <MenuIcon />
+        </IconButton>
+        {message && <div className="message">{message}</div>}
+      </div>
       <hr className="Line" />
     </>
   );

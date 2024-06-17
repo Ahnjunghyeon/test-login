@@ -1,4 +1,8 @@
 .Posts {
-  margin-left: 100px;
-  margin-right: 100px;
+  margin: 0 auto; /* 가운데 정렬을 위해 margin을 auto로 설정 */
+  max-width: 800px; /* 원하는 최대 너비로 설정 */
+  padding: 20px; /* 내용과의 간격을 주기 위해 padding 설정 */
+}
+
+.Post {
 }

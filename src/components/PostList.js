@@ -41,6 +41,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 import UploadPost from "../UploadPost";
 import ProfileImage from "./Profilelogo";
+import "./PostList.css";
 
 const PostList = ({
   user,
@@ -238,119 +239,124 @@ const PostList = ({
                 Study
               </MenuItem>
             </Menu>
-            {filteredPosts.length > 0 ? (
-              filteredPosts.map((post) => (
-                <div
-                  key={post.id}
-                  className="Post"
-                  style={{ marginBottom: "20px" }}
-                >
-                  <Card sx={{ maxWidth: 345 }}>
-                    <CardHeader
-                      className="cardheader"
-                      avatar={
-                        <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                          <ProfileImage uid={post.uid} />
-                        </Avatar>
-                      }
-                      action={
-                        user &&
-                        post.uid === user.uid && (
+            <div className="list">
+              {filteredPosts.length > 0 ? (
+                filteredPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="Post"
+                    style={{ marginBottom: "20px" }}
+                  >
+                    <Card sx={{ maxWidth: 345 }}>
+                      <CardHeader
+                        className="cardheader"
+                        avatar={
+                          <Avatar
+                            sx={{ bgcolor: red[500] }}
+                            aria-label="recipe"
+                          >
+                            <ProfileImage uid={post.uid} />
+                          </Avatar>
+                        }
+                        action={
+                          user &&
+                          post.uid === user.uid && (
+                            <>
+                              <IconButton
+                                aria-label="settings"
+                                onClick={(event) => handleMenuOpen(event, post)}
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
+                              <Menu
+                                anchorEl={menuAnchorEl[post.id]}
+                                open={Boolean(menuAnchorEl[post.id])}
+                                onClose={() => handleMenuClose(post)}
+                              >
+                                <MenuItem
+                                  onClick={() => handleOpenEditDialog(post)}
+                                >
+                                  글 수정
+                                </MenuItem>
+                                <MenuItem
+                                  onClick={() => handleDeletePost(post.id)}
+                                >
+                                  글 삭제
+                                </MenuItem>
+                              </Menu>
+                            </>
+                          )
+                        }
+                        title={
                           <>
-                            <IconButton
-                              aria-label="settings"
-                              onClick={(event) => handleMenuOpen(event, post)}
-                            >
-                              <MoreVertIcon />
-                            </IconButton>
-                            <Menu
-                              anchorEl={menuAnchorEl[post.id]}
-                              open={Boolean(menuAnchorEl[post.id])}
-                              onClose={() => handleMenuClose(post)}
-                            >
-                              <MenuItem
-                                onClick={() => handleOpenEditDialog(post)}
-                              >
-                                글 수정
-                              </MenuItem>
-                              <MenuItem
-                                onClick={() => handleDeletePost(post.id)}
-                              >
-                                글 삭제
-                              </MenuItem>
-                            </Menu>
+                            <Typography variant="subtitle1">
+                              {post.uid === user.uid
+                                ? user.displayName
+                                : post.userDisplayName}
+                            </Typography>
+                            <Typography variant="subtitle2">
+                              {post.title}
+                            </Typography>
                           </>
-                        )
-                      }
-                      title={
-                        <>
-                          <Typography variant="subtitle1">
-                            {post.uid === user.uid
-                              ? user.displayName
-                              : post.userDisplayName}
-                          </Typography>
-                          <Typography variant="subtitle2">
-                            {post.title}
-                          </Typography>
-                        </>
-                      }
-                    />
-                    <CardMedia>
-                      <div style={{ position: "relative" }}>
-                        <UploadPost
-                          imageUrls={post.imageUrls || []}
-                          currentImageIndex={currentImageIndex}
-                        />
-                      </div>
-                    </CardMedia>
-                    <CardContent>
-                      <Typography variant="body2" color="text.secondary">
-                        {post.content}
-                      </Typography>
-                    </CardContent>
-                    <CardActions disableSpacing>
-                      <IconButton
-                        aria-label="like"
-                        onClick={() => handleLikeClick(post.id)}
-                        style={{
-                          color: likedPosts[post.id] ? "pink" : "inherit",
-                        }}
-                      >
-                        <FavoriteIcon />
-                      </IconButton>
-                      <IconButton aria-label="share">
-                        <ShareIcon />
-                      </IconButton>
-                      <IconButton
-                        aria-expanded={expanded[post.id]}
-                        aria-label="show more"
-                        onClick={() => handleExpandClick(post.id)}
-                      >
-                        <ExpandMoreIcon />
-                      </IconButton>
-                    </CardActions>
-                    <Collapse
-                      in={expanded[post.id]}
-                      timeout="auto"
-                      unmountOnExit
-                    >
+                        }
+                      />
+                      <CardMedia>
+                        <div style={{ position: "relative" }}>
+                          <UploadPost
+                            imageUrls={post.imageUrls || []}
+                            currentImageIndex={currentImageIndex}
+                          />
+                        </div>
+                      </CardMedia>
                       <CardContent>
-                        <Typography>Category = {post.category}</Typography>
-                        <Typography variant="subtitle3">
-                          {post.createdAt instanceof Date
-                            ? post.createdAt.toLocaleString()
-                            : new Date(
-                                post.createdAt.seconds * 1000
-                              ).toLocaleString()}
+                        <Typography variant="body2" color="text.secondary">
+                          {post.content}
                         </Typography>
                       </CardContent>
-                    </Collapse>
-                  </Card>
-                </div>
-              ))
-            ) : (
-              <p>게시물이 없습니다.</p>
-            )}
+                      <CardActions disableSpacing>
+                        <IconButton
+                          aria-label="like"
+                          onClick={() => handleLikeClick(post.id)}
+                          style={{
+                            color: likedPosts[post.id] ? "pink" : "inherit",
+                          }}
+                        >
+                          <FavoriteIcon />
+                        </IconButton>
+                        <IconButton aria-label="share">
+                          <ShareIcon />
+                        </IconButton>
+                        <IconButton
+                          aria-expanded={expanded[post.id]}
+                          aria-label="show more"
+                          onClick={() => handleExpandClick(post.id)}
+                        >
+                          <ExpandMoreIcon />
+                        </IconButton>
+                      </CardActions>
+                      <Collapse
+                        in={expanded[post.id]}
+                        timeout="auto"
+                        unmountOnExit
+                      >
+                        <CardContent>
+                          <Typography>Category = {post.category}</Typography>
+                          <Typography variant="subtitle3">
+                            {post.createdAt instanceof Date
+                              ? post.createdAt.toLocaleString()
+                              : new Date(
+                                  post.createdAt.seconds * 1000
+                                ).toLocaleString()}
+                          </Typography>
+                        </CardContent>
+                      </Collapse>
+                    </Card>
+                  </div>
+                ))
+              ) : (
+                <p>게시물이 없습니다.</p>
+              )}
+            </div>
           </>
         ) : (
           <p>로그인 해주세요.</p>

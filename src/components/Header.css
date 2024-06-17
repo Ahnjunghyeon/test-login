@@ -34,12 +34,17 @@
   align-items: center;
 }
 .header .logoicon {
-  font-family: "DM Serif Text", serif;
-  font-weight: 400;
+  font-family: "Gowun Dodum", sans-serif;
+  font-weight: 600;
   font-style: normal;
   margin-left: 5px;
   font-size: 20px;
 }
+
+.header .search {
+  margin-left: 200px;
+}
+
 .header .menulist {
   display: flex;
 }
@@ -50,14 +55,14 @@
 
 .header .text {
   font-family: "DM Serif Text", serif;
-  font-weight: 400;
+  font-weight: 600;
   font-style: normal;
   color: black;
 }
 
 .header .menutext {
   font-family: "DM Serif Text", serif;
-  font-weight: 400;
+  font-weight: 600;
   font-style: normal;
   color: black;
   font-size: 16px;
@@ -92,4 +97,10 @@
 
 .header .imgmenu .loginbutton {
   margin-left: 150px;
+}
+
+/* -----------헤더 두번째라인----------- */
+.header2 {
+  margin-left: 100px;
+  margin-right: 100px;
 }
