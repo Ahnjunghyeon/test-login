@@ -1,3 +1,5 @@
+// 게시물에 이미지를 보여줌
+
 import React, { useState, useEffect } from "react";
 import { Box, CardMedia, IconButton } from "@mui/material";
 
@@ -37,7 +39,7 @@ function UploadPost({ imageUrls }) {
   }
 
   return (
-    <Box>
+    <Box className="img">
       <CardMedia
         component="img"
         height="auto"

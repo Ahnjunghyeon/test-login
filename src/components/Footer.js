@@ -1,7 +1,13 @@
 import React from "react";
+import { Link } from "react-router-dom"; // Link 컴포넌트 import
+import { getAuth } from "firebase/auth"; // Firebase Auth import
 import "./Footer.css"; // 스타일 시트 import
 
 const Footer = () => {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+  const profileLink = currentUser ? `/profile/${currentUser.uid}` : "#";
+
   return (
     <footer className="footer">
       <div className="footer-content">
@@ -13,37 +19,20 @@ const Footer = () => {
           <h2>링크</h2>
           <ul>
             <li>
-              <a href="#">홈</a>
+              <Link to="/">홈</Link>
             </li>
             <li>
-              <a href="#">소개</a>
+              <Link to="/home">메인</Link>
             </li>
             <li>
-              <a href="#">서비스</a>
-            </li>
-            <li>
-              <a href="#">문의</a>
+              <Link to={profileLink}>프로필</Link>
             </li>
           </ul>
         </div>
         <div className="footer-section contact-form">
           <h2>문의하기</h2>
           <form action="#">
-            <input
-              type="email"
-              name="email"
-              className="text-input contact-input"
-              placeholder="이메일 주소"
-            />
-            <textarea
-              rows="4"
-              name="message"
-              className="text-input contact-input"
-              placeholder="메시지"
-            ></textarea>
-            <button type="submit" className="btn btn-primary">
-              전송
-            </button>
+            <div className="email">이메일 주소 : 1271wndgusdl@naver.com</div>
           </form>
         </div>
       </div>

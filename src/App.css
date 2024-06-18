@@ -1,4 +1,7 @@
 .App {
+  font-family: "IBM Plex Sans KR", sans-serif;
+  font-weight: 600;
+  font-style: normal;
 }
 
 .App .main {

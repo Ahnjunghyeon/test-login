@@ -34,11 +34,12 @@
   align-items: center;
 }
 .header .logoicon {
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
-  margin-left: 5px;
   font-size: 20px;
+
+  margin-left: 5px;
 }
 
 .header .search {
@@ -54,14 +55,14 @@
 }
 
 .header .text {
-  font-family: "DM Serif Text", serif;
+  font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
   color: black;
 }
 
 .header .menutext {
-  font-family: "DM Serif Text", serif;
+  font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
   color: black;

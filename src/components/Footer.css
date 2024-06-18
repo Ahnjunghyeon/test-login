@@ -2,7 +2,12 @@
   background-color: #eeeeee;
   color: #000000;
   padding: 20px 0;
-  height: 350px;
+  height: 220px;
+  margin-top: 50px;
+
+  font-family: "IBM Plex Sans KR", sans-serif;
+  font-weight: 600;
+  font-style: normal;
 }
 
 .footer-content {
@@ -47,8 +52,7 @@
   flex-direction: column;
 }
 
-.contact-form input,
-.contact-form textarea {
+.contact-form .email {
   margin-bottom: 10px;
   padding: 10px;
   font-size: 1rem;

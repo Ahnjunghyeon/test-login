@@ -4,6 +4,10 @@
   height: 1000px;
   margin-top: 30px;
   justify-content: center;
+
+  font-family: "IBM Plex Sans KR", sans-serif;
+  font-weight: 600;
+  font-style: normal;
 }
 
 .Profile .P-main {

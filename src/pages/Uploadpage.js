@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Uploadpage.css";
 import CustomNavbar from "../components/Header";
+import Footer from "../components/Footer"; // Footer 컴포넌트 추가
 import {
   Container,
   TextField,
@@ -41,6 +42,7 @@ function Uploadpage() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [displayName, setDisplayName] = useState(""); // displayName 상태 추가
   const [categoryPostsCount, setCategoryPostsCount] = useState(0); // 카테고리별 게시물 수 상태 추가
+  const [imageError, setImageError] = useState(""); // 이미지 에러 상태 추가
 
   useEffect(() => {
     const auth = getAuth();
@@ -110,6 +112,13 @@ function Uploadpage() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    if (images.length === 0) {
+      setImageError("사진을 하나 이상 추가해야 합니다.");
+      return;
+    }
+
+    setImageError("");
     setConfirmDialogOpen(true);
   };
 
@@ -256,7 +265,7 @@ function Uploadpage() {
                 label="Category"
               >
                 <MenuItem value="">Select Category</MenuItem>
-                <MenuItem value="None"> </MenuItem>
+                <MenuItem value="None">None</MenuItem>
                 <MenuItem value="Travel">Travel</MenuItem>
                 <MenuItem value="Food">Food</MenuItem>
                 <MenuItem value="Cooking">Cooking</MenuItem>
@@ -282,6 +291,11 @@ function Uploadpage() {
               </Button>
             </label>
           </Box>
+          {imageError && (
+            <Typography color="error" variant="body2" mb={2}>
+              {imageError}
+            </Typography>
+          )}
           <Box mb={2} style={{ display: "flex", flexWrap: "wrap" }}>
             {previews.map((preview, index) => (
               <div
@@ -331,6 +345,7 @@ function Uploadpage() {
           )}
         </form>
       </Container>
+      <Footer /> {/* Footer 컴포넌트 추가 */}
       <Dialog open={confirmDialogOpen} onClose={handleCancel}>
         <DialogTitle>게시물을 등록하시겠습니까?</DialogTitle>
         <DialogActions>

@@ -1,28 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, setDoc, getDoc, getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth"; // Import getAuth from firebase/auth
 import { Button } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import { Form } from "react-bootstrap";
-import Modal from "@mui/material/Modal"; // Modal 컴포넌트 추가
+import Modal from "@mui/material/Modal";
 
 const ProfileImage = ({ uid, onUpload }) => {
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [photoURL, setPhotoURL] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false); // 모달 열림 상태 관리
+  const [modalOpen, setModalOpen] = useState(false);
   const storage = getStorage();
   const db = getFirestore();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const userDoc = await getDoc(doc(db, "users", uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setPhotoURL(userData.profileImage);
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (user && user.photoURL) {
+          // If user is logged in and has a photoURL from Google, use it
+          setPhotoURL(user.photoURL);
         } else {
-          console.log("No such user!");
+          // Fallback to checking Firestore
+          const userDoc = await getDoc(doc(db, "users", uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.profileImage) {
+              setPhotoURL(userData.profileImage);
+            } else {
+              console.log("No profile image found for user:", uid);
+            }
+          } else {
+            console.log("No such user!");
+          }
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -84,7 +98,6 @@ const ProfileImage = ({ uid, onUpload }) => {
         </div>
       )}
 
-      {/* Modal to display enlarged image */}
       <Modal
         open={modalOpen}
         onClose={handleModalClose}

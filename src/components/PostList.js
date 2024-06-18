@@ -6,6 +6,7 @@ import {
   updateDoc,
   collection,
   getDocs,
+  addDoc,
 } from "firebase/firestore";
 import {
   FormControl,
@@ -19,6 +20,14 @@ import {
   Collapse,
   Button,
   TextField,
+  List,
+  ListItem,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tooltip,
 } from "@mui/material";
 import {
   CardActions,
@@ -27,19 +36,14 @@ import {
   CardHeader,
   Card,
 } from "@mui/material";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
-import { red } from "@mui/material/colors";
+import { red, blue } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import CommentIcon from "@mui/icons-material/Comment";
 
-import UploadPost from "../UploadPost";
+import UploadPost from "./UploadPost";
 import ProfileImage from "./Profilelogo";
 import "./PostList.css";
 
@@ -57,12 +61,15 @@ const PostList = ({
   const [imageUrls, setImageUrls] = useState([]);
   const [menuAnchorEl, setMenuAnchorEl] = useState({});
   const [expanded, setExpanded] = useState({});
+  const [contentExpanded, setContentExpanded] = useState({});
   const [likedPosts, setLikedPosts] = useState({});
   const [category, setCategory] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [followedPosts, setFollowedPosts] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [categoryMenuAnchorEl, setCategoryMenuAnchorEl] = useState(null);
+  const [comments, setComments] = useState({});
+  const [newComment, setNewComment] = useState("");
 
   const db = getFirestore();
 
@@ -130,6 +137,13 @@ const PostList = ({
     setExpanded((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
+  const handleContentExpandClick = (postId) => {
+    setContentExpanded((prev) => ({
+      ...prev,
+      [postId]: !prev[postId],
+    }));
+  };
+
   const handleOpenEditDialog = (post) => {
     setSelectedPost(post);
     setTitle(post.title);
@@ -178,6 +192,42 @@ const PostList = ({
       });
     }
   };
+
+  const fetchComments = async (postId) => {
+    const commentsRef = collection(db, `posts/${postId}/comments`);
+    const commentsSnapshot = await getDocs(commentsRef);
+    const commentsData = commentsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setComments((prevComments) => ({
+      ...prevComments,
+      [postId]: commentsData,
+    }));
+  };
+
+  const handleCommentChange = (postId, content) => {
+    setNewComment(content);
+  };
+
+  const handleAddComment = async (postId) => {
+    if (newComment.trim() === "") return;
+
+    try {
+      const commentRef = collection(db, `posts/${postId}/comments`);
+      await addDoc(commentRef, {
+        content: newComment,
+        createdAt: new Date(),
+        userId: user.uid,
+        displayName: user.displayName,
+      });
+      setNewComment("");
+      fetchComments(postId);
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  };
+
   const filterPostsByCategory = (posts) => {
     if (categoryFilter === "") {
       return posts;
@@ -247,110 +297,167 @@ const PostList = ({
                     className="Post"
                     style={{ marginBottom: "20px" }}
                   >
-                    <Card sx={{ maxWidth: 345 }}>
-                      <CardHeader
-                        className="cardheader"
-                        avatar={
-                          <Avatar
-                            sx={{ bgcolor: red[500] }}
-                            aria-label="recipe"
-                          >
-                            <ProfileImage uid={post.uid} />
-                          </Avatar>
-                        }
-                        action={
-                          user &&
-                          post.uid === user.uid && (
+                    <div>
+                      <Card sx={{ maxWidth: 345 }}>
+                        <CardHeader
+                          className="cardheader"
+                          avatar={
+                            <Avatar
+                              sx={{ bgcolor: red[500] }}
+                              aria-label="recipe"
+                            >
+                              <ProfileImage uid={post.uid} />
+                            </Avatar>
+                          }
+                          action={
+                            user &&
+                            post.uid === user.uid && (
+                              <>
+                                <IconButton
+                                  aria-label="settings"
+                                  onClick={(event) =>
+                                    handleMenuOpen(event, post)
+                                  }
+                                >
+                                  <MoreVertIcon />
+                                </IconButton>
+                                <Menu
+                                  anchorEl={menuAnchorEl[post.id]}
+                                  open={Boolean(menuAnchorEl[post.id])}
+                                  onClose={() => handleMenuClose(post)}
+                                >
+                                  <MenuItem
+                                    onClick={() => handleOpenEditDialog(post)}
+                                  >
+                                    글 수정
+                                  </MenuItem>
+                                  <MenuItem
+                                    onClick={() => handleDeletePost(post.id)}
+                                  >
+                                    글 삭제
+                                  </MenuItem>
+                                </Menu>
+                              </>
+                            )
+                          }
+                          title={
                             <>
-                              <IconButton
-                                aria-label="settings"
-                                onClick={(event) => handleMenuOpen(event, post)}
-                              >
-                                <MoreVertIcon />
-                              </IconButton>
-                              <Menu
-                                anchorEl={menuAnchorEl[post.id]}
-                                open={Boolean(menuAnchorEl[post.id])}
-                                onClose={() => handleMenuClose(post)}
-                              >
-                                <MenuItem
-                                  onClick={() => handleOpenEditDialog(post)}
-                                >
-                                  글 수정
-                                </MenuItem>
-                                <MenuItem
-                                  onClick={() => handleDeletePost(post.id)}
-                                >
-                                  글 삭제
-                                </MenuItem>
-                              </Menu>
+                              <Typography variant="subtitle1">
+                                {post.uid === user.uid
+                                  ? user.displayName
+                                  : post.userDisplayName}
+                              </Typography>
+                              <Typography variant="subtitle2">
+                                {post.title}
+                              </Typography>
                             </>
-                          )
-                        }
-                        title={
-                          <>
-                            <Typography variant="subtitle1">
-                              {post.uid === user.uid
-                                ? user.displayName
-                                : post.userDisplayName}
-                            </Typography>
-                            <Typography variant="subtitle2">
-                              {post.title}
-                            </Typography>
-                          </>
-                        }
-                      />
-                      <CardMedia>
-                        <div style={{ position: "relative" }}>
-                          <UploadPost
-                            imageUrls={post.imageUrls || []}
-                            currentImageIndex={currentImageIndex}
-                          />
-                        </div>
-                      </CardMedia>
-                      <CardContent>
-                        <Typography variant="body2" color="text.secondary">
-                          {post.content}
-                        </Typography>
-                      </CardContent>
-                      <CardActions disableSpacing>
-                        <IconButton
-                          aria-label="like"
-                          onClick={() => handleLikeClick(post.id)}
-                          style={{
-                            color: likedPosts[post.id] ? "pink" : "inherit",
-                          }}
-                        >
-                          <FavoriteIcon />
-                        </IconButton>
-                        <IconButton aria-label="share">
-                          <ShareIcon />
-                        </IconButton>
-                        <IconButton
-                          aria-expanded={expanded[post.id]}
-                          aria-label="show more"
-                          onClick={() => handleExpandClick(post.id)}
-                        >
-                          <ExpandMoreIcon />
-                        </IconButton>
-                      </CardActions>
-                      <Collapse
-                        in={expanded[post.id]}
-                        timeout="auto"
-                        unmountOnExit
-                      >
-                        <CardContent>
-                          <Typography>Category = {post.category}</Typography>
-                          <Typography variant="subtitle3">
-                            {post.createdAt instanceof Date
-                              ? post.createdAt.toLocaleString()
-                              : new Date(
-                                  post.createdAt.seconds * 1000
-                                ).toLocaleString()}
+                          }
+                        />
+
+                        <CardMedia>
+                          <div style={{ position: "relative" }}>
+                            <UploadPost
+                              imageUrls={post.imageUrls || []}
+                              currentImageIndex={currentImageIndex}
+                            />
+                          </div>
+                        </CardMedia>
+                        <CardContent className="content">
+                          <Typography variant="body2" color="text.secondary">
+                            {post.content.length > 20
+                              ? contentExpanded[post.id]
+                                ? post.content
+                                : `${post.content.slice(0, 20)}...`
+                              : post.content}
                           </Typography>
+                          {post.content.length > 20 && (
+                            <IconButton
+                              aria-expanded={contentExpanded[post.id]}
+                              aria-label="show more"
+                              onClick={() => handleContentExpandClick(post.id)}
+                            >
+                              <ExpandMoreIcon />
+                            </IconButton>
+                          )}
                         </CardContent>
-                      </Collapse>
-                    </Card>
+                        <CardActions disableSpacing>
+                          <IconButton
+                            aria-label="like"
+                            onClick={() => handleLikeClick(post.id)}
+                            style={{
+                              color: likedPosts[post.id] ? "pink" : "inherit",
+                            }}
+                          >
+                            <FavoriteIcon />
+                          </IconButton>
+                          <IconButton aria-label="share">
+                            <ShareIcon />
+                          </IconButton>
+                          <IconButton
+                            aria-expanded={expanded[post.id]}
+                            aria-label="show more"
+                            onClick={() => handleExpandClick(post.id)}
+                          >
+                            <Tooltip title="댓글">
+                              <CommentIcon />
+                            </Tooltip>
+                          </IconButton>
+                        </CardActions>
+                        <Collapse
+                          in={expanded[post.id]}
+                          timeout="auto"
+                          unmountOnExit
+                        >
+                          <CardContent>
+                            <Typography>Category = {post.category}</Typography>
+                            <Typography variant="subtitle3">
+                              {post.createdAt instanceof Date
+                                ? post.createdAt.toLocaleString()
+                                : new Date(
+                                    post.createdAt.seconds * 1000
+                                  ).toLocaleString()}
+                            </Typography>
+                            <div>
+                              <Typography variant="h6">댓글</Typography>
+                              <List>
+                                {comments[post.id]?.map((comment) => (
+                                  <ListItem key={comment.id}>
+                                    <ListItemText
+                                      primary={comment.displayName}
+                                      secondary={comment.content}
+                                    />
+                                  </ListItem>
+                                ))}
+                              </List>
+                              {user && (
+                                <div>
+                                  <TextField
+                                    id={`comment-${post.id}`}
+                                    label="댓글 추가"
+                                    variant="outlined"
+                                    value={newComment}
+                                    onChange={(e) =>
+                                      handleCommentChange(
+                                        post.id,
+                                        e.target.value
+                                      )
+                                    }
+                                    fullWidth
+                                  />
+                                  <Button
+                                    variant="contained"
+                                    onClick={() => handleAddComment(post.id)}
+                                    sx={{ mt: 1 }}
+                                  >
+                                    댓글 추가
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Collapse>
+                      </Card>
+                    </div>
                   </div>
                 ))
               ) : (

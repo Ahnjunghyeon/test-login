@@ -18,19 +18,20 @@ import {
   CircularProgress,
   Card,
   CardContent,
-  CardMedia,
   Grid,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import CustomNavbar from "../components/Header";
-import ProfileImage from "../components/ProfileImage"; // Import ProfileImage component
+import ProfileImage from "../components/ProfileImage";
+import Footer from "../components/Footer";
+import UploadPost from "../components/UploadPost"; // Import UploadPost component
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [profileUser, setProfileUser] = useState(null);
   const [refreshProfileImage, setRefreshProfileImage] = useState(false);
-  const [profileImage, setProfileImage] = useState(""); // State to hold profile image URL
+  const [profileImage, setProfileImage] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
   const [profilePosts, setProfilePosts] = useState([]);
@@ -38,7 +39,7 @@ const Profile = () => {
   const db = getFirestore();
   const currentUser = auth.currentUser;
   const { uid } = useParams();
-  const navigate = useNavigate(); // useNavigate hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -48,7 +49,7 @@ const Profile = () => {
           const userData = userDoc.data();
           setProfileUser(userData);
           setDisplayName(userData.displayName);
-          setProfileImage(userData.profileImage); // Set profile image URL from Firestore
+          setProfileImage(userData.profileImage);
           if (currentUser && currentUser.uid === uid) {
             setUserEmail(currentUser.email);
           }
@@ -192,7 +193,7 @@ const Profile = () => {
                   {currentUser && currentUser.uid === uid && (
                     <ProfileImage uid={uid} onUpload={handleImageUpload} />
                   )}
-                  {profileImage && ( // Conditional rendering of profile image
+                  {profileImage && (
                     <img
                       src={profileImage}
                       alt="Profile"
@@ -231,23 +232,13 @@ const Profile = () => {
             <Grid container spacing={4}>
               {profilePosts.map((post) => (
                 <Grid item xs={12} sm={6} md={4} key={post.id}>
-                  <Card
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handlePostClick(post.id)}
-                  >
-                    <CardContent>
+                  <Card style={{ cursor: "pointer" }}>
+                    <CardContent onClick={() => handlePostClick(post.id)}>
                       <Typography variant="h5">{post.title}</Typography>
                       <Typography variant="body2">{post.category}</Typography>
-                      {post.imageUrls &&
-                        post.imageUrls.map((imageUrl, index) => (
-                          <CardMedia
-                            component="img"
-                            key={index}
-                            image={imageUrl}
-                            alt={`Image ${index}`}
-                            sx={{ maxWidth: "100%", maxHeight: "200px" }}
-                          />
-                        ))}
+                      {post.imageUrls && post.imageUrls.length > 0 && (
+                        <UploadPost imageUrls={post.imageUrls} />
+                      )}
                       <Typography variant="body2">{post.content}</Typography>
                     </CardContent>
                   </Card>
@@ -257,6 +248,7 @@ const Profile = () => {
           </Box>
         </Box>
       </Container>
+      <Footer />
     </>
   );
 };

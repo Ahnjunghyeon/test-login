@@ -1,8 +1,30 @@
 .Posts {
-  margin: 0 auto; /* 가운데 정렬을 위해 margin을 auto로 설정 */
-  max-width: 800px; /* 원하는 최대 너비로 설정 */
+  margin-left: 100px;
+  margin-right: 100px;
   padding: 20px; /* 내용과의 간격을 주기 위해 padding 설정 */
+  flex-direction: column;
+  overflow-y: auto; /* 세로 스크롤바가 필요할 때 자동으로 보이게 함 */
+
+  height: 5000px;
+
+  font-family: "IBM Plex Sans KR", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.Posts .list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .Post {
+  width: 345px;
+  height: 420px;
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+.Post .postindex {
+  max-width: 345px;
 }
