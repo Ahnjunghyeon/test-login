@@ -1,29 +1,37 @@
-.Posts {
+.PostList {
   display: flex;
   margin-left: 100px;
   margin-right: 100px;
+  justify-content: space-between;
+}
+
+.PostList .Posts {
+  display: flex;
+  align-items: center;
   padding: 20px; /* 내용과의 간격을 주기 위해 padding 설정 */
   flex-direction: column;
   overflow-y: auto; /* 세로 스크롤바가 필요할 때 자동으로 보이게 함 */
-  justify-content: center;
-  align-items: center;
 
   font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
 }
 
-.Posts .list {
+.PostList .Posts .list {
   display: flex;
 }
 
-.Post {
+.PostList .Post {
   width: 345px;
   height: 420px;
   margin-left: 20px;
   margin-bottom: 20px;
 }
 
-.Post .postindex {
+.PostList .Post .postindex {
   max-width: 345px;
+}
+
+.PostList .Followers {
+  margin-left: 100;
 }

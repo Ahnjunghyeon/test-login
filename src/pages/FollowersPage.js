@@ -10,7 +10,7 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import ProfileImage from "../components/ProfileImage"; // ProfileImage 컴포넌트 import
+import ProfileImage from "../components/ProfileImage";
 
 const FollowersPage = () => {
   const [followers, setFollowers] = useState([]);
@@ -23,7 +23,7 @@ const FollowersPage = () => {
     if (user) {
       fetchFollowers();
     } else {
-      navigate("/login"); // 로그인 안 되어 있으면 로그인 페이지로 리다이렉트
+      navigate("/home"); // 로그인 안 되어 있으면 로그인 페이지로 리다이렉트
     }
   }, [user, navigate]);
 
@@ -47,6 +47,10 @@ const FollowersPage = () => {
     }
   };
 
+  const handleProfileClick = (followerId) => {
+    navigate(`/profile/${followerId}`); // 해당 팔로워의 프로필 페이지로 이동
+  };
+
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
@@ -59,9 +63,12 @@ const FollowersPage = () => {
       ) : (
         <List>
           {followers.map((follower) => (
-            <ListItem key={follower.id}>
-              <ProfileImage uid={follower.id} />{" "}
-              {/* ProfileImage 컴포넌트 사용 */}
+            <ListItem
+              key={follower.id}
+              button
+              onClick={() => handleProfileClick(follower.id)}
+            >
+              <ProfileImage uid={follower.id} />
               <ListItemText
                 primary={follower.displayName}
                 secondary={follower.email}
@@ -70,7 +77,9 @@ const FollowersPage = () => {
           ))}
         </List>
       )}
-      <Button onClick={() => navigate("/profile")}>Back to Profile</Button>
+      <Button onClick={() => navigate(`/profile/${user.uid}`)}>
+        Back to Profile
+      </Button>
     </div>
   );
 };
