@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Button, IconButton, Menu, MenuItem } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import HomeIcon from "@mui/icons-material/Home";
+import PublishIcon from "@mui/icons-material/Publish";
 import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
@@ -14,6 +16,7 @@ import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import "./Header.css";
 import SearchBar from "./searchBar";
 import ProfileImage from "./Profilelogo";
+import logo from "../img/GREAPP.png"; // 로고 이미지 경로
 
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
@@ -120,64 +123,59 @@ const Header = ({ refreshProfileImage }) => {
       <hr className="topline"></hr>
 
       <div className="header">
-        <div className="mainlogo">
-          <Typography
-            className="logoicon"
-            onClick={() => navigate("/")}
+        <div className="mainlogo" onClick={() => navigate("/")}>
+          <img
+            src={logo}
+            alt="Logo"
             style={{
-              color: "inherit",
-              textDecoration: "none",
               cursor: "pointer",
+              height: "40px",
+              marginRight: "10px",
             }}
-          >
-            JungHyeon
-          </Typography>
+          />
         </div>
         <div className="search">
           <SearchBar />
         </div>
         <div className="menulist">
-          <Button className="homebt" onClick={() => navigate("/home")}>
-            <div className="menutext">메인</div>
-          </Button>
+          <IconButton className="homebt" onClick={() => navigate("/home")}>
+            <HomeIcon />
+          </IconButton>
 
           {user && (
-            <Button className="uploadbt" component={Link} to="/uploadpage">
-              <div className="menutext">업로드</div>
-            </Button>
+            <IconButton className="uploadbt" component={Link} to="/uploadpage">
+              <PublishIcon />
+            </IconButton>
           )}
 
           {user ? (
             <>
-              <div className="imgmenu">
-                <div className="text"> 내 정보</div>
-                <IconButton className="imgbt" onClick={handleMenuOpen}>
-                  <ProfileImage
-                    className="MyPage"
-                    uid={user.uid}
-                    refresh={refreshProfileImage}
-                  />
-                </IconButton>
-                <Menu
+              <IconButton className="imgbt" onClick={handleMenuOpen}>
+                <ProfileImage
+                  className="MyPage"
+                  uid={user.uid}
+                  refresh={refreshProfileImage}
+                />
+              </IconButton>
+              <Menu
+                className="text"
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem
                   className="text"
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
+                  onClick={() => {
+                    handleMenuClose();
+                    navigate(`/profile/${user.uid}`);
+                  }}
                 >
-                  <MenuItem
-                    className="text"
-                    onClick={() => {
-                      handleMenuClose();
-                      navigate(`/profile/${user.uid}`);
-                    }}
-                  >
-                    <div className="menutext">프로필</div>
-                  </MenuItem>
-                  <MenuItem className="logoutbt" onClick={signOutUser}>
-                    <div className="text">로그아웃</div>
-                  </MenuItem>
-                </Menu>
-              </div>
+                  <div className="menutext">프로필</div>
+                </MenuItem>
+                <MenuItem className="logoutbt" onClick={signOutUser}>
+                  <div className="text">로그아웃</div>
+                </MenuItem>
+              </Menu>
             </>
           ) : (
             <Button className="loginbutton" onClick={signInWithGoogle}>
