@@ -3,14 +3,9 @@ import { getAuth } from "firebase/auth";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import {
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
-  Button,
-} from "@mui/material";
+import { List, ListItem, ListItemText, Typography } from "@mui/material";
 import ProfileImage from "../components/ProfileImage";
+import "./FollowersPage.css";
 
 const FollowersPage = () => {
   const [followers, setFollowers] = useState([]);
@@ -56,13 +51,16 @@ const FollowersPage = () => {
   }
 
   return (
-    <div>
-      <Typography variant="h4">Followers</Typography>
-      {followers.length === 0 ? (
-        <Typography>No followers found.</Typography>
-      ) : (
-        <List>
-          {followers.map((follower) => (
+    <div className="followers">
+      <List>
+        <ListItem button onClick={() => navigate(`/profile/${user.uid}`)}>
+          <ProfileImage className="MyPage" uid={user.uid} />
+          <ListItemText primary={user.displayName} secondary={user.email} />
+        </ListItem>
+        {followers.length === 0 ? (
+          <Typography>No followers found.</Typography>
+        ) : (
+          followers.slice(0, 5).map((follower) => (
             <ListItem
               key={follower.id}
               button
@@ -74,12 +72,9 @@ const FollowersPage = () => {
                 secondary={follower.email}
               />
             </ListItem>
-          ))}
-        </List>
-      )}
-      <Button onClick={() => navigate(`/profile/${user.uid}`)}>
-        Back to Profile
-      </Button>
+          ))
+        )}
+      </List>
     </div>
   );
 };

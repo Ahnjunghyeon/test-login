@@ -1,40 +1,110 @@
+/* Profile.css */
+
 .Profile {
   display: flex;
-  width: 100%;
-  height: 1000px;
-  margin-top: 30px;
-  justify-content: center;
-
+  align-items: center;
   font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
+  margin: 0 20px;
+  min-height: 100vh; /* 최소 높이를 100vh로 설정 */
 }
 
-.Profile .P-main {
-  width: 1050px;
+.Profile .ProfileContainer {
   display: flex;
+  width: 100%;
+  flex: 1;
+  flex-direction: row; /* 세로 방향에서 가로 방향으로 변경 */
+}
+
+.Profile .ProfileBox {
+  display: flex;
+  flex: 1;
+  flex-direction: row; /* 세로 방향에서 가로 방향으로 변경 */
+  align-items: flex-start; /* 좌측 정렬 */
   justify-content: center;
 }
 
-/* 내정보 칸 */
-.Profile .P-main .mt-4 {
-  width: 500px;
-  margin-right: 50px;
-  height: 200px;
+.Profile .ProfileBox .Profileimg {
+  /* margin-bottom: 20px; */
 }
 
-/* 내정보에 추가될 내용들 */
-.Profile .P-main .service {
-  width: 500px;
-}
-
-.Profile .P-main .mt-4 .usname {
+.Profile .LeftSide {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  margin-top: 15px;
+  flex: 1; /* 유동적인 높이 설정 */
+  margin-top: 50px;
 }
 
-.Profile .P-main .formDisplayName {
-  justify-content: center;
+.Profile .Namefield {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.Profile .Namefield .savebt {
+  width: 100px;
+  height: 50px;
+  margin: auto;
+  background-color: #ad85f7;
+}
+.Profile .UserInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.Profile .Userpost {
+  flex: 1.5; /* 기존 2에서 변경 */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 가운데 정렬 */
+  margin-top: 50px;
+}
+
+.posts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.post-card-content {
+  width: auto;
+  height: auto; /* 기본 높이를 유지 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+@media (max-width: 1000px) {
+  .Profile .ProfileContainer {
+    flex-direction: column;
+  }
+
+  .Profile .ProfileBox {
+    flex-direction: column;
+  }
+
+  .Profile .LeftSide,
+  .Profile .Namefield,
+  .Profile .UserInfo,
+  .Profile .Userpost {
+    width: 100%; /* 컨테이너에 맞춰 전체 너비 사용 */
+    margin-bottom: 20px; /* 아래 여백 추가 */
+  }
+
+  .posts-container {
+    grid-template-columns: 1fr; /* 한 열로 배치 */
+  }
+
+  .post-card-content {
+    width: auto;
+    height: auto; /* 카드 높이 자동 조정 */
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.footer {
+  margin-top: auto; /* Footer를 항상 페이지 하단에 고정 */
 }

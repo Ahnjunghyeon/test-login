@@ -6,20 +6,22 @@ import Header from "./components/Header";
 import Uploadpage from "./pages/Uploadpage";
 import Logopage from "./pages/Logopage";
 import Profile from "./pages/Profile";
-import FollowersPage from "./pages/FollowersPage"; // 추가
+import FollowersPage from "./pages/FollowersPage";
 import Footer from "./components/Footer";
 
 function App() {
   return (
-    <div>
+    <div className="App">
       <Header />
-      <Routes>
-        <Route path="/" element={<Logopage />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/uploadpage" element={<Uploadpage />} />
-        <Route path="/profile/:uid" element={<Profile />} />
-        <Route path="/followers" element={<FollowersPage />} /> {/* 추가 */}
-      </Routes>
+      <div className="content">
+        <Routes>
+          <Route path="/" element={<Logopage />} />
+          <Route path="/home/*" element={<Home />} />
+          <Route path="/uploadpage" element={<Uploadpage />} />
+          <Route path="/profile/:uid" element={<Profile />} />
+          <Route path="/followers" element={<FollowersPage />} />
+        </Routes>
+      </div>
       <Footer />
     </div>
   );

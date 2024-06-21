@@ -18,13 +18,14 @@ import {
   CircularProgress,
   Card,
   CardContent,
-  Grid,
+  Avatar,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import CustomNavbar from "../components/Header";
 import ProfileImage from "../components/ProfileImage";
 import Footer from "../components/Footer";
 import UploadPost from "../components/UploadPost"; // Import UploadPost component
+import "./Profile.css";
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -159,95 +160,115 @@ const Profile = () => {
     <>
       <CustomNavbar refreshProfileImage={refreshProfileImage} />
       <Container className="Profile">
-        <Box className="P-main" mt={4}>
-          <Grid container spacing={4} justifyContent="center">
-            <Grid item md={6} textAlign="center">
+        <Box className="ProfileContainer">
+          <Box className="ProfileBox">
+            {/* Left side - User Info */}
+            <Box className="LeftSide">
               {profileUser && (
                 <>
-                  <Typography variant="h5" className="usname">
-                    {displayName}
-                  </Typography>
-                  {userEmail && (
-                    <Typography variant="body1">Email: {userEmail}</Typography>
+                  {currentUser && currentUser.uid !== uid && (
+                    <>
+                      {isFollowing ? (
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={handleUnfollow}
+                        >
+                          Unfollow
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleFollow}
+                        >
+                          Follow
+                        </Button>
+                      )}
+                    </>
                   )}
-                  <Typography variant="body1">User UID: {uid}</Typography>
-                  {currentUser &&
-                    currentUser.uid !== uid &&
-                    (isFollowing ? (
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleUnfollow}
-                      >
-                        Unfollow
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleFollow}
-                      >
-                        Follow
-                      </Button>
-                    ))}
-                  {currentUser && currentUser.uid === uid && (
-                    <ProfileImage uid={uid} onUpload={handleImageUpload} />
-                  )}
+
                   {profileImage && (
-                    <img
+                    <Avatar
                       src={profileImage}
-                      alt="Profile"
-                      style={{ maxWidth: "100%", maxHeight: "200px" }}
+                      alt="Profileimg"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "200px",
+                        width: "90px",
+                        height: "90px",
+                      }}
                     />
                   )}
+                  {currentUser && currentUser.uid === uid ? (
+                    <form className="Namefield" onSubmit={handleSubmit}>
+                      <TextField
+                        className="yourname"
+                        fullWidth
+                        label="Your Name"
+                        variant="outlined"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        disabled={loading}
+                      />
+
+                      <Button
+                        className="savebt"
+                        type="submit"
+                        variant="contained"
+                        disabled={loading}
+                        sx={{ mt: 2 }}
+                      >
+                        {loading ? <CircularProgress size={24} /> : "Save"}
+                      </Button>
+                    </form>
+                  ) : (
+                    <Box className="UserInfo">
+                      {profileImage && (
+                        <img
+                          src={profileImage}
+                          alt="Profileimg"
+                          style={{ maxWidth: "100%", maxHeight: "200px" }}
+                        />
+                      )}
+                      <Typography variant="h5">{displayName}</Typography>
+                      <Typography variant="body1">User UID: {uid}</Typography>
+                    </Box>
+                  )}
+                  <Typography variant="body1">Email: {userEmail}</Typography>
+                  <Typography variant="body1">User UID: {uid}</Typography>
                 </>
               )}
-            </Grid>
-            <Grid item md={6}>
-              {currentUser && currentUser.uid === uid && (
-                <form onSubmit={handleSubmit}>
-                  <TextField
-                    fullWidth
-                    label="Your Name"
-                    variant="outlined"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    disabled={loading}
-                  />
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={loading}
-                    sx={{ mt: 2 }}
+            </Box>
+
+            {/* Right side - User's Posts */}
+            <Box className="Userpost">
+              <Typography variant="h4">User's Posts</Typography>
+              <div className="posts-container">
+                {profilePosts.map((post) => (
+                  <div
+                    className="post-card"
+                    key={post.id}
+                    onClick={() => handlePostClick(post.id)}
                   >
-                    {loading ? <CircularProgress size={24} /> : "Save"}
-                  </Button>
-                </form>
-              )}
-            </Grid>
-          </Grid>
-          <Box mt={4}>
-            <Typography variant="h4">User's Posts</Typography>
-            <Grid container spacing={4}>
-              {profilePosts.map((post) => (
-                <Grid item xs={12} sm={6} md={4} key={post.id}>
-                  <Card style={{ cursor: "pointer" }}>
-                    <CardContent onClick={() => handlePostClick(post.id)}>
-                      <Typography variant="h5">{post.title}</Typography>
-                      <Typography variant="body2">{post.category}</Typography>
-                      {post.imageUrls && post.imageUrls.length > 0 && (
-                        <UploadPost imageUrls={post.imageUrls} />
-                      )}
-                      <Typography variant="body2">{post.content}</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
+                    <Card className="post-card-content">
+                      <CardContent>
+                        <Typography variant="h5">{post.title}</Typography>
+                        <Typography variant="body2">{post.category}</Typography>
+                        {post.imageUrls && post.imageUrls.length > 0 && (
+                          <UploadPost imageUrls={post.imageUrls} />
+                        )}
+                        <Typography variant="body2">{post.content}</Typography>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+            </Box>
           </Box>
         </Box>
       </Container>
+
       <Footer />
     </>
   );

@@ -1,0 +1,13 @@
+.followers {
+  max-width: 100%; /* 최대 너비를 부모 요소의 너비에 따라 조정 */
+  width: 100%; /* 너비를 부모 요소의 너비에 따라 조정 */
+}
+
+@media (max-width: 600px) {
+  .followers {
+    max-width: 100%;
+    width: 100%;
+
+    /* 추가적인 스타일링 */
+  }
+}

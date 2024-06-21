@@ -1,37 +1,80 @@
+/* PostList.css */
+
 .PostList {
   display: flex;
-  margin-left: 100px;
-  margin-right: 100px;
-  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  justify-content: center;
+  margin: 20px 100px; /* 위아래 20px, 좌우 100px */
 }
 
-.PostList .Posts {
+.Posts {
+  flex: 2;
+  margin-right: 10px; /* 우측 여백 줄임 */
+  max-width: 100%; /* 최대 너비 100% */
   display: flex;
-  align-items: center;
-  padding: 20px; /* 내용과의 간격을 주기 위해 padding 설정 */
   flex-direction: column;
-  overflow-y: auto; /* 세로 스크롤바가 필요할 때 자동으로 보이게 함 */
+  align-items: center; /* 요소를 세로 방향으로 가운데 정렬 */
+}
 
+.Followers {
+  flex: 1;
+  max-width: 100%; /* 최대 너비 100% */
+  display: block; /* 기본적으로 Followers 노출 */
+}
+
+.PostList .Post {
+  width: 345px; /* 카드의 고정된 너비 */
+  height: auto; /* 높이 자동 조정 */
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
   font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
+}
+
+.CardMedia {
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  /* 작은 화면에서의 스타일 조정 */
+  .PostList {
+    margin: 10px; /* 좌우 여백 10px */
+  }
+
+  .Posts {
+    margin-right: 0;
+  }
+
+  .PostList .Posts .Post {
+    width: 100%; /* 카드 너비 100% */
+  }
 }
 
 .PostList .Posts .list {
   display: flex;
 }
 
-.PostList .Post {
-  width: 345px;
-  height: 420px;
-  margin-left: 20px;
-  margin-bottom: 20px;
+@media (max-width: 869px) {
+  /* 869px 이하에서 Followers 숨김 */
+  .Followers {
+    display: none;
+  }
 }
 
-.PostList .Post .postindex {
-  max-width: 345px;
-}
+@media (max-width: 600px) {
+  /* 작은 화면에서의 스타일 조정 */
+  .PostList {
+    margin: 10px; /* 좌우 여백 10px */
+  }
 
-.PostList .Followers {
-  margin-left: 100;
+  .Posts {
+    margin-right: 0;
+  }
 }

@@ -1,7 +1,7 @@
 import React from "react";
-import { Link } from "react-router-dom"; // Link 컴포넌트 import
-import { getAuth } from "firebase/auth"; // Firebase Auth import
-import "./Footer.css"; // 스타일 시트 import
+import { Link } from "react-router-dom";
+import { getAuth } from "firebase/auth";
+import "./Footer.css";
 
 const Footer = () => {
   const auth = getAuth();

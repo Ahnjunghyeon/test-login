@@ -42,7 +42,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommentIcon from "@mui/icons-material/Comment";
-import FollowersPage from "../pages/FollowersPage"; // 추가된 부분
+import FollowersPage from "../pages/FollowersPage";
 import UploadPost from "./UploadPost";
 import ProfileImage from "./Profilelogo";
 import "./PostList.css";
@@ -447,9 +447,12 @@ const PostList = ({
             <Typography variant="body1">로그인 해주세요.</Typography>
           )}
         </div>
-        <div className="Followers">
-          <FollowersPage />
-        </div>
+        {/* Conditionally render FollowersPage component based on screen width */}
+        {window.innerWidth >= 869 && (
+          <div className="Followers">
+            <FollowersPage />
+          </div>
+        )}
       </div>
       <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
         <DialogTitle>게시물 수정</DialogTitle>

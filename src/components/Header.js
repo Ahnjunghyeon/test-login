@@ -3,6 +3,7 @@ import { Typography, Button, IconButton, Menu, MenuItem } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import HomeIcon from "@mui/icons-material/Home";
 import PublishIcon from "@mui/icons-material/Publish";
+import GradeIcon from "@mui/icons-material/Grade";
 import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
@@ -117,9 +118,31 @@ const Header = ({ refreshProfileImage }) => {
     };
   }, [message]);
 
+  const addToFavorites = () => {
+    const url = "https://login-test-a417d.web.app";
+    const title = "My Home Page";
+
+    if (window.external && window.external.AddFavorite) {
+      // Internet Explorer
+      window.external.AddFavorite(url, title);
+    } else if (window.sidebar && window.sidebar.addPanel) {
+      // Firefox <=22
+      window.sidebar.addPanel(title, url, "");
+    } else {
+      // Other browsers
+      alert(
+        "Windows 에서는 Press Ctrl+D  or mac 에서는 Command+D (Mac) 를 눌러주세요."
+      );
+    }
+  };
+
   return (
     <>
-      <div className="topheader">gasd</div>
+      <div className="topheader">
+        <IconButton className="favoriteButton" onClick={addToFavorites}>
+          <GradeIcon sx={{ color: "gold" }} />
+        </IconButton>
+      </div>
       <hr className="topline"></hr>
 
       <div className="header">
@@ -139,12 +162,12 @@ const Header = ({ refreshProfileImage }) => {
         </div>
         <div className="menulist">
           <IconButton className="homebt" onClick={() => navigate("/home")}>
-            <HomeIcon />
+            <HomeIcon sx={{ color: "#83769C" }} />
           </IconButton>
 
           {user && (
             <IconButton className="uploadbt" component={Link} to="/uploadpage">
-              <PublishIcon />
+              <PublishIcon sx={{ color: "#83769C" }} />
             </IconButton>
           )}
 
@@ -172,6 +195,16 @@ const Header = ({ refreshProfileImage }) => {
                 >
                   <div className="menutext">프로필</div>
                 </MenuItem>
+                <MenuItem className="homebt" onClick={() => navigate("/home")}>
+                  <div className="menutext">홈</div>
+                </MenuItem>
+                <MenuItem
+                  className="uploadbt"
+                  component={Link}
+                  to="/uploadpage"
+                >
+                  <div className="menutext">업로드</div>
+                </MenuItem>
                 <MenuItem className="logoutbt" onClick={signOutUser}>
                   <div className="text">로그아웃</div>
                 </MenuItem>
@@ -192,6 +225,7 @@ const Header = ({ refreshProfileImage }) => {
           color="inherit"
           aria-label="open drawer"
           onClick={handleIconClick}
+          sx={{ color: "#83769C" }}
         >
           <MenuIcon />
         </IconButton>

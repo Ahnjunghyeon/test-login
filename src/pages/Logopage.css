@@ -5,8 +5,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 60vh;
-
+  height: 100vh;
   font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
@@ -24,6 +23,7 @@
 
 .navigation-buttons {
   display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
@@ -33,8 +33,25 @@
   color: white;
   text-decoration: none;
   border-radius: 5px;
+  text-align: center;
 }
 
 .button:hover {
   background-color: #0056b3;
+}
+
+@media (min-width: 600px) {
+  .logopage-container {
+    height: 60vh;
+  }
+
+  .navigation-buttons {
+    flex-direction: row;
+  }
+
+  .button {
+    padding: 10px 20px;
+    width: 150px;
+    text-align: center;
+  }
 }

@@ -1,3 +1,4 @@
+/* Header.css */
 .topline {
   margin: 0px;
   height: 0px;
@@ -6,11 +7,16 @@
 
 .topheader {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* 왼쪽 정렬 */
   align-items: center;
   height: 30px;
-  margin-left: 100px;
-  margin-right: 100px;
+  margin: 0 20px; /* 위아래 0px, 좌우 20px */
+}
+
+.favoriteButton {
+  margin-right: auto; /* 다른 요소들을 오른쪽으로 밀어냄 */
+  color: rgb(0, 0, 0); /* 텍스트 색상 검정 */
+  background-color: rgb(255, 230, 0); /* 배경색 노랑 */
 }
 
 .header {
@@ -18,8 +24,7 @@
   justify-content: space-between;
   align-items: center;
   height: 60px;
-  margin-left: 100px;
-  margin-right: 100px;
+  margin: 0 20px; /* 위아래 0px, 좌우 20px */
 }
 
 .header .mainlogo {
@@ -43,7 +48,6 @@
 }
 
 .header .search {
-  margin-left: 200px;
 }
 
 .header .menulist {
@@ -52,6 +56,14 @@
 
 .header .menulist .homebt {
   margin-left: 50px;
+  margin-right: 10px;
+  width: 55px;
+  padding: 5px;
+}
+
+.header .menulist .uploadbt {
+  margin-right: 10px;
+  width: 55px;
 }
 
 .header .text {
@@ -89,11 +101,11 @@
 
 .header2 {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  margin: 0 20px; /* 위아래 0px, 좌우 20px */
+
   height: 60px;
-  margin-left: 100px;
-  margin-right: 100px;
 }
 
 .header .imgmenu .loginbutton {
@@ -102,6 +114,51 @@
 
 /* -----------헤더 두번째라인----------- */
 .header2 {
-  margin-left: 100px;
-  margin-right: 100px;
+}
+
+.header2 .lsidelist {
+  margin-right: auto; /* 다른 요소들을 오른쪽으로 밀어냄 */
+}
+
+@media (max-width: 600px) {
+  /* 작은 화면에서의 스타일 조정 */
+
+  .topheader {
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 30px;
+  }
+
+  .header {
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 50px;
+  }
+
+  .header .mainlogo {
+    height: 30px;
+    margin-right: 5px;
+  }
+
+  .header .menulist .homebt {
+    margin-left: 5px;
+    margin-right: 5px;
+    width: 40px;
+    padding: 5px;
+  }
+
+  .header .menulist .uploadbt {
+    margin-right: 5px;
+    width: 40px;
+  }
+
+  .header .menutext {
+    font-size: 12px;
+    margin-left: 5px;
+  }
+
+  .header2 {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
 }
