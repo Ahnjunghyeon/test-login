@@ -7,6 +7,8 @@ import {
   collection,
   getDocs,
   addDoc,
+  setDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import {
   FormControl,
@@ -44,7 +46,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommentIcon from "@mui/icons-material/Comment";
 import FollowersPage from "../pages/FollowersPage";
 import UploadPost from "./UploadPost";
-import ProfileImage from "./Profilelogo";
+import ProfileImage from "./ProfileLogo";
 import "./PostList.css";
 
 const PostList = ({
@@ -56,7 +58,6 @@ const PostList = ({
 }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [imageUrls, setImageUrls] = useState([]);
   const [menuAnchorEl, setMenuAnchorEl] = useState({});
@@ -90,7 +91,6 @@ const PostList = ({
       if (user) {
         const followRef = collection(db, `users/${user.uid}/follow`);
         const followSnapshot = await getDocs(followRef);
-
         const uids = followSnapshot.docs.map((doc) => doc.id);
 
         if (uids.length > 0) {
@@ -117,7 +117,6 @@ const PostList = ({
           }
 
           followedPostsData.sort((a, b) => b.createdAt - a.createdAt);
-
           setFollowedPosts(followedPostsData);
         }
       }
@@ -146,7 +145,6 @@ const PostList = ({
 
   const handleOpenEditDialog = (post) => {
     setSelectedPost(post);
-    setTitle(post.title);
     setContent(post.content);
     setImageUrls(post.imageUrls || []);
     setCategory(post.category || "");
@@ -162,13 +160,13 @@ const PostList = ({
   const handleSaveEdit = async () => {
     if (selectedPost) {
       const updatedPost = {
-        title,
         content,
         imageUrls,
         category,
       };
 
       try {
+        // 게시물 업데이트 시, category 필드를 포함하여 업데이트
         await handleUpdatePost(selectedPost.id, updatedPost);
         handleCloseEditDialog();
       } catch (error) {
@@ -182,28 +180,82 @@ const PostList = ({
   };
 
   const handleLikeClick = async (postId) => {
+    // 좋아요 상태를 업데이트하고 UI에 반영
     const updatedLikedPosts = { ...likedPosts, [postId]: !likedPosts[postId] };
     setLikedPosts(updatedLikedPosts);
 
+    // Firebase에 사용자가 좋아요 누른 정보 업데이트
     if (user) {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         likedPosts: updatedLikedPosts,
       });
+
+      // 게시물의 좋아요 정보를 저장할 경로 설정 (like 컬렉션)
+      const likeRef = collection(
+        db,
+        `users/${user.uid}/posts/${postId}/${postId}like`
+      );
+
+      // 사용자가 해당 게시물에 좋아요를 누른지 확인
+      const userLikeDoc = doc(likeRef, user.uid);
+
+      if (likedPosts[postId]) {
+        // 좋아요를 누른 경우, 좋아요 문서 삭제
+        await deleteDoc(userLikeDoc);
+      } else {
+        // 좋아요를 누르지 않은 경우, 좋아요 문서 추가
+        await setDoc(userLikeDoc, {
+          liked: true,
+          timestamp: new Date(),
+        });
+      }
+
+      // 좋아요 개수 가져오기 및 UI에 반영 (옵셔널)
+      const likeQuerySnapshot = await getDocs(likeRef);
+      const likeCount = likeQuerySnapshot.size;
+
+      console.log(`게시물 ${postId}의 좋아요 개수:`, likeCount);
+
+      // 게시물 작성자에게 알림
+      const postRef = doc(db, "posts", postId);
+      const postDoc = await getDoc(postRef);
+      if (postDoc.exists()) {
+        const postAuthorId = postDoc.data().uid;
+
+        // 알림 컬렉션
+        const notificationsRef = collection(
+          db,
+          `users/${postAuthorId}/notifications`
+        );
+        await addDoc(notificationsRef, {
+          type: "like",
+          postId: postId,
+          userId: user.uid,
+          createdAt: new Date(),
+        });
+      }
     }
   };
 
   const fetchComments = async (postId) => {
-    const commentsRef = collection(db, `posts/${postId}/comments`);
-    const commentsSnapshot = await getDocs(commentsRef);
-    const commentsData = commentsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setComments((prevComments) => ({
-      ...prevComments,
-      [postId]: commentsData,
-    }));
+    try {
+      const commentsRef = collection(
+        db,
+        `users/${user.uid}/posts/${postId}/${postId}_comments`
+      );
+      const commentsSnapshot = await getDocs(commentsRef);
+      const commentsData = commentsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setComments((prevComments) => ({
+        ...prevComments,
+        [postId]: commentsData,
+      }));
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
   };
 
   const handleCommentChange = (postId, content) => {
@@ -214,7 +266,10 @@ const PostList = ({
     if (newComment.trim() === "") return;
 
     try {
-      const commentRef = collection(db, `posts/${postId}/comments`);
+      const commentRef = collection(
+        db,
+        `users/${user.uid}/posts/${postId}/comments`
+      );
       await addDoc(commentRef, {
         content: newComment,
         createdAt: new Date(),
@@ -222,7 +277,7 @@ const PostList = ({
         displayName: user.displayName,
       });
       setNewComment("");
-      fetchComments(postId);
+      fetchComments(postId); // 댓글 추가 후 새로고침
     } catch (error) {
       console.error("Error adding comment:", error);
     }
@@ -374,6 +429,14 @@ const PostList = ({
                       >
                         <FavoriteIcon />
                       </IconButton>
+                      <Typography variant="body2" color="text.secondary">
+                        {
+                          Object.keys(likedPosts).filter(
+                            (key) => likedPosts[key]
+                          ).length
+                        }{" "}
+                        Likes
+                      </Typography>
                       <IconButton aria-label="share">
                         <ShareIcon />
                       </IconButton>
@@ -475,16 +538,6 @@ const PostList = ({
               </Button>
             </div>
           ))}
-          <TextField
-            autoFocus
-            margin="dense"
-            id="title"
-            label="제목"
-            type="text"
-            fullWidth
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
           <TextField
             margin="dense"
             id="content"

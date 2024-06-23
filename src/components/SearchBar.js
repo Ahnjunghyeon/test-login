@@ -18,7 +18,7 @@ import {
   Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import ProfileImage from "./Profilelogo"; // ProfileImage 컴포넌트를 import
+import ProfileImage from "./ProfileLogo"; // ProfileImage 컴포넌트를 import
 
 const SearchBar = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -124,7 +124,7 @@ const SearchBar = ({ user }) => {
       <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
         <InputBase
           className="text"
-          placeholder="Search"
+          placeholder="검색"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}

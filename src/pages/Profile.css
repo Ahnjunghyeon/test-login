@@ -1,4 +1,8 @@
-/* Profile.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 .Profile {
   display: flex;
@@ -6,8 +10,16 @@
   font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
-  margin: 0 20px;
+
   min-height: 100vh; /* 최소 높이를 100vh로 설정 */
+
+  max-width: 600px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+
+  margin: 10px 0; /* 위 아래 모두에 20px 마진 적용 */
 }
 
 .Profile .ProfileContainer {
@@ -49,6 +61,7 @@
   margin: auto;
   background-color: #ad85f7;
 }
+
 .Profile .UserInfo {
   display: flex;
   flex-direction: column;
@@ -71,11 +84,23 @@
 
 .post-card-content {
   width: auto;
-  height: auto; /* 기본 높이를 유지 */
+  height: 300px; /* 고정된 높이 설정 */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center; /* 중앙 정렬 */
+  align-items: center; /* 중앙 정렬 */
 }
+
+.post-card-content img {
+  height: 150px; /* 이미지 높이 제한 */
+  object-fit: cover;
+  display: block;
+  margin: auto;
+}
+
+.Userpost .Profileuploadimg {
+}
+
 @media (max-width: 1000px) {
   .Profile .ProfileContainer {
     flex-direction: column;

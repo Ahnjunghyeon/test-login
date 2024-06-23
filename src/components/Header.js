@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Typography, Button, IconButton, Menu, MenuItem } from "@mui/material";
+import React, { useState, useEffect, useRef } from "react";
+import { IconButton, Menu, MenuItem, Button, Icon } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import HomeIcon from "@mui/icons-material/Home";
 import PublishIcon from "@mui/icons-material/Publish";
@@ -15,18 +15,19 @@ import {
 } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import "./Header.css";
-import SearchBar from "./searchBar";
-import ProfileImage from "./Profilelogo";
+import SearchBar from "./SearchBar";
+import ProfileImage from "./ProfileLogo";
 import logo from "../img/GREAPP.png"; // 로고 이미지 경로
 
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [message, setMessage] = useState(""); // State to hold the message
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State to manage menu open/close
   const auth = getAuth();
   const db = getFirestore();
   const provider = new GoogleAuthProvider();
   const navigate = useNavigate();
+  const menuRef = useRef(null); // Ref to access the menu DOM element
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -99,24 +100,16 @@ const Header = ({ refreshProfileImage }) => {
     return () => unsubscribe();
   }, [auth, refreshProfileImage]);
 
-  const handleIconClick = (event) => {
-    event.stopPropagation();
-    setMessage((prevMessage) => (prevMessage ? "" : "구상중"));
+  const handleIconClick = () => {
+    setIsMenuOpen(!isMenuOpen); // Toggle menu open/close
   };
 
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setMessage("");
-    };
-
-    if (message) {
-      window.addEventListener("click", handleClickOutside);
+  const handleClickOutside = (event) => {
+    // Close menu if clicked outside
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setIsMenuOpen(false);
     }
-
-    return () => {
-      window.removeEventListener("click", handleClickOutside);
-    };
-  }, [message]);
+  };
 
   const addToFavorites = () => {
     const url = "https://login-test-a417d.web.app";
@@ -130,45 +123,98 @@ const Header = ({ refreshProfileImage }) => {
       window.sidebar.addPanel(title, url, "");
     } else {
       // Other browsers
-      alert(
-        "Windows 에서는 Press Ctrl+D  or mac 에서는 Command+D (Mac) 를 눌러주세요."
-      );
+      alert("Press Ctrl+D (Windows) or Command+D (Mac) to bookmark this page.");
     }
   };
 
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
+      <div className={`overlay ${isMenuOpen ? "open" : ""}`} />
       <div className="topheader">
         <IconButton className="favoriteButton" onClick={addToFavorites}>
           <GradeIcon sx={{ color: "gold" }} />
         </IconButton>
       </div>
-      <hr className="topline"></hr>
+      <hr className="topline" />
 
       <div className="header">
         <div className="mainlogo" onClick={() => navigate("/")}>
           <img
             src={logo}
             alt="Logo"
-            style={{
-              cursor: "pointer",
-              height: "40px",
-              marginRight: "10px",
-            }}
+            style={{ cursor: "pointer", height: "40px", marginRight: "10px" }}
           />
         </div>
         <div className="search">
           <SearchBar />
         </div>
         <div className="menulist">
-          <IconButton className="homebt" onClick={() => navigate("/home")}>
-            <HomeIcon sx={{ color: "#83769C" }} />
-          </IconButton>
+          <div
+            className="homebt"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "45px",
+              height: "45px",
+              padding: "8px",
+              borderRadius: "15%",
+              transition: "background-color 0.3s",
+              backgroundColor: "transparent",
+            }}
+            onClick={() => navigate("/home")}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            <HomeIcon
+              sx={{
+                color: "#83769C",
+                fontSize: "1.7rem",
+              }}
+            />
+          </div>
 
           {user && (
-            <IconButton className="uploadbt" component={Link} to="/uploadpage">
-              <PublishIcon sx={{ color: "#83769C" }} />
-            </IconButton>
+            <div
+              className="uploadbt"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "45px",
+                height: "45px",
+                padding: "8px",
+                borderRadius: "15%",
+                transition: "background-color 0.3s",
+                backgroundColor: "transparent",
+                marginRight: "5px",
+              }}
+              onClick={() => navigate("/uploadpage")}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              <PublishIcon
+                sx={{
+                  color: "#83769C",
+                  fontSize: "1.7rem",
+                }}
+              />
+            </div>
           )}
 
           {user ? (
@@ -187,7 +233,6 @@ const Header = ({ refreshProfileImage }) => {
                 onClose={handleMenuClose}
               >
                 <MenuItem
-                  className="text"
                   onClick={() => {
                     handleMenuClose();
                     navigate(`/profile/${user.uid}`);
@@ -195,18 +240,18 @@ const Header = ({ refreshProfileImage }) => {
                 >
                   <div className="menutext">프로필</div>
                 </MenuItem>
-                <MenuItem className="homebt" onClick={() => navigate("/home")}>
+                <MenuItem onClick={() => navigate("/home")}>
                   <div className="menutext">홈</div>
                 </MenuItem>
                 <MenuItem
-                  className="uploadbt"
                   component={Link}
                   to="/uploadpage"
+                  onClick={handleMenuClose}
                 >
                   <div className="menutext">업로드</div>
                 </MenuItem>
-                <MenuItem className="logoutbt" onClick={signOutUser}>
-                  <div className="text">로그아웃</div>
+                <MenuItem onClick={signOutUser}>
+                  <div className="menutext">로그아웃</div>
                 </MenuItem>
               </Menu>
             </>
@@ -217,7 +262,7 @@ const Header = ({ refreshProfileImage }) => {
           )}
         </div>
       </div>
-      <div className="header2">
+      <div className="Sidebtn">
         <IconButton
           className="lsidelist"
           size="large"
@@ -225,13 +270,63 @@ const Header = ({ refreshProfileImage }) => {
           color="inherit"
           aria-label="open drawer"
           onClick={handleIconClick}
-          sx={{ color: "#83769C" }}
+          sx={{ color: "#83769C", fontSize: "1.5rem" }} // Adjust icon size
         >
           <MenuIcon />
         </IconButton>
-        {message && <div className="message">{message}</div>}
       </div>
-      <hr className="Line" />
+      <hr className="topline" />
+
+      {/* Header2 */}
+      <div className={`header2 ${isMenuOpen ? "open" : ""}`}>
+        {/* Conditional rendering for the menu */}
+        <div
+          ref={menuRef}
+          className={`header2-menu ${isMenuOpen ? "open" : ""}`}
+        >
+          <IconButton
+            className="header2-menu-button"
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleIconClick}
+            sx={{ color: "#83769C", fontSize: "1.5rem" }} // Adjust icon size
+          >
+            <MenuIcon />
+          </IconButton>
+          <div
+            className="search"
+            style={{
+              maxWidth: "220px",
+              marginLeft: "20px",
+              marginRight: "20px",
+            }}
+          >
+            <SearchBar className="sidesearch" />
+          </div>
+          <MenuItem
+            className="sidehomebtn"
+            style={{ marginLeft: "2px" }}
+            onClick={() => navigate("/home")}
+          >
+            <HomeIcon sx={{ color: "#83769C" }} />
+            <div className="text" style={{ marginLeft: "30px" }}>
+              Home
+            </div>
+          </MenuItem>
+          <MenuItem
+            className="sideuploadbtn"
+            style={{ marginLeft: "2px" }}
+            onClick={() => navigate("/uploadpage")}
+          >
+            {user && <PublishIcon sx={{ color: "#83769C" }} />}{" "}
+            <div className="text" style={{ marginLeft: "30px" }}>
+              Upload
+            </div>
+          </MenuItem>
+        </div>
+      </div>
     </>
   );
 };

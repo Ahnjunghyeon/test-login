@@ -32,7 +32,6 @@ import {
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 function Uploadpage() {
-  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -82,10 +81,6 @@ function Uploadpage() {
     setCategoryPostsCount(categoryPostsSnapshot.size);
   };
 
-  const handleTitleChange = (event) => {
-    setTitle(event.target.value);
-  };
-
   const handleContentChange = (event) => {
     setContent(event.target.value);
   };
@@ -126,7 +121,7 @@ function Uploadpage() {
     setConfirmDialogOpen(false);
     setLoading(true);
 
-    const folderRef = ref(storage, `users/${user.uid}/postimage/${title}/`);
+    const folderRef = ref(storage, `users/${user.uid}/postimage/`);
 
     // 이미지 업로드 및 저장을 위한 함수
     const uploadImages = async () => {
@@ -198,14 +193,12 @@ function Uploadpage() {
         ? `${displayName}_${category}_${postNumber}`
         : `${displayName}_${postNumber}`;
       await setDoc(doc(db, `users/${user.uid}/posts`, userPostId), {
-        title: title,
         content: content,
         imageUrls: imageUrls,
         category: category || "Uncategorized",
         createdAt: new Date(),
         uid: user.uid, // 유저의 uid를 추가합니다.
       });
-      setTitle("");
       setContent("");
       setImages([]);
       setPreviews([]);
@@ -235,15 +228,6 @@ function Uploadpage() {
           Write a Post
         </Typography>
         <form onSubmit={handleSubmit}>
-          <Box mb={2}>
-            <TextField
-              fullWidth
-              label="Title"
-              variant="outlined"
-              value={title}
-              onChange={handleTitleChange}
-            />
-          </Box>
           <Box mb={2}>
             <TextField
               fullWidth
@@ -310,7 +294,6 @@ function Uploadpage() {
                   src={preview}
                   alt={`preview-${index}`}
                   style={{
-                    display: "flex",
                     maxWidth: "100%",
                     maxHeight: "100px",
                     marginRight: "10px",

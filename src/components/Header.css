@@ -1,22 +1,28 @@
-/* Header.css */
+/* 기본 헤더 스타일 */
+* {
+  font-family: "IBM Plex Sans KR", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
 .topline {
-  margin: 0px;
-  height: 0px;
+  margin: 0;
+  height: 0;
   color: rgb(185, 185, 185);
 }
 
 .topheader {
   display: flex;
-  justify-content: flex-start; /* 왼쪽 정렬 */
+  justify-content: flex-start;
   align-items: center;
   height: 30px;
-  margin: 0 20px; /* 위아래 0px, 좌우 20px */
+  margin: 0 20px;
 }
 
 .favoriteButton {
-  margin-right: auto; /* 다른 요소들을 오른쪽으로 밀어냄 */
-  color: rgb(0, 0, 0); /* 텍스트 색상 검정 */
-  background-color: rgb(255, 230, 0); /* 배경색 노랑 */
+  margin-right: auto;
+  color: rgb(0, 0, 0);
+  background-color: rgb(255, 255, 255);
 }
 
 .header {
@@ -24,7 +30,7 @@
   justify-content: space-between;
   align-items: center;
   height: 60px;
-  margin: 0 20px; /* 위아래 0px, 좌우 20px */
+  margin: 0 20px;
 }
 
 .header .mainlogo {
@@ -33,40 +39,26 @@
   align-items: center;
 }
 
-.header .lsidelist {
-  margin-left: 5px;
-  justify-content: center;
-  align-items: center;
-}
-.header .logoicon {
-  font-family: "IBM Plex Sans KR", sans-serif;
-  font-weight: 600;
-  font-style: normal;
-  font-size: 20px;
-
-  margin-left: 5px;
-}
-
-.header .search {
-}
-
 .header .menulist {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header .menulist .homebt {
-  margin-left: 50px;
+  margin-left: 20px;
   margin-right: 10px;
   width: 55px;
   padding: 5px;
 }
 
 .header .menulist .uploadbt {
-  margin-right: 10px;
   width: 55px;
+  padding: 5px;
 }
 
-.header .text {
+.header .text,
+.header .menutext {
   font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
@@ -74,18 +66,14 @@
 }
 
 .header .menutext {
-  font-family: "IBM Plex Sans KR", sans-serif;
-  font-weight: 600;
-  font-style: normal;
-  color: black;
   font-size: 16px;
   margin-left: 20px;
 }
 
-.menulist .imgmenu {
+.header .imgmenu {
+  display: flex;
   justify-content: center;
   align-items: center;
-  display: flex;
   margin-left: 30px;
   margin-right: 10px;
   background-color: rgb(238, 238, 238);
@@ -94,71 +82,88 @@
   height: 50px;
 }
 
+.Sidebtn {
+  margin: 0 20px;
+}
+
 .Line {
-  margin-top: 0px;
-  margin-bottom: 0px;
+  margin: 0;
 }
 
+/* Header2 스타일 */
 .header2 {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start; /* 왼쪽 정렬 */
-  margin: 0 20px; /* 위아래 0px, 좌우 20px */
-
-  height: 60px;
+  position: fixed; /* 화면에 고정 */
+  top: 0;
+  left: -250px; /* 초기에는 왼쪽으로 숨김 */
+  height: 100%;
+  width: 250px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease; /* 왼쪽 위치 변화에 대한 전환 효과 */
+  z-index: 1000; /* 항상 다른 요소들 위에 있도록 설정 */
 }
 
-.header .imgmenu .loginbutton {
-  margin-left: 150px;
+.header2.open {
+  left: 0; /* 'open' 클래스가 적용되면 왼쪽으로 이동하여 나타남 */
 }
 
-/* -----------헤더 두번째라인----------- */
-.header2 {
+.header2-menu {
+  padding-top: 20px;
+}
+
+.header2-menu .menutext {
+  padding: 12px;
+  cursor: pointer;
 }
 
 .header2 .lsidelist {
-  margin-right: auto; /* 다른 요소들을 오른쪽으로 밀어냄 */
+  position: absolute;
+  top: 20px;
+  left: 20px; /* 추가된 부분: margin-left 대신 left로 위치 조정 */
+}
+
+.header2 .sidehomebtn .sideuploadbtn {
+  font-family: "IBM Plex Sans KR", sans-serif;
+  font-weight: 600;
+  font-style: normal;
 }
 
 @media (max-width: 600px) {
-  /* 작은 화면에서의 스타일 조정 */
-
-  .topheader {
-    margin-left: 10px;
-    margin-right: 10px;
-    height: 30px;
-  }
-
-  .header {
-    margin-left: 10px;
-    margin-right: 10px;
-    height: 50px;
-  }
-
-  .header .mainlogo {
-    height: 30px;
-    margin-right: 5px;
-  }
-
-  .header .menulist .homebt {
-    margin-left: 5px;
-    margin-right: 5px;
-    width: 40px;
-    padding: 5px;
-  }
-
-  .header .menulist .uploadbt {
-    margin-right: 5px;
-    width: 40px;
-  }
-
-  .header .menutext {
-    font-size: 12px;
-    margin-left: 5px;
-  }
-
+  /* 모바일 화면에 대한 반응형 스타일 */
   .header2 {
-    margin-left: 10px;
-    margin-right: 10px;
+    width: 250px;
+    left: -250px; /* 초기에는 왼쪽으로 숨김 */
   }
+
+  .header2.open {
+    left: 0; /* 모바일에서는 왼쪽으로 이동하여 나타남 */
+  }
+
+  .header2 .lsidelist {
+    left: 20px; /* 추가된 부분: 위치 조정 */
+  }
+
+  .header2-menu .menutext {
+    padding: 10px;
+  }
+}
+
+/* Overlay 스타일 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 999; /* header2 바로 아래에 위치하도록 설정 */
+}
+
+.overlay.open {
+  display: block;
+}
+
+.header2-menu-button {
+  margin-left: 5px;
 }

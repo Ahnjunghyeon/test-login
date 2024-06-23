@@ -24,7 +24,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import CustomNavbar from "../components/Header";
 import ProfileImage from "../components/ProfileImage";
 import Footer from "../components/Footer";
-import UploadPost from "../components/UploadPost"; // Import UploadPost component
+import UploadPost from "../components/UploadPost";
 import "./Profile.css";
 
 const Profile = () => {
@@ -253,12 +253,15 @@ const Profile = () => {
                   >
                     <Card className="post-card-content">
                       <CardContent>
-                        <Typography variant="h5">{post.title}</Typography>
-                        <Typography variant="body2">{post.category}</Typography>
+                        <Typography variant="body2" className="post-category">
+                          {post.category}
+                        </Typography>
                         {post.imageUrls && post.imageUrls.length > 0 && (
                           <UploadPost imageUrls={post.imageUrls} />
                         )}
-                        <Typography variant="body2">{post.content}</Typography>
+                        <Typography variant="body2" className="post-content">
+                          {post.content}
+                        </Typography>
                       </CardContent>
                     </Card>
                   </div>

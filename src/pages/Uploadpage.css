@@ -1,15 +1,145 @@
-.Dashboard {
-  display: flex;
-  width: 100%;
-  height: 1000px;
-  margin-top: 30px;
-  justify-content: center;
+/* Resetting default margin and padding */
 
-  font-family: "IBM Plex Sans KR", sans-serif;
-  font-weight: 600;
-  font-style: normal;
+/* Body styling */
+body {
+  font-family: "Noto Sans KR", sans-serif;
+  background-color: #f0f2f5;
 }
 
-.Dashboard .D-main {
-  width: 1050px;
+/* Container styling */
+.Dashboard {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Title styling */
+.Dashboard h4 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #83769c;
+}
+
+/* Form styling */
+.Dashboard form {
+  display: flex;
+  flex-direction: column;
+}
+
+.Dashboard form > * {
+  margin-bottom: 20px;
+}
+
+/* Label and Input styling */
+.Dashboard form label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333333;
+}
+
+.Dashboard form input[type="file"] {
+  display: none;
+}
+
+/* Select styling */
+.Dashboard form .MuiFormControl-root {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.Dashboard form .MuiSelect-root {
+  font-size: 16px;
+  color: #333333;
+}
+
+/* Button styling */
+.Dashboard form .MuiButton-root {
+  background-color: #83769c;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.Dashboard form .MuiButton-root:hover {
+  background-color: #83769c;
+}
+
+.Dashboard form .MuiButton-root.Mui-disabled {
+  background-color: #ccc;
+}
+
+/* Error message styling */
+.Dashboard form .MuiTypography-colorError {
+  margin-top: -10px;
+  margin-bottom: 10px;
+  color: #f44336;
+}
+
+/* Image preview styling */
+.Dashboard form .image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.Dashboard form .image-preview .image-item {
+  position: relative;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+}
+
+.Dashboard form .image-preview .image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.Dashboard form .image-preview .image-item button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  font-size: 12px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .Dashboard {
+    padding: 10px;
+  }
+
+  .Dashboard form .MuiFormControl-root {
+    margin-top: 10px;
+  }
+
+  .Dashboard form .MuiFormControl-root label,
+  .Dashboard form .MuiButton-root {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .Dashboard form .image-preview .image-item {
+    width: 100px;
+    height: 100px;
+  }
 }
