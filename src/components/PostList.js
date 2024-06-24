@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
   getFirestore,
+  runTransaction,
   doc,
   getDoc,
-  updateDoc,
   collection,
   getDocs,
   addDoc,
   setDoc,
   deleteDoc,
+  onSnapshot, // 추가된 부분
 } from "firebase/firestore";
 import {
   FormControl,
@@ -63,7 +64,6 @@ const PostList = ({
   const [menuAnchorEl, setMenuAnchorEl] = useState({});
   const [expanded, setExpanded] = useState({});
   const [contentExpanded, setContentExpanded] = useState({});
-  const [likedPosts, setLikedPosts] = useState({});
   const [category, setCategory] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [followedPosts, setFollowedPosts] = useState([]);
@@ -71,20 +71,10 @@ const PostList = ({
   const [categoryMenuAnchorEl, setCategoryMenuAnchorEl] = useState(null);
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState("");
+  const [likedPosts, setLikedPosts] = useState({});
+  const [likesCount, setLikesCount] = useState({});
 
   const db = getFirestore();
-
-  useEffect(() => {
-    const fetchLikedPosts = async () => {
-      if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          setLikedPosts(userDoc.data().likedPosts || {});
-        }
-      }
-    };
-    fetchLikedPosts();
-  }, [user, db]);
 
   useEffect(() => {
     const fetchFollowedPosts = async () => {
@@ -123,6 +113,83 @@ const PostList = ({
     };
     fetchFollowedPosts();
   }, [user, db]);
+
+  useEffect(() => {
+    const fetchLikedPosts = async () => {
+      if (user) {
+        const allPosts = [...posts, ...followedPosts];
+        const likedPostsData = {};
+
+        for (const post of allPosts) {
+          const likesRef = collection(
+            db,
+            `users/${post.uid}/posts/${post.id}/likes`
+          );
+          const likeDoc = await getDoc(doc(likesRef, user.uid));
+
+          if (likeDoc.exists()) {
+            likedPostsData[post.id] = true;
+          } else {
+            likedPostsData[post.id] = false;
+          }
+        }
+
+        setLikedPosts(likedPostsData);
+      }
+    };
+
+    fetchLikedPosts();
+  }, [user, posts, followedPosts, db]);
+
+  useEffect(() => {
+    const fetchLikesCount = async () => {
+      const likesCounts = {};
+      const allPosts = [...posts, ...followedPosts];
+      for (const post of allPosts) {
+        try {
+          const likesRef = collection(
+            db,
+            `users/${post.uid}/posts/${post.id}/likes`
+          );
+          const likesSnapshot = await getDocs(likesRef);
+          const likesCount = likesSnapshot.docs.length;
+          likesCounts[post.id] = likesCount;
+        } catch (error) {
+          console.error(
+            `Error fetching likes count for post ${post.id}:`,
+            error
+          );
+          likesCounts[post.id] = 0;
+        }
+      }
+      setLikesCount(likesCounts);
+    };
+
+    fetchLikesCount();
+  }, [posts, followedPosts, db]);
+
+  // 좋아요 수를 실시간으로 감시하여 업데이트
+  useEffect(() => {
+    const unsubscribeLikes = {};
+    const allPosts = [...posts, ...followedPosts]; // 모든 게시물을 합침
+    allPosts.forEach((post) => {
+      const likesRef = collection(
+        db,
+        `users/${post.uid}/posts/${post.id}/likes`
+      );
+      unsubscribeLikes[post.id] = onSnapshot(likesRef, (snapshot) => {
+        const likesCount = snapshot.docs.length;
+        setLikesCount((prevLikesCount) => ({
+          ...prevLikesCount,
+          [post.id]: likesCount,
+        }));
+      });
+    });
+
+    return () => {
+      Object.values(unsubscribeLikes).forEach((unsubscribe) => unsubscribe());
+    };
+  }, [posts, followedPosts, db]);
 
   const handleMenuOpen = (event, post) => {
     setMenuAnchorEl((prev) => ({ ...prev, [post.id]: event.currentTarget }));
@@ -166,7 +233,6 @@ const PostList = ({
       };
 
       try {
-        // 게시물 업데이트 시, category 필드를 포함하여 업데이트
         await handleUpdatePost(selectedPost.id, updatedPost);
         handleCloseEditDialog();
       } catch (error) {
@@ -177,65 +243,6 @@ const PostList = ({
 
   const handleRemoveImage = (index) => {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleLikeClick = async (postId) => {
-    // 좋아요 상태를 업데이트하고 UI에 반영
-    const updatedLikedPosts = { ...likedPosts, [postId]: !likedPosts[postId] };
-    setLikedPosts(updatedLikedPosts);
-
-    // Firebase에 사용자가 좋아요 누른 정보 업데이트
-    if (user) {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        likedPosts: updatedLikedPosts,
-      });
-
-      // 게시물의 좋아요 정보를 저장할 경로 설정 (like 컬렉션)
-      const likeRef = collection(
-        db,
-        `users/${user.uid}/posts/${postId}/${postId}like`
-      );
-
-      // 사용자가 해당 게시물에 좋아요를 누른지 확인
-      const userLikeDoc = doc(likeRef, user.uid);
-
-      if (likedPosts[postId]) {
-        // 좋아요를 누른 경우, 좋아요 문서 삭제
-        await deleteDoc(userLikeDoc);
-      } else {
-        // 좋아요를 누르지 않은 경우, 좋아요 문서 추가
-        await setDoc(userLikeDoc, {
-          liked: true,
-          timestamp: new Date(),
-        });
-      }
-
-      // 좋아요 개수 가져오기 및 UI에 반영 (옵셔널)
-      const likeQuerySnapshot = await getDocs(likeRef);
-      const likeCount = likeQuerySnapshot.size;
-
-      console.log(`게시물 ${postId}의 좋아요 개수:`, likeCount);
-
-      // 게시물 작성자에게 알림
-      const postRef = doc(db, "posts", postId);
-      const postDoc = await getDoc(postRef);
-      if (postDoc.exists()) {
-        const postAuthorId = postDoc.data().uid;
-
-        // 알림 컬렉션
-        const notificationsRef = collection(
-          db,
-          `users/${postAuthorId}/notifications`
-        );
-        await addDoc(notificationsRef, {
-          type: "like",
-          postId: postId,
-          userId: user.uid,
-          createdAt: new Date(),
-        });
-      }
-    }
   };
 
   const fetchComments = async (postId) => {
@@ -277,9 +284,39 @@ const PostList = ({
         displayName: user.displayName,
       });
       setNewComment("");
-      fetchComments(postId); // 댓글 추가 후 새로고침
+      fetchComments(postId);
     } catch (error) {
       console.error("Error adding comment:", error);
+    }
+  };
+
+  const handleLikePost = async (post) => {
+    try {
+      const likesRef = collection(
+        db,
+        `users/${post.uid}/posts/${post.id}/likes`
+      );
+      const likeDocRef = doc(likesRef, user.uid);
+
+      await runTransaction(db, async (transaction) => {
+        const likeDoc = await transaction.get(likeDocRef);
+
+        if (likeDoc.exists()) {
+          transaction.delete(likeDocRef);
+          setLikedPosts((prevLikedPosts) => ({
+            ...prevLikedPosts,
+            [post.id]: false,
+          }));
+        } else {
+          transaction.set(likeDocRef, { userId: user.uid });
+          setLikedPosts((prevLikedPosts) => ({
+            ...prevLikedPosts,
+            [post.id]: true,
+          }));
+        }
+      });
+    } catch (error) {
+      console.error("Error liking/unliking post:", error);
     }
   };
 
@@ -421,22 +458,13 @@ const PostList = ({
                     </CardContent>
                     <CardActions disableSpacing>
                       <IconButton
-                        aria-label="like"
-                        onClick={() => handleLikeClick(post.id)}
-                        style={{
-                          color: likedPosts[post.id] ? "pink" : "inherit",
-                        }}
+                        onClick={() => handleLikePost(post)}
+                        color={likedPosts[post.id] ? "secondary" : "default"}
                       >
                         <FavoriteIcon />
                       </IconButton>
-                      <Typography variant="body2" color="text.secondary">
-                        {
-                          Object.keys(likedPosts).filter(
-                            (key) => likedPosts[key]
-                          ).length
-                        }{" "}
-                        Likes
-                      </Typography>
+                      <Typography>{likesCount[post.id]} Likes</Typography>
+
                       <IconButton aria-label="share">
                         <ShareIcon />
                       </IconButton>
@@ -450,6 +478,7 @@ const PostList = ({
                         </Tooltip>
                       </IconButton>
                     </CardActions>
+
                     <Collapse
                       in={expanded[post.id]}
                       timeout="auto"
@@ -510,7 +539,6 @@ const PostList = ({
             <Typography variant="body1">로그인 해주세요.</Typography>
           )}
         </div>
-        {/* Conditionally render FollowersPage component based on screen width */}
         {window.innerWidth >= 869 && (
           <div className="Followers">
             <FollowersPage />
@@ -568,6 +596,7 @@ const PostList = ({
           </FormControl>
         </DialogContent>
         <DialogActions>
+          {" "}
           <Button onClick={handleCloseEditDialog}>취소</Button>
           <Button onClick={handleSaveEdit}>저장</Button>
         </DialogActions>
