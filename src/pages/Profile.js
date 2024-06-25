@@ -166,32 +166,10 @@ const Profile = () => {
             <Box className="LeftSide">
               {profileUser && (
                 <>
-                  {currentUser && currentUser.uid !== uid && (
-                    <>
-                      {isFollowing ? (
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={handleUnfollow}
-                        >
-                          Unfollow
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleFollow}
-                        >
-                          Follow
-                        </Button>
-                      )}
-                    </>
-                  )}
-
                   {profileImage && (
                     <Avatar
                       src={profileImage}
-                      alt="Profileimg"
+                      alt="Profile"
                       style={{
                         maxWidth: "100%",
                         maxHeight: "200px",
@@ -200,6 +178,7 @@ const Profile = () => {
                       }}
                     />
                   )}
+
                   {currentUser && currentUser.uid === uid ? (
                     <form className="Namefield" onSubmit={handleSubmit}>
                       <TextField
@@ -224,19 +203,33 @@ const Profile = () => {
                     </form>
                   ) : (
                     <Box className="UserInfo">
-                      {profileImage && (
-                        <img
-                          src={profileImage}
-                          alt="Profileimg"
-                          style={{ maxWidth: "100%", maxHeight: "200px" }}
-                        />
-                      )}
                       <Typography variant="h5">{displayName}</Typography>
                       <Typography variant="body1">User UID: {uid}</Typography>
                     </Box>
                   )}
                   <Typography variant="body1">Email: {userEmail}</Typography>
-                  <Typography variant="body1">User UID: {uid}</Typography>
+
+                  {currentUser && currentUser.uid !== uid && (
+                    <>
+                      {isFollowing ? (
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={handleUnfollow}
+                        >
+                          Unfollow
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleFollow}
+                        >
+                          Follow
+                        </Button>
+                      )}
+                    </>
+                  )}
                 </>
               )}
             </Box>
