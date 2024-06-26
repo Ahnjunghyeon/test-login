@@ -29,6 +29,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom"; // useNavigate import 추가
 
 function Uploadpage() {
   const [content, setContent] = useState("");
@@ -41,6 +42,7 @@ function Uploadpage() {
   const [displayName, setDisplayName] = useState(""); // displayName 상태 추가
   const [categoryPostsCount, setCategoryPostsCount] = useState(0); // 카테고리별 게시물 수 상태 추가
   const [imageError, setImageError] = useState(""); // 이미지 에러 상태 추가
+  const navigate = useNavigate(); // useNavigate hook 추가
 
   useEffect(() => {
     const auth = getAuth();
@@ -173,7 +175,7 @@ function Uploadpage() {
       // 이미지 업로드 및 URL 획득
       const imageUrls = await uploadImages();
 
-      // Firestore에 데이터 저장
+      // Firestore에 데이터 저장 및 페이지 네비게이션
       await savePostData(imageUrls);
     } catch (error) {
       console.error("Error uploading images or saving data:", error);
@@ -203,6 +205,9 @@ function Uploadpage() {
       setPreviews([]);
       setLoading(false);
       console.log("Document successfully written!");
+
+      // 새로 생성된 게시물 페이지로 이동
+      navigate("/home");
     } catch (error) {
       console.error("Error writing document: ", error);
       setLoading(false);

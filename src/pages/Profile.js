@@ -90,7 +90,7 @@ const Profile = () => {
       const userPostsRef = collection(db, `users/${uid}/posts`);
       const querySnapshot = await getDocs(userPostsRef);
       const userPosts = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
+        id: doc.id, // 게시물 ID를 추가
         ...doc.data(),
       }));
       return userPosts;
@@ -153,7 +153,7 @@ const Profile = () => {
   };
 
   const handlePostClick = (postId) => {
-    navigate(`/post/${postId}`);
+    navigate(`/posts/${uid}/${postId}`); // 해당 게시물의 URL로 이동
   };
 
   return (
@@ -242,7 +242,7 @@ const Profile = () => {
                   <div
                     className="post-card"
                     key={post.id}
-                    onClick={() => handlePostClick(post.id)}
+                    onClick={() => handlePostClick(post.id)} // 게시물 클릭 시 이벤트 핸들러 추가
                   >
                     <Card className="post-card-content">
                       <CardContent>

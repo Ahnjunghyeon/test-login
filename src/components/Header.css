@@ -164,6 +164,15 @@
   display: block;
 }
 
+.header2 .sidehomebtn {
+  margin-bottom: 15px;
+}
+
 .header2-menu-button {
-  margin-left: 5px;
+  margin-left: 15px;
+}
+
+.header2-menuopenBtn {
+  display: flex;
+  align-items: center;
 }

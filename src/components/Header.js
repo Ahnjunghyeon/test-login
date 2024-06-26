@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IconButton, Menu, MenuItem, Button, Icon } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import HomeIcon from "@mui/icons-material/Home";
-import PublishIcon from "@mui/icons-material/Publish";
+import MenuOpenRoundedIcon from "@mui/icons-material/MenuOpenRounded";
+
+import AddHomeRoundedIcon from "@mui/icons-material/AddHomeRounded";
+import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
 import GradeIcon from "@mui/icons-material/Grade";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -177,7 +179,7 @@ const Header = ({ refreshProfileImage }) => {
               e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
-            <HomeIcon
+            <AddHomeRoundedIcon
               sx={{
                 color: "#83769C",
                 fontSize: "1.7rem",
@@ -208,7 +210,7 @@ const Header = ({ refreshProfileImage }) => {
                 e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
-              <PublishIcon
+              <UploadFileRoundedIcon
                 sx={{
                   color: "#83769C",
                   fontSize: "1.7rem",
@@ -284,17 +286,30 @@ const Header = ({ refreshProfileImage }) => {
           ref={menuRef}
           className={`header2-menu ${isMenuOpen ? "open" : ""}`}
         >
-          <IconButton
-            className="header2-menu-button"
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleIconClick}
-            sx={{ color: "#83769C", fontSize: "1.5rem" }} // Adjust icon size
-          >
-            <MenuIcon />
-          </IconButton>
+          <div className="header2-menuopenBtn">
+            <IconButton
+              className="header2-menu-button"
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleIconClick}
+              sx={{ color: "#83769C", fontSize: "1.5rem", margin: "0 7px" }} // Adjust icon size
+            >
+              <MenuOpenRoundedIcon />
+            </IconButton>
+            <div className="mainlogo" onClick={() => navigate("/")}>
+              <img
+                src={logo}
+                alt="Logo"
+                style={{
+                  cursor: "pointer",
+                  height: "40px",
+                  marginRight: "10px",
+                }}
+              />
+            </div>
+          </div>
           <div
             className="search"
             style={{
@@ -310,7 +325,7 @@ const Header = ({ refreshProfileImage }) => {
             style={{ marginLeft: "2px" }}
             onClick={() => navigate("/home")}
           >
-            <HomeIcon sx={{ color: "#83769C" }} />
+            <AddHomeRoundedIcon sx={{ color: "#83769C" }} />
             <div className="text" style={{ marginLeft: "30px" }}>
               Home
             </div>
@@ -320,7 +335,7 @@ const Header = ({ refreshProfileImage }) => {
             style={{ marginLeft: "2px" }}
             onClick={() => navigate("/uploadpage")}
           >
-            {user && <PublishIcon sx={{ color: "#83769C" }} />}{" "}
+            {user && <UploadFileRoundedIcon sx={{ color: "#83769C" }} />}{" "}
             <div className="text" style={{ marginLeft: "30px" }}>
               Upload
             </div>

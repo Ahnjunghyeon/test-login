@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import {
   getFirestore,
   runTransaction,
@@ -9,7 +10,7 @@ import {
   addDoc,
   setDoc,
   deleteDoc,
-  onSnapshot, // 추가된 부분
+  onSnapshot,
 } from "firebase/firestore";
 import {
   FormControl,
@@ -43,8 +44,10 @@ import { red } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import CommentIcon from "@mui/icons-material/Comment";
+import MapsUgcRoundedIcon from "@mui/icons-material/MapsUgcRounded";
+import ReadMoreRoundedIcon from "@mui/icons-material/ReadMoreRounded";
 import FollowersPage from "../pages/FollowersPage";
 import UploadPost from "./UploadPost";
 import ProfileImage from "./ProfileLogo";
@@ -73,6 +76,7 @@ const PostList = ({
   const [newComment, setNewComment] = useState("");
   const [likedPosts, setLikedPosts] = useState({});
   const [likesCount, setLikesCount] = useState({});
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const db = getFirestore();
 
@@ -168,10 +172,9 @@ const PostList = ({
     fetchLikesCount();
   }, [posts, followedPosts, db]);
 
-  // 좋아요 수를 실시간으로 감시하여 업데이트
   useEffect(() => {
     const unsubscribeLikes = {};
-    const allPosts = [...posts, ...followedPosts]; // 모든 게시물을 합침
+    const allPosts = [...posts, ...followedPosts];
     allPosts.forEach((post) => {
       const likesRef = collection(
         db,
@@ -346,6 +349,37 @@ const PostList = ({
     handleCategoryMenuClose();
   };
 
+  const handleMoreClick = async (postId, postUid) => {
+    try {
+      const postDoc = await getDoc(doc(db, `users/${postUid}/posts/${postId}`));
+      if (postDoc.exists()) {
+        navigate(`/posts/${postUid}/${postId}`);
+      } else {
+        console.error("Post not found!");
+      }
+    } catch (error) {
+      console.error("Error fetching post:", error);
+    }
+  };
+
+  const handleShare = async (post) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: post.content,
+          text: post.content,
+          url: `${window.location.origin}/posts/${post.uid}/${post.id}`,
+        });
+      } else {
+        throw new Error("Web Share API is not supported in this browser.");
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+      // Fallback sharing option if navigator.share is not supported
+      // You can implement a custom sharing solution here
+    }
+  };
+
   return (
     <>
       <div className="PostList">
@@ -465,7 +499,10 @@ const PostList = ({
                       </IconButton>
                       <Typography>{likesCount[post.id]} Likes</Typography>
 
-                      <IconButton aria-label="share">
+                      <IconButton
+                        aria-label="share"
+                        onClick={() => handleShare(post)}
+                      >
                         <ShareIcon />
                       </IconButton>
                       <IconButton
@@ -474,8 +511,13 @@ const PostList = ({
                         onClick={() => handleExpandClick(post.id)}
                       >
                         <Tooltip title="댓글">
-                          <CommentIcon />
+                          <MapsUgcRoundedIcon />
                         </Tooltip>
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleMoreClick(post.id, post.uid)}
+                      >
+                        <MoreHorizRoundedIcon />
                       </IconButton>
                     </CardActions>
 
