@@ -8,7 +8,8 @@ import Logopage from "./pages/Logopage";
 import Profile from "./pages/Profile";
 import FollowersPage from "./pages/FollowersPage";
 import Footer from "./components/Footer";
-import PostPage from "./pages/PostPage"; // 새로운 PostPage 컴포넌트 임포트
+import PostPage from "./pages/PostPage";
+import LoginModal from "./components/LoginModal"; // LoginModal import 수정
 
 function App() {
   return (
@@ -21,8 +22,8 @@ function App() {
           <Route path="/uploadpage" element={<Uploadpage />} />
           <Route path="/profile/:uid" element={<Profile />} />
           <Route path="/followers" element={<FollowersPage />} />
-          <Route path="/posts/:uid/:postId" element={<PostPage />} />{" "}
-          {/* 새로운 라우트 추가 */}
+          <Route path="/posts/:uid/:postId" element={<PostPage />} />
+          <Route path="/login" element={<LoginModal />} />{" "}
         </Routes>
       </div>
       <Footer />

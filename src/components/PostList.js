@@ -503,7 +503,10 @@ const PostList = ({
                         aria-label="share"
                         onClick={() => handleShare(post)}
                       >
-                        <ShareIcon />
+                        <Tooltip title="공유">
+                          {" "}
+                          <ShareIcon />
+                        </Tooltip>
                       </IconButton>
                       <IconButton
                         aria-expanded={expanded[post.id]}
@@ -517,7 +520,9 @@ const PostList = ({
                       <IconButton
                         onClick={() => handleMoreClick(post.id, post.uid)}
                       >
-                        <MoreHorizRoundedIcon />
+                        <Tooltip title="글보기">
+                          <MoreHorizRoundedIcon />
+                        </Tooltip>
                       </IconButton>
                     </CardActions>
 

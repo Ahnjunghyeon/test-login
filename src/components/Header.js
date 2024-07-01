@@ -1,33 +1,28 @@
 import React, { useState, useEffect, useRef } from "react";
-import { IconButton, Menu, MenuItem, Button, Icon } from "@mui/material";
+import { IconButton, Menu, MenuItem, Button } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenRoundedIcon from "@mui/icons-material/MenuOpenRounded";
-
 import AddHomeRoundedIcon from "@mui/icons-material/AddHomeRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
 import GradeIcon from "@mui/icons-material/Grade";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  getAuth,
-  signOut,
-  onAuthStateChanged,
-  signInWithPopup,
-  GoogleAuthProvider,
-  updateProfile,
-} from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import "./Header.css";
 import SearchBar from "./SearchBar";
 import ProfileImage from "./ProfileLogo";
 import logo from "../img/GREAPP.png"; // 로고 이미지 경로
+import LoginModal from "./LoginModal"; // Import LoginModal
+import SignupModal from "./SignupModal"; // Import SignupModal
 
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State to manage menu open/close
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // State to manage login modal
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false); // State to manage signup modal
   const auth = getAuth();
   const db = getFirestore();
-  const provider = new GoogleAuthProvider();
   const navigate = useNavigate();
   const menuRef = useRef(null); // Ref to access the menu DOM element
 
@@ -48,45 +43,6 @@ const Header = ({ refreshProfileImage }) => {
       })
       .catch((error) => {
         console.error("Error logging out: ", error);
-      });
-  };
-
-  const signInWithGoogle = () => {
-    signInWithPopup(auth, provider)
-      .then(async (result) => {
-        const user = result.user;
-        const googleName = user.displayName;
-        const profileImageUrl = user.photoURL;
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        const isNewUser = !userDoc.exists();
-
-        if (googleName) {
-          await updateProfile(user, {
-            displayName: googleName,
-          });
-
-          try {
-            await setDoc(userDocRef, {
-              displayName: googleName,
-              email: user.email,
-              uid: user.uid,
-              profileImage: profileImageUrl,
-            });
-            console.log("User profile saved successfully in Firestore");
-
-            if (isNewUser) {
-              navigate(`/profile/${user.uid}`);
-            }
-          } catch (error) {
-            console.error("Failed to save user profile in Firestore:", error);
-          }
-        } else {
-          console.log("Google name not available");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
       });
   };
 
@@ -258,9 +214,20 @@ const Header = ({ refreshProfileImage }) => {
               </Menu>
             </>
           ) : (
-            <Button className="loginbutton" onClick={signInWithGoogle}>
-              <div className="menutext">로그인</div>
-            </Button>
+            <>
+              <Button
+                className="loginbutton"
+                onClick={() => setIsLoginModalOpen(true)}
+              >
+                <div className="menutext">로그인</div>
+              </Button>
+              <Button
+                className="signupbutton"
+                onClick={() => setIsSignupModalOpen(true)}
+              >
+                <div className="menutext">회원가입</div>
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -342,6 +309,21 @@ const Header = ({ refreshProfileImage }) => {
           </MenuItem>
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
+
+      {/* Signup Modal */}
+      <SignupModal
+        isOpen={isSignupModalOpen}
+        onClose={() => setIsSignupModalOpen(false)}
+        onSignup={() => {
+          /* Define your signup logic here */
+        }}
+      />
     </>
   );
 };
