@@ -13,6 +13,7 @@
   max-width: 400px;
   width: 100%;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  font-family: "Noto Sans KR", sans-serif; /* Kakao 스타일의 폰트 사용 */
 }
 
 .overlay {
@@ -42,17 +43,25 @@ button {
   font-size: 16px;
   border: none;
   border-radius: 5px;
-  background-color: #007bff;
+  background-color: #d0a4ff; /* 연보라색 */
   color: white;
   cursor: pointer;
   margin-top: 10px;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #b280ff; /* 연보라색의 좀 더 진한 색상 */
 }
 
 .error {
   color: red;
   margin-bottom: 10px;
+}
+
+.typography {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #4a4a4a; /* Kakao 스타일의 글씨 색상 */
+  text-align: center;
 }

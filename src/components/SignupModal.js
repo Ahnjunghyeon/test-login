@@ -11,6 +11,7 @@ import {
 import { styled } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import "./LoginModal.css";
 
 const ModalContent = styled("div")(({ theme }) => ({
   position: "absolute",
@@ -67,7 +68,7 @@ const SignupModal = ({ isOpen, onClose, onSignup }) => {
         onClick: onClose, // Backdrop 클릭 시 onClose 호출
       }}
     >
-      <ModalContent>
+      <ModalContent className="ModalContent">
         <Typography variant="h5">회원가입</Typography>
         <InputField
           label="이메일"
@@ -84,7 +85,7 @@ const SignupModal = ({ isOpen, onClose, onSignup }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <div>
+        <div className="signbtn">
           <Button variant="contained" color="primary" onClick={handleSignup}>
             회원가입
           </Button>

@@ -1,3 +1,4 @@
+/* SignupModal.css */
 .modal {
   position: fixed;
   top: 50%;
@@ -22,10 +23,21 @@
 .signup-modal-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* 수직 중앙 정렬 */
 }
 
 .error-message {
   color: red;
   margin-top: 10px;
+}
+
+/* SignupModal.css */
+.ModalContent .signbtn {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.signbtn button {
+  margin-left: 10px;
 }
