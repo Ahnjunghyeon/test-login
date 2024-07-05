@@ -51,9 +51,7 @@ const Profile = () => {
           setProfileUser(userData);
           setDisplayName(userData.displayName);
           setProfileImage(userData.profileImage);
-          if (currentUser && currentUser.uid === uid) {
-            setUserEmail(currentUser.email);
-          }
+          setUserEmail(userData.email); // Set the email from user data
         } else {
           console.log("No such user!");
         }

@@ -1,5 +1,3 @@
-// src/components/LoginModal.js
-
 import React from "react";
 import { Modal, Box, Typography, Button } from "@mui/material";
 import {
@@ -17,12 +15,11 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
   boxShadow: 24,
   p: 4,
 };
 
-const LoginModal = ({ isOpen, onClose }) => {
+const LoginModal = ({ isOpen, onClose, onSignupOpen }) => {
   const auth = getAuth();
 
   const handleLogin = (event) => {
@@ -69,8 +66,13 @@ const LoginModal = ({ isOpen, onClose }) => {
       aria-describedby="modal-modal-description"
     >
       <Box sx={style}>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
-          Login
+        <Typography
+          id="modal-modal-title"
+          variant="h6"
+          component="h2"
+          className="typography"
+        >
+          로그인
         </Typography>
         <form onSubmit={handleLogin}>
           <input type="email" name="email" placeholder="Email" required />
@@ -80,18 +82,19 @@ const LoginModal = ({ isOpen, onClose }) => {
             placeholder="Password"
             required
           />
-          <Button type="submit" variant="contained" color="primary" fullWidth>
+          <Button type="submit" fullWidth className="default btn-jelly">
             Login
           </Button>
         </form>
         <Button
-          variant="contained"
-          color="secondary"
           fullWidth
           onClick={handleGoogleLogin}
-          style={{ marginTop: "10px" }}
+          className="google btn-jelly"
         >
           Login with Google
+        </Button>
+        <Button fullWidth onClick={onSignupOpen} className="signup btn-jelly">
+          회원가입
         </Button>
       </Box>
     </Modal>

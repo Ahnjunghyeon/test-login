@@ -1,5 +1,3 @@
-// src/components/Header.js
-
 import React, { useState, useEffect, useRef } from "react";
 import { IconButton, Menu, MenuItem, Button } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -8,7 +6,12 @@ import AddHomeRoundedIcon from "@mui/icons-material/AddHomeRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
 import GradeIcon from "@mui/icons-material/Grade";
 import { Link, useNavigate } from "react-router-dom";
-import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import "./Header.css";
 import SearchBar from "./SearchBar";
@@ -93,6 +96,23 @@ const Header = ({ refreshProfileImage }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handleSignup = (email, password) => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("User signed up:", user);
+        // Optionally, you can navigate or perform additional actions here
+      })
+      .catch((error) => {
+        console.error("Error signing up:", error);
+      });
+  };
+
+  const handleLoginOpen = () => {
+    setIsSignupModalOpen(false);
+    setIsLoginModalOpen(true);
+  };
 
   return (
     <>
@@ -322,9 +342,8 @@ const Header = ({ refreshProfileImage }) => {
       <SignupModal
         isOpen={isSignupModalOpen}
         onClose={() => setIsSignupModalOpen(false)}
-        onSignup={() => {
-          /* Define your signup logic here */
-        }}
+        onSignup={handleSignup}
+        onLoginOpen={handleLoginOpen} // Pass the handleLoginOpen function to SignupModal
       />
     </>
   );

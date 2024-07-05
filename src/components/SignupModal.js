@@ -11,7 +11,13 @@ import {
 import { styled } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import "./LoginModal.css";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import "./SignupModal.css";
 
 const ModalContent = styled("div")(({ theme }) => ({
   position: "absolute",
@@ -36,22 +42,37 @@ const TooltipContainer = styled("div")(({ theme }) => ({
   marginTop: theme.spacing(1),
 }));
 
-const SignupModal = ({ isOpen, onClose, onSignup }) => {
+const SignupModal = ({ isOpen, onClose, onSignup, onLoginOpen }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [errorTooltip, setErrorTooltip] = useState(false);
+  const auth = getAuth();
+  const db = getFirestore();
 
-  const handleSignup = () => {
-    if (email === "") {
+  const handleSignup = async () => {
+    if (email === "" || password === "" || displayName === "") {
       setErrorTooltip(true);
       return;
     }
-    if (password === "") {
-      setErrorTooltip(true);
-      return;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      await updateProfile(user, { displayName });
+      await setDoc(doc(db, "users", user.uid), {
+        displayName,
+        email,
+        profileImage: "", // Default value for profileImage
+      });
+      onSignup(email, password);
+      onClose(); // Close the modal after signup
+    } catch (error) {
+      console.error("Error signing up: ", error);
     }
-
-    onSignup(email, password);
   };
 
   const handleTooltipToggle = () => {
@@ -62,15 +83,26 @@ const SignupModal = ({ isOpen, onClose, onSignup }) => {
     <Modal
       open={isOpen}
       onClose={onClose}
-      BackdropComponent={Backdrop} // Backdrop 설정 추가
+      BackdropComponent={Backdrop}
       BackdropProps={{
         timeout: 500,
-        onClick: onClose, // Backdrop 클릭 시 onClose 호출
+        onClick: onClose,
       }}
     >
       <ModalContent className="ModalContent">
-        <Typography variant="h5">회원가입</Typography>
+        <Typography variant="h5" className="typography">
+          회원가입
+        </Typography>
         <InputField
+          className="Name"
+          label="이름"
+          variant="outlined"
+          fullWidth
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+        />
+        <InputField
+          className="Email"
           label="이메일"
           variant="outlined"
           fullWidth
@@ -78,6 +110,7 @@ const SignupModal = ({ isOpen, onClose, onSignup }) => {
           onChange={(e) => setEmail(e.target.value)}
         />
         <InputField
+          className="Password"
           label="비밀번호"
           variant="outlined"
           fullWidth
@@ -85,9 +118,13 @@ const SignupModal = ({ isOpen, onClose, onSignup }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+
         <div className="signbtn">
-          <Button variant="contained" color="primary" onClick={handleSignup}>
+          <Button className="btn-slide" onClick={handleSignup}>
             회원가입
+          </Button>
+          <Button className="btn-slide" onClick={onLoginOpen}>
+            로그인 페이지로
           </Button>
         </div>
         <TooltipContainer>
@@ -131,6 +168,7 @@ SignupModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSignup: PropTypes.func.isRequired,
+  onLoginOpen: PropTypes.func.isRequired,
 };
 
 export default SignupModal;
