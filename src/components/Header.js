@@ -4,7 +4,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenRoundedIcon from "@mui/icons-material/MenuOpenRounded";
 import AddHomeRoundedIcon from "@mui/icons-material/AddHomeRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
-import GradeIcon from "@mui/icons-material/Grade";
 import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
@@ -12,7 +11,7 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 import "./Header.css";
 import SearchBar from "./SearchBar";
 import ProfileImage from "./ProfileLogo";
@@ -116,16 +115,21 @@ const Header = ({ refreshProfileImage }) => {
 
   return (
     <>
-      <div className={`overlay ${isMenuOpen ? "open" : ""}`} />
-      <div className="topheader">
-        <IconButton className="favoriteButton" onClick={addToFavorites}>
-          <GradeIcon sx={{ color: "gold" }} />
-        </IconButton>
-      </div>
-      <hr className="topline" />
-
       <div className="header">
         <div className="mainlogo" onClick={() => navigate("/")}>
+          <div className="Sidebtn">
+            <IconButton
+              className="lsidelist"
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleIconClick}
+              sx={{ color: "#83769C", fontSize: "1.5rem" }} // Adjust icon size
+            >
+              <MenuIcon />
+            </IconButton>
+          </div>
           <img
             src={logo}
             alt="Logo"
@@ -253,19 +257,7 @@ const Header = ({ refreshProfileImage }) => {
           )}
         </div>
       </div>
-      <div className="Sidebtn">
-        <IconButton
-          className="lsidelist"
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="open drawer"
-          onClick={handleIconClick}
-          sx={{ color: "#83769C", fontSize: "1.5rem" }} // Adjust icon size
-        >
-          <MenuIcon />
-        </IconButton>
-      </div>
+
       <hr className="topline" />
 
       {/* Header2 */}

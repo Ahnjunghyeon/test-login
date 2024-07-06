@@ -1,54 +1,86 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Modal,
   TextField,
-  Tooltip,
-  IconButton,
   Typography,
   Backdrop,
+  Box,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import PropTypes from "prop-types";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import {
   getAuth,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import "./SignupModal.css";
+import "./LoginModal.css";
 
-const ModalContent = styled("div")(({ theme }) => ({
+const style = {
   position: "absolute",
-  width: 400,
-  backgroundColor: theme.palette.background.paper,
-  boxShadow: theme.shadows[5],
-  padding: theme.spacing(2, 4, 3),
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  outline: "none",
-}));
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 4,
+};
 
-const InputField = styled(TextField)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-}));
-
-const TooltipContainer = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  marginTop: theme.spacing(1),
-}));
-
-const SignupModal = ({ isOpen, onClose, onSignup, onLoginOpen }) => {
+const SignupModal = ({ isOpen, onClose }) => {
+  const auth = getAuth();
+  const db = getFirestore();
+  const [isSignUp, setIsSignUp] = useState(true); // 기본값을 true로 설정하여 Sign Up 모드로 시작
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [errorTooltip, setErrorTooltip] = useState(false);
-  const auth = getAuth();
-  const db = getFirestore();
+
+  // isOpen prop이 변경될 때 isSignUp 상태 초기화
+  useEffect(() => {
+    setIsSignUp(true); // 기본값을 true로 설정하여 Sign Up 모드로 초기화
+    setEmail("");
+    setPassword("");
+    setDisplayName("");
+  }, [isOpen]);
+
+  const handleLogin = (event) => {
+    event.preventDefault();
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("Logged in as:", user.email);
+        onClose();
+        // 로그인 성공 후 초기화
+        setEmail("");
+        setPassword("");
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("Login error:", errorCode, errorMessage);
+      });
+  };
+
+  const handleGoogleLogin = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+        console.log("Logged in with Google as:", user.email);
+        onClose();
+        // Google 로그인 성공 후 초기화
+        setEmail("");
+        setPassword("");
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("Google login error:", errorCode, errorMessage);
+      });
+  };
 
   const handleSignup = async () => {
     if (email === "" || password === "" || displayName === "") {
@@ -66,17 +98,27 @@ const SignupModal = ({ isOpen, onClose, onSignup, onLoginOpen }) => {
       await setDoc(doc(db, "users", user.uid), {
         displayName,
         email,
-        profileImage: "", // Default value for profileImage
+        profileImage: "",
       });
-      onSignup(email, password);
-      onClose(); // Close the modal after signup
+      console.log("Signed up as:", user.email);
+      onClose();
+      // 회원가입 성공 후 초기화
+      setEmail("");
+      setPassword("");
+      setDisplayName("");
     } catch (error) {
       console.error("Error signing up: ", error);
     }
   };
 
-  const handleTooltipToggle = () => {
-    setErrorTooltip(!errorTooltip);
+  const handleCheckboxChange = (event) => {
+    setIsSignUp(event.target.checked);
+    // 회원가입 모드로 변경 시 입력 필드 초기화
+    if (!event.target.checked) {
+      setEmail("");
+      setPassword("");
+      setDisplayName("");
+    }
   };
 
   return (
@@ -86,89 +128,100 @@ const SignupModal = ({ isOpen, onClose, onSignup, onLoginOpen }) => {
       BackdropComponent={Backdrop}
       BackdropProps={{
         timeout: 500,
-        onClick: onClose,
       }}
     >
-      <ModalContent className="ModalContent">
-        <Typography variant="h5" className="typography">
-          회원가입
-        </Typography>
-        <InputField
-          className="Name"
-          label="이름"
-          variant="outlined"
-          fullWidth
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-        />
-        <InputField
-          className="Email"
-          label="이메일"
-          variant="outlined"
-          fullWidth
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <InputField
-          className="Password"
-          label="비밀번호"
-          variant="outlined"
-          fullWidth
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        <div className="signbtn">
-          <Button className="btn-slide" onClick={handleSignup}>
-            회원가입
-          </Button>
-          <Button className="btn-slide" onClick={onLoginOpen}>
-            로그인 페이지로
-          </Button>
-        </div>
-        <TooltipContainer>
-          <Typography>회원가입 관련</Typography>
-          <Tooltip
-            PopperProps={{
-              disablePortal: true,
-            }}
-            onClose={handleTooltipToggle}
-            open={errorTooltip}
-            disableFocusListener
-            disableHoverListener
-            disableTouchListener
-            title={
-              <>
-                <Typography>* 회원가입이 안될 수 있는 경우 *</Typography>
-                <Typography>1. 이미 사용 중인 이메일 주소</Typography>
-                <Typography>2. 유효하지 않은 이메일 형식</Typography>
-                <Typography>
-                  3. 비밀번호는 일반적으로 최소 6자 이상이어야 합니다.
-                </Typography>
-                <Typography>
-                  4. 비밀번호는 숫자, 대문자, 소문자 및 특수 문자를 포함해야 할
-                  수 있습니다.
-                </Typography>
-              </>
-            }
-            arrow
+      <Box sx={style}>
+        <div className="text-center">
+          <Typography
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+            className="typography"
           >
-            <IconButton onClick={handleTooltipToggle}>
-              <HelpOutlineIcon />
-            </IconButton>
-          </Tooltip>
-        </TooltipContainer>
-      </ModalContent>
+            {isSignUp ? "Sign Up" : "Log In"}
+          </Typography>
+          <input
+            className="checkbox"
+            type="checkbox"
+            id="reg-log"
+            name="reg-log"
+            onChange={handleCheckboxChange}
+            checked={isSignUp} // 체크박스 체크 상태를 isSignUp 상태와 동기화
+          />
+          <label htmlFor="reg-log"></label>
+        </div>
+
+        {isSignUp ? (
+          <>
+            <TextField
+              label="Name"
+              variant="outlined"
+              fullWidth
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="input-field"
+            />
+            <TextField
+              label="Email"
+              variant="outlined"
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-field"
+            />
+            <TextField
+              label="Password"
+              variant="outlined"
+              fullWidth
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input-field"
+            />
+            <div className="button-group">
+              <Button onClick={handleSignup} className="default btn-6">
+                Sign Up
+              </Button>
+              <Button onClick={handleGoogleLogin} className="google btn-6">
+                Sign Up with Google
+              </Button>
+            </div>
+          </>
+        ) : (
+          <form onSubmit={handleLogin}>
+            <TextField
+              type="email"
+              name="email"
+              label="Email"
+              variant="outlined"
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-field"
+            />
+            <TextField
+              type="password"
+              name="password"
+              label="Password"
+              variant="outlined"
+              fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input-field"
+            />
+            <div className="button-group">
+              <Button type="submit" className="default btn-6">
+                Login
+              </Button>
+              <Button onClick={handleGoogleLogin} className="google btn-6">
+                Login with Google
+              </Button>
+            </div>
+          </form>
+        )}
+      </Box>
     </Modal>
   );
-};
-
-SignupModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onSignup: PropTypes.func.isRequired,
-  onLoginOpen: PropTypes.func.isRequired,
 };
 
 export default SignupModal;

@@ -1,27 +1,99 @@
-.modal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 40px; /* More padding for a cleaner look */
-  border-radius: 8px; /* Slightly less rounded corners */
-  outline: none;
-  max-width: 400px;
-  width: 100%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Softer shadow */
-  font-family: "Roboto", sans-serif; /* Google's primary font */
+body {
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #c4c3ca;
+  background-color: #1f2029;
+  overflow-x: hidden;
 }
 
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+a {
+  cursor: pointer;
+  transition: all 200ms linear;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+.link {
+  color: #c4c3ca;
+}
+
+.link:hover {
+  color: #ffeba7;
+}
+
+p {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+h4 {
+  font-weight: 600;
+}
+
+h6 span {
+  padding: 0 20px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.section {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+.full-height {
+  min-height: 100vh;
+}
+
+[type="checkbox"]:checked,
+[type="checkbox"]:not(:checked) {
+  position: absolute;
+
+  left: -9999px;
+}
+
+.checkbox:checked + label,
+.checkbox:not(:checked) + label {
+  position: relative;
+  display: block;
+  text-align: center;
+  width: 60px;
+  height: 16px;
+  border-radius: 8px;
+  padding: 0;
+  margin: 10px auto;
+  cursor: pointer;
+  background-color: rgb(204, 0, 255);
+}
+
+.checkbox:checked + label:before,
+.checkbox:not(:checked) + label:before {
+  position: absolute;
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #ffeba7;
+  background-color: #3f72ff;
+  font-family: "unicons";
+  content: "\eb4f";
+  z-index: 20;
+  top: -10px;
+  left: -10px;
+  line-height: 36px;
+  text-align: center;
+  font-size: 24px;
+  transition: all 0.5s ease;
+}
+
+.checkbox:checked + label:before {
+  transform: translateX(44px) rotate(-270deg);
 }
 
 form {
@@ -29,99 +101,83 @@ form {
   flex-direction: column;
 }
 
-input {
-  margin-bottom: 20px; /* More space between inputs */
-  padding: 14px; /* Larger padding for inputs */
-  font-size: 16px;
-  border: 1px solid #dadce0; /* Lighter border color */
-  border-radius: 4px; /* Slightly less rounded */
-  transition: border-color 0.2s; /* Smooth transition */
-}
-
-input:focus {
-  border-color: #4285f4; /* Google's blue color for focus */
-  outline: none;
-}
-
-button {
-  padding: 14px; /* Larger padding for button */
-  font-size: 16px;
-  border: none;
-  border-radius: 4px; /* Less rounded corners */
-  cursor: pointer;
-  transition: background-color 0.3s; /* Smooth transition */
-}
-
-button.default {
-  background-color: #007bff; /* Standard blue color */
-  color: white;
-}
-
-button.default:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-}
-
-button.google {
-  background-color: #4285f4; /* Google's blue color */
-  color: white;
-}
-
-button.google:hover {
-  background-color: #3367d6; /* Darker blue on hover */
-}
-
-button.signup {
-  background-color: #28a745; /* Green color for signup */
-  color: white;
-}
-
-button.signup:hover {
-  background-color: #218838; /* Darker green on hover */
-}
-
-.error {
-  color: red;
+.input-field {
   margin-bottom: 20px;
 }
 
+.button-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+button {
+  padding: 14px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  background-color: white;
+  color: black;
+  margin: 0 3px;
+}
+
+button:hover {
+  background-color: #e6e6fa;
+}
+
+button.default,
+button.google {
+  flex: 1;
+}
+
 .typography {
-  margin-bottom: 40px; /* Updated margin-bottom for the Login title */
+  margin-bottom: 40px;
   font-size: 24px;
   font-weight: bold;
   color: #202124;
   text-align: center;
 }
 
-input[type="email"] {
-  margin-top: 10px;
-  margin-bottom: 5px; /* Margin between email input and password input */
+.btn-6 {
+  color: #96a6b7; /* Example color, replace with actual dynamic value */
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  text-transform: uppercase;
+  font-size: 16px;
+  background-color: white;
+  color: black;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-input[type="password"] {
-  margin-bottom: 15px; /* Margin between password input and buttons */
+.btn-6 span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background-color: #5b6b7e; /* Example color, replace with actual dynamic value */
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+  z-index: -1;
 }
 
-button.google {
-  margin-top: 10px; /* Additional margin for Google button */
+.btn-6:hover {
+  color: #f1f5f9; /* Example color, replace with actual dynamic value */
+  background-color: #e6e6fa;
 }
 
-/* Add the btn-jelly class */
-.btn-jelly {
-  &:hover {
-    animation: jelly 0.5s;
-  }
+.btn-6:hover span {
+  width: 200%;
+  height: 200%;
 }
 
-@keyframes jelly {
-  25% {
-    transform: scale(0.9, 1.1);
-  }
-
-  50% {
-    transform: scale(1.1, 0.9);
-  }
-
-  75% {
-    transform: scale(0.95, 1.05);
-  }
+.btn-6:active {
+  background-color: #96a6b7; /* Example color, replace with actual dynamic value */
 }

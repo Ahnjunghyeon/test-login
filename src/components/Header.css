@@ -52,7 +52,8 @@
   padding: 5px;
 }
 
-.header .menulist .uploadbt {
+.header .homebt,
+.header .uploadbt {
   width: 55px;
   padding: 5px;
 }
@@ -67,7 +68,7 @@
 
 .header .menutext {
   font-size: 16px;
-  margin-left: 20px;
+  margin: 0 8px;
 }
 
 .header .imgmenu {
@@ -83,7 +84,7 @@
 }
 
 .Sidebtn {
-  margin: 0 20px;
+  margin: 0 5px;
 }
 
 .Line {
@@ -145,6 +146,17 @@
 
   .header2-menu .menutext {
     padding: 10px;
+  }
+
+  .header .homebt,
+  .header .uploadbt {
+    width: 35px; /* 더 작은 너비로 조정 */
+    padding: 3px; /* 작은 패딩으로 조정 */
+  }
+
+  .header .menutext {
+    font-size: 14px; /* 작은 글자 크기로 조정 */
+    margin: 0 10px; /* 작은 마진으로 조정 */
   }
 }
 
