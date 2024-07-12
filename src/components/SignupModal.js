@@ -16,6 +16,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
+import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
 import "./LoginModal.css";
 
 const style = {
@@ -32,15 +34,14 @@ const style = {
 const SignupModal = ({ isOpen, onClose }) => {
   const auth = getAuth();
   const db = getFirestore();
-  const [isSignUp, setIsSignUp] = useState(true); // 기본값을 true로 설정하여 Sign Up 모드로 시작
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [errorTooltip, setErrorTooltip] = useState(false);
 
-  // isOpen prop이 변경될 때 isSignUp 상태 초기화
   useEffect(() => {
-    setIsSignUp(true); // 기본값을 true로 설정하여 Sign Up 모드로 초기화
+    setIsSignUp(false);
     setEmail("");
     setPassword("");
     setDisplayName("");
@@ -53,7 +54,6 @@ const SignupModal = ({ isOpen, onClose }) => {
         const user = userCredential.user;
         console.log("Logged in as:", user.email);
         onClose();
-        // 로그인 성공 후 초기화
         setEmail("");
         setPassword("");
       })
@@ -71,7 +71,6 @@ const SignupModal = ({ isOpen, onClose }) => {
         const user = result.user;
         console.log("Logged in with Google as:", user.email);
         onClose();
-        // Google 로그인 성공 후 초기화
         setEmail("");
         setPassword("");
       })
@@ -102,7 +101,6 @@ const SignupModal = ({ isOpen, onClose }) => {
       });
       console.log("Signed up as:", user.email);
       onClose();
-      // 회원가입 성공 후 초기화
       setEmail("");
       setPassword("");
       setDisplayName("");
@@ -113,12 +111,16 @@ const SignupModal = ({ isOpen, onClose }) => {
 
   const handleCheckboxChange = (event) => {
     setIsSignUp(event.target.checked);
-    // 회원가입 모드로 변경 시 입력 필드 초기화
     if (!event.target.checked) {
       setEmail("");
       setPassword("");
       setDisplayName("");
     }
+  };
+
+  const handleResetPassword = () => {
+    // Implement your password reset logic here
+    console.log("Reset password clicked");
   };
 
   return (
@@ -146,9 +148,10 @@ const SignupModal = ({ isOpen, onClose }) => {
             id="reg-log"
             name="reg-log"
             onChange={handleCheckboxChange}
-            checked={isSignUp} // 체크박스 체크 상태를 isSignUp 상태와 동기화
           />
-          <label htmlFor="reg-log"></label>
+          <label htmlFor="reg-log" className="checkbox-label">
+            {isSignUp ? <AssignmentIndRoundedIcon /> : <VpnKeyRoundedIcon />}
+          </label>
         </div>
 
         {isSignUp ? (
@@ -210,7 +213,7 @@ const SignupModal = ({ isOpen, onClose }) => {
               className="input-field"
             />
             <div className="button-group">
-              <Button type="submit" className="default btn-6">
+              <Button type="submit" className="btn-6">
                 Login
               </Button>
               <Button onClick={handleGoogleLogin} className="google btn-6">
@@ -219,6 +222,10 @@ const SignupModal = ({ isOpen, onClose }) => {
             </div>
           </form>
         )}
+
+        <Button onClick={handleResetPassword} className="reset-password btn-6">
+          Reset Password
+        </Button>
       </Box>
     </Modal>
   );

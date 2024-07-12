@@ -16,14 +16,21 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
+import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
+import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
 import "./LoginModal.css";
+import { Margin } from "@mui/icons-material";
 
 const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: "90vw", // 뷰포트 너비의 90%
+  maxWidth: 400, // 최대 너비 400px
+  height: "400px",
+  maxheight: "400px",
   bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
@@ -132,14 +139,6 @@ const LoginModal = ({ isOpen, onClose }) => {
     >
       <Box sx={style}>
         <div className="text-center">
-          <Typography
-            id="modal-modal-title"
-            variant="h6"
-            component="h2"
-            className="typography"
-          >
-            {isSignUp ? "Sign Up" : "Log In"}
-          </Typography>
           <input
             className="checkbox"
             type="checkbox"
@@ -147,7 +146,10 @@ const LoginModal = ({ isOpen, onClose }) => {
             name="reg-log"
             onChange={handleCheckboxChange}
           />
-          <label htmlFor="reg-log"></label>
+          <label htmlFor="reg-log" className="checkbox-label">
+            {isSignUp ? <AssignmentIndRoundedIcon /> : <LockOpenRoundedIcon />}
+          </label>
+          <div className="assignlogo">{isSignUp ? "Sign Up" : "Log In"}</div>
         </div>
 
         {isSignUp ? (
@@ -158,7 +160,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               fullWidth
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="input-field"
+              className="input-field-Name"
             />
             <TextField
               label="Email"
@@ -166,7 +168,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               fullWidth
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input-field"
+              className="input-field-Email"
             />
             <TextField
               label="Password"
@@ -175,7 +177,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
+              className="input-field-Password"
             />
             <div className="button-group">
               <Button onClick={handleSignup} className="default btn-6">
@@ -196,7 +198,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               fullWidth
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input-field"
+              className="input-field-Email"
             />
             <TextField
               type="password"
@@ -206,8 +208,9 @@ const LoginModal = ({ isOpen, onClose }) => {
               fullWidth
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
+              className="input-field-"
             />
+            Password
             <div className="button-group">
               <Button type="submit" className="btn-6">
                 Login
@@ -218,11 +221,6 @@ const LoginModal = ({ isOpen, onClose }) => {
             </div>
           </form>
         )}
-
-        {/* New Button */}
-        <Button onClick={handleResetPassword} className="reset-password btn-6">
-          Reset Password
-        </Button>
       </Box>
     </Modal>
   );
