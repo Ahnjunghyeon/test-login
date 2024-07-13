@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css?family=Amatic+SC");
+
 body {
   font-family: "Poppins", sans-serif;
   font-weight: 300;
@@ -15,6 +17,9 @@ a {
 
 a:hover {
   text-decoration: none;
+}
+
+.text-center {
 }
 
 .link {
@@ -74,20 +79,20 @@ h6 span {
 .checkbox:checked + label .MuiSvgIcon-root,
 .checkbox:not(:checked) + label .MuiSvgIcon-root {
   position: absolute;
-  top: -10px;
-  left: 15px;
-  font-size: 36px;
+  top: -15px;
+  left: 10px;
+  font-size: 40px;
   transition: all 0.5s ease;
   transform-origin: center;
-  color: rgb(255, 0, 0);
+  color: rgb(200, 90, 250);
 }
 
 .checkbox:checked + label .MuiSvgIcon-root {
-  animation: rotateIcon 0.5s forwards;
+  animation: rotateIcon 1s forwards;
 }
 
 .checkbox:not(:checked) + label .MuiSvgIcon-root {
-  animation: rotateIconReverse 0.5s forwards;
+  animation: rotateIconReverse 1s forwards;
 }
 
 @keyframes rotateIcon {
@@ -119,13 +124,14 @@ form {
   flex-direction: column;
 }
 
-.input-field {
-  margin-bottom: 20px;
+.input-field-Password {
+  margin-top: 15px; /* 여기서 margin-bottom을 15px로 설정합니다 */
 }
 
 .button-group {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 button {
@@ -158,7 +164,7 @@ button.google {
 }
 
 .btn-6 {
-  color: #96a6b7; /* Example color, replace with actual dynamic value */
+  color: #96a6b7;
   position: relative;
   display: inline-block;
   padding: 10px 20px;
@@ -180,14 +186,14 @@ button.google {
   width: 0;
   height: 0;
   border-radius: 50%;
-  background-color: #5b6b7e; /* Example color, replace with actual dynamic value */
+  background-color: #5b6b7e;
   transform: translate(-50%, -50%);
   transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
   z-index: -1;
 }
 
 .btn-6:hover {
-  color: #f1f5f9; /* Example color, replace with actual dynamic value */
+  color: #f1f5f9;
   background-color: #e6e6fa;
 }
 
@@ -197,5 +203,108 @@ button.google {
 }
 
 .btn-6:active {
-  background-color: #96a6b7; /* Example color, replace with actual dynamic value */
+  background-color: #96a6b7;
+}
+
+.assignlogo {
+  margin-top: 10px;
+  margin-bottom: 15px; /* 여기서 margin-bottom을 15px로 설정합니다 */
+}
+
+.button-container-3 {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  margin: 15px 0; /* 상하 마진 추가 */
+  overflow: hidden;
+  border: 1px solid #ffffff;
+  font-family: "Lato", sans-serif;
+  font-weight: 300;
+  transition: 0.5s;
+  letter-spacing: 1px;
+  border-radius: 8px;
+
+  button {
+    width: 100%;
+    height: 100%;
+    font-family: "Lato", sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    letter-spacing: 1px;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgb(200, 90, 250);
+    border: none;
+    cursor: pointer;
+
+    /* mask 설정 */
+    -webkit-mask: url("https://raw.githubusercontent.com/pizza3/asset/master/natureSmaller.png");
+    mask: url("https://raw.githubusercontent.com/pizza3/asset/master/natureSmaller.png");
+    -webkit-mask-size: 7100% 100%;
+    mask-size: 7100% 100%;
+    -webkit-animation: ani2 0.7s steps(70) forwards;
+    animation: ani2 0.7s steps(70) forwards;
+
+    &:hover {
+      -webkit-animation: ani 0.7s steps(70) forwards;
+      animation: ani 0.7s steps(70) forwards;
+    }
+  }
+}
+
+.mas {
+  position: absolute;
+  color: #65adff;
+  text-align: center;
+  width: 100%;
+  font-family: "Lato", sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  margin-top: 15px;
+  overflow: hidden;
+  font-weight: bold;
+}
+
+@-webkit-keyframes ani {
+  from {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+  to {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+}
+
+@keyframes ani {
+  from {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+  to {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+}
+
+@-webkit-keyframes ani2 {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  to {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+}
+
+@keyframes ani2 {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  to {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
 }

@@ -62,7 +62,8 @@ const Header = ({ refreshProfileImage }) => {
     return () => unsubscribe();
   }, [auth, refreshProfileImage]);
 
-  const handleIconClick = () => {
+  const handleIconClick = (event) => {
+    event.stopPropagation(); // Prevent event bubbling to parent elements
     setIsMenuOpen(!isMenuOpen); // Toggle menu open/close
   };
 
@@ -309,16 +310,6 @@ const Header = ({ refreshProfileImage }) => {
             <AddHomeRoundedIcon sx={{ color: "#83769C" }} />
             <div className="text" style={{ marginLeft: "30px" }}>
               Home
-            </div>
-          </MenuItem>
-          <MenuItem
-            className="sideuploadbtn"
-            style={{ marginLeft: "2px" }}
-            onClick={() => navigate("/uploadpage")}
-          >
-            {user && <UploadFileRoundedIcon sx={{ color: "#83769C" }} />}{" "}
-            <div className="text" style={{ marginLeft: "30px" }}>
-              Upload
             </div>
           </MenuItem>
         </div>

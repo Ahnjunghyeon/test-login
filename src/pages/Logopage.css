@@ -1,57 +1,195 @@
-/* Logopage.css */
+/* MainPage.css */
 
-.logopage-container {
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.main-page {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
-  font-family: "IBM Plex Sans KR", sans-serif;
-  font-weight: 600;
-  font-style: normal;
 }
 
-.logo-container {
-  margin-bottom: 20px;
+.logo {
+  font-size: 1.5rem;
 }
 
-.intro-text {
-  text-align: center;
-  max-width: 600px;
-  margin-bottom: 20px;
-}
-
-.navigation-buttons {
+.nav {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  list-style-type: none;
+  padding: 0;
 }
 
-.button {
+.nav-list {
+  display: flex;
+}
+
+.nav-item {
+  margin-right: 20px;
+}
+
+.nav-item a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-item a:hover {
+  color: #f0f0f0;
+}
+
+.hero {
+  width: 100%;
+  height: 600px;
+  background-image: url("../img/seoul.jpg");
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 800px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.hero-text {
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+}
+
+.btn-primary {
+  display: inline-block;
   padding: 10px 20px;
   background-color: #007bff;
-  color: white;
+  color: #fff;
   text-decoration: none;
   border-radius: 5px;
-  text-align: center;
+  transition: background-color 0.3s ease;
 }
 
-.button:hover {
+.btn-primary:hover {
   background-color: #0056b3;
 }
 
-@media (min-width: 600px) {
-  .logopage-container {
-    height: 60vh;
+.section-title {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.feature-box,
+.service-box {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.feature-item,
+.service-item {
+  flex: 1;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
+
+.feature-item-title,
+.service-item-title {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.feature-item-text,
+.service-item-text {
+  font-size: 1rem;
+}
+
+.footer {
+  width: 100%;
+  background-color: #333;
+  color: #fff;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.social-links {
+  font-size: 1.5rem;
+}
+
+.social-links a {
+  color: #fff;
+  margin-right: 10px;
+  text-decoration: none;
+}
+
+.social-links a:hover {
+  color: #f0f0f0;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .navigation-buttons {
-    flex-direction: row;
+  .nav {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
   }
 
-  .button {
-    padding: 10px 20px;
-    width: 150px;
-    text-align: center;
+  .nav-item {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .hero {
+    height: 400px;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-text {
+    font-size: 1.2rem;
+  }
+
+  .btn-primary {
+    padding: 8px 16px;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .feature-box,
+  .service-box {
+    flex-direction: column;
+    gap: 10px;
   }
 }

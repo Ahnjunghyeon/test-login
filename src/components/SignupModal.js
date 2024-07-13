@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  Modal,
-  TextField,
-  Typography,
-  Backdrop,
-  Box,
-} from "@mui/material";
+import { Button, Modal, TextField, Backdrop, Box } from "@mui/material";
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -16,32 +9,37 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
+import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
 import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
-import "./LoginModal.css";
+import "./SignupModal.css";
 
 const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: "90vw",
+  maxWidth: 400,
+  height: "450px",
+  maxHeight: "450px",
   bgcolor: "background.paper",
-  boxShadow: 24,
+  boxShadow:
+    "0px 8px 16px rgba(0, 0, 0, 0.3), 0px 0px 0px 1px rgba(0, 0, 0, 0.1)", // 그림자 추가
+  borderRadius: 10, // 테두리를 둥글게 만듦
   p: 4,
 };
 
 const SignupModal = ({ isOpen, onClose }) => {
   const auth = getAuth();
   const db = getFirestore();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true); // 초기값을 true로 설정하여 항상 Sign Up 창 먼저 보이기
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [errorTooltip, setErrorTooltip] = useState(false);
 
   useEffect(() => {
-    setIsSignUp(false);
+    setIsSignUp(true); // Modal이 열릴 때마다 Sign Up 창으로 시작하도록 설정
     setEmail("");
     setPassword("");
     setDisplayName("");
@@ -119,7 +117,6 @@ const SignupModal = ({ isOpen, onClose }) => {
   };
 
   const handleResetPassword = () => {
-    // Implement your password reset logic here
     console.log("Reset password clicked");
   };
 
@@ -134,24 +131,18 @@ const SignupModal = ({ isOpen, onClose }) => {
     >
       <Box sx={style}>
         <div className="text-center">
-          <Typography
-            id="modal-modal-title"
-            variant="h6"
-            component="h2"
-            className="typography"
-          >
-            {isSignUp ? "Sign Up" : "Log In"}
-          </Typography>
           <input
             className="checkbox"
             type="checkbox"
             id="reg-log"
             name="reg-log"
             onChange={handleCheckboxChange}
+            checked={isSignUp} // 체크박스 상태를 isSignUp에 맞춰 변경
           />
           <label htmlFor="reg-log" className="checkbox-label">
-            {isSignUp ? <AssignmentIndRoundedIcon /> : <VpnKeyRoundedIcon />}
+            {isSignUp ? <AssignmentIndRoundedIcon /> : <LockOpenRoundedIcon />}
           </label>
+          <div className="assignlogo">{isSignUp ? "Sign Up" : "Log In"}</div>
         </div>
 
         {isSignUp ? (
@@ -162,7 +153,7 @@ const SignupModal = ({ isOpen, onClose }) => {
               fullWidth
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="input-field"
+              className="input-field-Name"
             />
             <TextField
               label="Email"
@@ -170,7 +161,7 @@ const SignupModal = ({ isOpen, onClose }) => {
               fullWidth
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input-field"
+              className="input-field-Email"
             />
             <TextField
               label="Password"
@@ -179,15 +170,15 @@ const SignupModal = ({ isOpen, onClose }) => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
+              className="input-field-Password"
             />
-            <div className="button-group">
-              <Button onClick={handleSignup} className="default btn-6">
-                Sign Up
-              </Button>
-              <Button onClick={handleGoogleLogin} className="google btn-6">
-                Sign Up with Google
-              </Button>
+            <div className="button-container-3">
+              <span className="mas">Sign Up</span>
+              <button onClick={handleSignup}>Sign Up</button>
+            </div>
+            <div className="button-container-3">
+              <span className="mas">Sign Up with Google</span>
+              <button onClick={handleGoogleLogin}>Sign Up with Google</button>
             </div>
           </>
         ) : (
@@ -200,7 +191,7 @@ const SignupModal = ({ isOpen, onClose }) => {
               fullWidth
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input-field"
+              className="input-field-Email"
             />
             <TextField
               type="password"
@@ -210,22 +201,27 @@ const SignupModal = ({ isOpen, onClose }) => {
               fullWidth
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
+              className="input-field-Password"
             />
-            <div className="button-group">
-              <Button type="submit" className="btn-6">
-                Login
-              </Button>
-              <Button onClick={handleGoogleLogin} className="google btn-6">
-                Login with Google
+            <div className="button-container-3">
+              <span className="mas">Log In</span>
+              <button type="submit">Log In</button>
+            </div>
+            <div className="button-container-3">
+              <span className="mas">Log In with Google</span>
+              <button onClick={handleGoogleLogin}>Log In with Google</button>
+            </div>
+            <div className="text-center">
+              <Button
+                variant="text"
+                color="primary"
+                onClick={handleResetPassword}
+              >
+                Forgot Password?
               </Button>
             </div>
           </form>
         )}
-
-        <Button onClick={handleResetPassword} className="reset-password btn-6">
-          Reset Password
-        </Button>
       </Box>
     </Modal>
   );

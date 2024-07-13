@@ -227,7 +227,7 @@ function Uploadpage() {
   return (
     <>
       <CustomNavbar />
-      <Container className="Dashboard mt-4">
+      <Container className="Dashboard">
         <Typography variant="h4" component="h1" gutterBottom>
           Write a Post
         </Typography>

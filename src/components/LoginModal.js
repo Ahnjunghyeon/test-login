@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  Modal,
-  TextField,
-  Typography,
-  Backdrop,
-  Box,
-} from "@mui/material";
+import { Button, Modal, TextField, Backdrop, Box } from "@mui/material";
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -16,23 +9,23 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
 import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
 import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
 import "./LoginModal.css";
-import { Margin } from "@mui/icons-material";
 
 const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "90vw", // 뷰포트 너비의 90%
-  maxWidth: 400, // 최대 너비 400px
-  height: "400px",
-  maxheight: "400px",
+  width: "90vw",
+  maxWidth: 400,
+  height: "450px",
+  maxHeight: "450px",
   bgcolor: "background.paper",
-  boxShadow: 24,
+  boxShadow:
+    "0px 8px 16px rgba(0, 0, 0, 0.3), 0px 0px 0px 1px rgba(0, 0, 0, 0.1)", // 그림자 추가
+  borderRadius: 10, // 테두리를 둥글게 만듦
   p: 4,
 };
 
@@ -124,7 +117,6 @@ const LoginModal = ({ isOpen, onClose }) => {
   };
 
   const handleResetPassword = () => {
-    // Implement your password reset logic here
     console.log("Reset password clicked");
   };
 
@@ -179,13 +171,13 @@ const LoginModal = ({ isOpen, onClose }) => {
               onChange={(e) => setPassword(e.target.value)}
               className="input-field-Password"
             />
-            <div className="button-group">
-              <Button onClick={handleSignup} className="default btn-6">
-                Sign Up
-              </Button>
-              <Button onClick={handleGoogleLogin} className="google btn-6">
-                Sign Up with Google
-              </Button>
+            <div className="button-container-3">
+              <span className="mas">Sign Up</span>
+              <button onClick={handleSignup}>Sign Up</button>
+            </div>
+            <div className="button-container-3">
+              <span className="mas">Sign Up with Google</span>
+              <button onClick={handleGoogleLogin}>Sign Up with Google</button>
             </div>
           </>
         ) : (
@@ -208,15 +200,23 @@ const LoginModal = ({ isOpen, onClose }) => {
               fullWidth
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input-field-"
+              className="input-field-Password"
             />
-            Password
-            <div className="button-group">
-              <Button type="submit" className="btn-6">
-                Login
-              </Button>
-              <Button onClick={handleGoogleLogin} className="google btn-6">
-                Login with Google
+            <div className="button-container-3">
+              <span className="mas">Log In</span>
+              <button type="submit">Log In</button>
+            </div>
+            <div className="button-container-3">
+              <span className="mas">Log In with Google</span>
+              <button onClick={handleGoogleLogin}>Log In with Google</button>
+            </div>
+            <div className="text-center">
+              <Button
+                variant="text"
+                color="primary"
+                onClick={handleResetPassword}
+              >
+                Forgot Password?
               </Button>
             </div>
           </form>

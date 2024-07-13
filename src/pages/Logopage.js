@@ -37,27 +37,82 @@ const Logopage = () => {
   };
 
   return (
-    <div className="logopage-container">
-      <div className="logo-container">gdsags</div>
-      <div className="intro-text">
-        <h1 className="Main">Junghyeon의 SNS</h1>
-        <p className="middle"> Welcome^^</p>
-      </div>
-      <div className="navigation-buttons">
-        <Link to="/home" className="button" onClick={handleViewClick}>
-          바로보기
-        </Link>{" "}
-        {/* "바로보기" 버튼 */}
-        <Link to="/uploadpage" className="button" onClick={handleUploadClick}>
-          글 업로드
-        </Link>{" "}
-        {/* "글 업로드" 버튼 */}
-      </div>
-      {!user && ( // user가 없으면 (로그인이 되어 있지 않으면)
-        <p style={{ textAlign: "center", marginTop: "20px", color: "red" }}>
-          로그인이 필요합니다.
-        </p>
-      )}
+    <div className="main-page">
+      <section className="hero">
+        <div className="hero-content">
+          <h1 className="hero-title">Welcome to Our Website</h1>
+          <p className="hero-text">
+            Discover the best services and products for your needs.
+          </p>
+          <a href="#services" className="btn-primary">
+            <Link to="/home" className="button" onClick={handleViewClick}>
+              바로보기
+            </Link>{" "}
+          </a>
+          {!user && ( // user가 없으면 (로그인이 되어 있지 않으면)
+            <p style={{ textAlign: "center", marginTop: "20px", color: "red" }}>
+              로그인이 필요합니다.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section className="features" id="features">
+        <div className="container">
+          <h2 className="section-title">Key Features</h2>
+          <div className="feature-box">
+            <div className="feature-item">
+              <h3 className="feature-item-title">Feature 1</h3>
+              <p className="feature-item-text">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              </p>
+            </div>
+            <div className="feature-item">
+              <h3 className="feature-item-title">Feature 2</h3>
+              <p className="feature-item-text">
+                Sed do eiusmod tempor incididunt ut labore et dolore magna
+                aliqua.
+              </p>
+            </div>
+            <div className="feature-item">
+              <h3 className="feature-item-title">Feature 3</h3>
+              <p className="feature-item-text">
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="services" id="services">
+        <div className="container">
+          <h2 className="section-title">Our Services</h2>
+          <div className="service-box">
+            <div className="service-item">
+              <h3 className="service-item-title">Service 1</h3>
+              <p className="service-item-text">
+                Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                labore et dolore magna aliqua.
+              </p>
+            </div>
+            <div className="service-item">
+              <h3 className="service-item-title">Service 2</h3>
+              <p className="service-item-text">
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+            </div>
+            <div className="service-item">
+              <h3 className="service-item-title">Service 3</h3>
+              <p className="service-item-text">
+                Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum dolore eu fugiat nulla pariatur.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
