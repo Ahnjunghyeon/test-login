@@ -1,5 +1,3 @@
-// profile 동그란 img
-
 import React, { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import Avatar from "@mui/material/Avatar";

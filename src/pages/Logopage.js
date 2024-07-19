@@ -40,16 +40,19 @@ const Logopage = () => {
     <div className="main-page">
       <section className="hero">
         <div className="hero-content">
-          <h1 className="hero-title">GREAP에 오신것을 환영합니다!</h1>
+          <h1 className="hero-title">GREAP에 오신 것을 환영합니다!</h1>
           <p className="hero-text">
             친한 사람들과 본인의 이야기를 공유해보세요
           </p>
+          <button className="view-button" onClick={handleViewClick}>
+            바로보기
+          </button>
         </div>
       </section>
 
       <section className="features" id="features">
         <div className="container">
-          <h2 className="section-title">기능소개</h2>
+          <h2 className="section-title">기능 소개</h2>
           <div className="feature-box">
             <div className="feature-item">
               <h3 className="feature-item-title">사람과의 연결</h3>
@@ -66,33 +69,13 @@ const Logopage = () => {
             <div className="feature-item">
               <h3 className="feature-item-title">새로운 탐색</h3>
               <p className="feature-item-text">
-                당신의 소중한 순간을 보낼 동안, 다른사람은 어떤 소중한 순간을
+                당신의 소중한 순간을 보낼 동안, 다른 사람은 어떤 소중한 순간을
                 보냈는지 구경해보세요!
               </p>
             </div>
           </div>
         </div>
       </section>
-
-      {/* <section className="services" id="services">
-        <div className="container">
-          <h2 className="section-title">서브내용 2</h2>
-          <div className="service-box">
-            <div className="service-item">
-              <h3 className="service-item-title">미니타이틀 1</h3>
-              <p className="service-item-text">내용</p>
-            </div>
-            <div className="service-item">
-              <h3 className="service-item-title">미니타이틀 2</h3>
-              <p className="service-item-text">내용</p>
-            </div>
-            <div className="service-item">
-              <h3 className="service-item-title">미니타이틀 3</h3>
-              <p className="service-item-text">내용</p>
-            </div>
-          </div>
-        </div>
-      </section> */}
     </div>
   );
 };

@@ -286,37 +286,15 @@ function Uploadpage() {
           )}
           <Box mb={2} style={{ display: "flex", flexWrap: "wrap" }}>
             {previews.map((preview, index) => (
-              <div
-                key={index}
-                style={{
-                  alignItems: "center",
-                  margin: "10px",
-                  position: "relative",
-                }}
-              >
+              <div key={index} className="image-preview-item">
                 <img
                   src={preview}
                   alt={`preview-${index}`}
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "100px",
-                    marginRight: "10px",
-                  }}
+                  className="image-preview"
                 />
                 <Button
                   onClick={() => handleRemoveImage(index)}
-                  style={{
-                    position: "absolute",
-                    top: "0px",
-                    right: "10px",
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    color: "white",
-                    width: "30px",
-                    height: "30px",
-                    minWidth: "30px",
-                    fontSize: "12px",
-                    padding: "0",
-                  }}
+                  className="remove-image-button"
                 >
                   X
                 </Button>
@@ -332,7 +310,6 @@ function Uploadpage() {
           )}
         </form>
       </Container>
-      <Footer /> {/* Footer 컴포넌트 추가 */}
       <Dialog open={confirmDialogOpen} onClose={handleCancel}>
         <DialogTitle>게시물을 등록하시겠습니까?</DialogTitle>
         <DialogActions>
@@ -344,6 +321,7 @@ function Uploadpage() {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* <Footer /> */}
     </>
   );
 }

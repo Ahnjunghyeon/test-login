@@ -495,8 +495,11 @@ const PostList = ({
                         onClick={() => handleLikePost(post)}
                         color={likedPosts[post.id] ? "secondary" : "default"}
                       >
-                        <FavoriteIcon />
+                        <Tooltip title="좋아요">
+                          <FavoriteIcon />
+                        </Tooltip>
                       </IconButton>
+
                       <Typography>{likesCount[post.id]} Likes</Typography>
 
                       <IconButton
@@ -504,10 +507,10 @@ const PostList = ({
                         onClick={() => handleShare(post)}
                       >
                         <Tooltip title="공유">
-                          {" "}
                           <ShareIcon />
                         </Tooltip>
                       </IconButton>
+
                       <IconButton
                         aria-expanded={expanded[post.id]}
                         aria-label="show more"
@@ -517,6 +520,7 @@ const PostList = ({
                           <MapsUgcRoundedIcon />
                         </Tooltip>
                       </IconButton>
+
                       <IconButton
                         onClick={() => handleMoreClick(post.id, post.uid)}
                       >

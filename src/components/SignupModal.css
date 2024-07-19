@@ -84,7 +84,7 @@ h6 span {
   font-size: 40px;
   transition: all 0.5s ease;
   transform-origin: center;
-  color: rgb(200, 90, 250);
+  color: rgba(191, 82, 255, 0.76);
 }
 
 .checkbox:checked + label .MuiSvgIcon-root {
@@ -233,7 +233,7 @@ button.google {
     letter-spacing: 1px;
     font-weight: bold;
     color: #fff;
-    background-color: rgb(200, 90, 250);
+    background-color: rgb(217, 152, 255);
     border: none;
     cursor: pointer;
 
@@ -254,7 +254,7 @@ button.google {
 
 .mas {
   position: absolute;
-  color: #65adff;
+  color: #000000;
   text-align: center;
   width: 100%;
   font-family: "Lato", sans-serif;
