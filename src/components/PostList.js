@@ -8,8 +8,6 @@ import {
   collection,
   getDocs,
   addDoc,
-  setDoc,
-  deleteDoc,
   onSnapshot,
 } from "firebase/firestore";
 import {
@@ -47,7 +45,6 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import MapsUgcRoundedIcon from "@mui/icons-material/MapsUgcRounded";
-import ReadMoreRoundedIcon from "@mui/icons-material/ReadMoreRounded";
 import FollowersPage from "../pages/FollowersPage";
 import UploadPost from "./UploadPost";
 import ProfileImage from "./ProfileLogo";
@@ -76,6 +73,9 @@ const PostList = ({
   const [newComment, setNewComment] = useState("");
   const [likedPosts, setLikedPosts] = useState({});
   const [likesCount, setLikesCount] = useState({});
+  const [commentToEdit, setCommentToEdit] = useState(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
+  const [commentMenuAnchorEl, setCommentMenuAnchorEl] = useState({});
   const navigate = useNavigate(); // Initialize useNavigate
 
   const db = getFirestore();
@@ -194,6 +194,30 @@ const PostList = ({
     };
   }, [posts, followedPosts, db]);
 
+  useEffect(() => {
+    const unsubscribeComments = {};
+
+    for (const post of [...posts, ...followedPosts]) {
+      const commentsRef = collection(db, `posts/${post.id}/comments`);
+      unsubscribeComments[post.id] = onSnapshot(commentsRef, (snapshot) => {
+        const commentsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setComments((prevComments) => ({
+          ...prevComments,
+          [post.id]: commentsData,
+        }));
+      });
+    }
+
+    return () => {
+      Object.values(unsubscribeComments).forEach((unsubscribe) =>
+        unsubscribe()
+      );
+    };
+  }, [posts, followedPosts, db]);
+
   const handleMenuOpen = (event, post) => {
     setMenuAnchorEl((prev) => ({ ...prev, [post.id]: event.currentTarget }));
   };
@@ -250,15 +274,13 @@ const PostList = ({
 
   const fetchComments = async (postId) => {
     try {
-      const commentsRef = collection(
-        db,
-        `users/${user.uid}/posts/${postId}/${postId}_comments`
-      );
+      const commentsRef = collection(db, `posts/${postId}/comments`);
       const commentsSnapshot = await getDocs(commentsRef);
       const commentsData = commentsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+      console.log("Fetched comments:", commentsData); // Debugging line
       setComments((prevComments) => ({
         ...prevComments,
         [postId]: commentsData,
@@ -268,6 +290,7 @@ const PostList = ({
     }
   };
 
+  // 댓글 입력 핸들러
   const handleCommentChange = (postId, content) => {
     setNewComment(content);
   };
@@ -276,10 +299,7 @@ const PostList = ({
     if (newComment.trim() === "") return;
 
     try {
-      const commentRef = collection(
-        db,
-        `users/${user.uid}/posts/${postId}/comments`
-      );
+      const commentRef = collection(db, `posts/${postId}/comments`);
       await addDoc(commentRef, {
         content: newComment,
         createdAt: new Date(),
@@ -287,6 +307,7 @@ const PostList = ({
         displayName: user.displayName,
       });
       setNewComment("");
+      // 댓글 추가 후 다시 댓글을 가져오기
       fetchComments(postId);
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -546,34 +567,83 @@ const PostList = ({
                         </Typography>
                         <div>
                           <Typography variant="h6">댓글</Typography>
-                          <List>
+                          <List className="comments-list">
                             {comments[post.id]?.map((comment) => (
-                              <ListItem key={comment.id}>
+                              <ListItem
+                                key={comment.id}
+                                alignItems="flex-start"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "10px 0",
+                                }}
+                              >
+                                <ProfileImage uid={comment.userId} />
                                 <ListItemText
-                                  primary={comment.displayName}
-                                  secondary={comment.content}
+                                  primary={
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        marginLeft: "10px",
+                                      }}
+                                    >
+                                      <Typography
+                                        variant="body2"
+                                        color="textPrimary"
+                                        style={{ fontWeight: "bold" }}
+                                      >
+                                        {comment.displayName}
+                                      </Typography>
+                                      <Typography
+                                        variant="body2"
+                                        color="textPrimary"
+                                        style={{ marginTop: "4px" }}
+                                      >
+                                        {comment.content}{" "}
+                                        {/* Make sure you are using the correct field name */}
+                                      </Typography>
+                                    </div>
+                                  }
                                 />
                               </ListItem>
                             ))}
                           </List>
+
                           {user && (
-                            <div>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginTop: "20px",
+                              }}
+                            >
+                              <Avatar
+                                src={user.photoURL}
+                                alt={user.displayName}
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  borderRadius: "19px",
+                                }}
+                              />
                               <TextField
                                 id={`comment-${post.id}`}
                                 label="댓글 추가"
-                                variant="outlined"
                                 value={newComment}
                                 onChange={(e) =>
                                   handleCommentChange(post.id, e.target.value)
                                 }
                                 fullWidth
+                                multiline
+                                margin="normal"
                               />
                               <Button
-                                variant="contained"
                                 onClick={() => handleAddComment(post.id)}
-                                sx={{ mt: 1 }}
+                                variant="contained"
+                                color="primary"
                               >
-                                댓글 추가
+                                댓글 달기
                               </Button>
                             </div>
                           )}
