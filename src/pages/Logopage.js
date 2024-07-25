@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "./Logopage.css"; // 스타일 시트 import
+import ImageSlideshow from "../components/ImageSlideshow"; // 슬라이드쇼 컴포넌트 import
 
 const Logopage = () => {
   const [user, setUser] = useState(null); // 로그인 상태를 담는 상태 변수
@@ -75,6 +76,11 @@ const Logopage = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="slideshow-section">
+        <h2 className="section-title">미리보기</h2>
+        <ImageSlideshow />
       </section>
     </div>
   );
