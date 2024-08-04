@@ -176,7 +176,7 @@ const PostPage = () => {
 
   return (
     <Container className="container">
-      <Typography variant="h3" className="title">
+      <Typography variant="h3" className="text">
         {post.category}
       </Typography>
       <UploadPost imageUrls={post.imageUrls} />
@@ -191,7 +191,7 @@ const PostPage = () => {
         >
           <FavoriteIcon />
         </IconButton>
-        <Typography>{likesCount} 좋아요</Typography>
+        <Typography className="text">{likesCount} 좋아요</Typography>
       </Box>
       <Box className="comments-section">
         <Typography variant="h6" className="comments-title">
@@ -215,14 +215,16 @@ const PostPage = () => {
         </Box>
         <Box className="add-comment">
           <TextField
+            className="text"
             variant="outlined"
             fullWidth
             value={newComment}
             onChange={handleCommentChange}
-            placeholder="Add a comment..."
+            placeholder="입력"
           />
           <Button
             onClick={handleAddComment}
+            className="text"
             variant="contained"
             color="primary"
           >

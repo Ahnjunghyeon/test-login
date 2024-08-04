@@ -1,21 +1,14 @@
 /* App.css */
 
-@font-face {
-  font-family: "HancomSans-Light";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/2406-1@1.0/HancomSans-Light.woff2")
-    format("woff2");
-  font-weight: 300;
-  font-style: normal;
-}
-
 .App {
   display: flex;
   flex-direction: column;
   min-height: 100vh; /* 화면 전체 높이를 최소한 화면 크기만큼 설정 */
   height: 1080px; /* 기본 높이를 1080px로 설정 */
-  font-family: "HancomSans-Light";
+  font-family: "BMJUA";
   font-weight: 600;
   font-style: normal;
+  background-color: white;
 }
 
 .content {

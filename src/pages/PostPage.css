@@ -1,42 +1,48 @@
 /* PostPage.css */
+@font-face {
+  font-family: "BMJUA";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
 
 .container {
   max-width: 800px;
   margin: auto;
   margin-top: 20px;
   padding: 20px;
-  font-family: Arial, sans-serif;
+  font-family: "BMJUA", sans-serif;
   background-color: #f9f9f9;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
 }
 
-.title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #1a73e8;
+.container .text {
+  font-family: "BMJUA";
 }
 
-.content {
+.container .content {
   font-size: 1.5rem;
+  font-family: "BMJUA";
+
   line-height: 1.8;
   margin-bottom: 20px;
   color: #333;
 }
 
-.actions {
+.container .actions {
   display: flex;
   align-items: center;
   margin-top: 20px;
   gap: 10px;
 }
 
-.actions .MuiIconButton-root {
+.container .actions .MuiIconButton-root {
   color: #e57373;
 }
 
-.liked {
+.container .liked {
   color: #9c27b0;
 }
 
@@ -45,6 +51,8 @@
 }
 
 .comments-title {
+  font-family: "BMJUA";
+
   font-size: 1.8rem;
   font-weight: bold;
   margin-bottom: 10px;
@@ -52,6 +60,7 @@
 
 .comments-list {
   margin-bottom: 20px;
+  font-family: "BMJUA";
 }
 
 .comment {
@@ -88,4 +97,5 @@
   display: flex;
   gap: 10px;
   margin-top: 20px;
+  font-family: "BMJUA";
 }

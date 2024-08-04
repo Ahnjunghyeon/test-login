@@ -1,4 +1,11 @@
-/* Footer.css */
+@font-face {
+  font-family: "BMJUA";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff")
+    format("woff");
+
+  font-weight: normal;
+  font-style: normal;
+}
 
 .footer {
   background-color: #eeeeee;
@@ -6,7 +13,7 @@
   padding: 20px 0;
   height: 220px; /* Footer의 기본 높이 */
   margin-top: auto; /* 상단 여백을 auto로 설정하여 항상 페이지 하단에 고정 */
-  font-family: "IBM Plex Sans KR", sans-serif;
+  font-family: "BMJUA";
   font-weight: 600;
   font-style: normal;
   bottom: 0; /* 페이지 하단에 고정 */

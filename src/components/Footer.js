@@ -11,18 +11,7 @@ const Footer = () => {
   return (
     <footer className="footer" id="contact">
       <div className="footer-content">
-        <p>&copy; 2024. 08. 04 업데이트</p>
-        <div className="social-links">
-          <a href="#!">
-            <i className="fab fa-facebook"></i>
-          </a>
-          <a href="#!">
-            <i className="fab fa-twitter"></i>
-          </a>
-          <a href="#!">
-            <i className="fab fa-instagram"></i>
-          </a>
-        </div>
+        <p style={{ fontFamily: "BMJUA" }}>&copy; 2024. 08. 04 업데이트</p>
       </div>
     </footer>
   );

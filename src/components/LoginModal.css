@@ -1,13 +1,18 @@
-@import url("https://fonts.googleapis.com/css?family=Amatic+SC");
+@font-face {
+  font-family: "BMJUA";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff")
+    format("woff");
+
+  font-weight: normal;
+  font-style: normal;
+}
 
 body {
-  font-family: "Poppins", sans-serif;
-  font-weight: 300;
-  font-size: 15px;
   line-height: 1.7;
   color: #c4c3ca;
   background-color: #1f2029;
   overflow-x: hidden;
+  font-family: "BMJUA", sans-serif;
 }
 
 a {
@@ -31,19 +36,15 @@ a:hover {
 }
 
 p {
-  font-weight: 500;
-  font-size: 14px;
   line-height: 1.7;
 }
 
 h4 {
-  font-weight: 600;
 }
 
 h6 span {
   padding: 0 20px;
   text-transform: uppercase;
-  font-weight: 700;
 }
 
 .section {
@@ -81,7 +82,6 @@ h6 span {
   position: absolute;
   top: -15px;
   left: 10px;
-  font-size: 40px;
   transition: all 0.5s ease;
   transform-origin: center;
   color: rgb(200, 90, 250);
@@ -136,7 +136,6 @@ form {
 
 button {
   padding: 14px;
-  font-size: 16px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -157,8 +156,7 @@ button.google {
 
 .typography {
   margin-bottom: 40px;
-  font-size: 24px;
-  font-weight: bold;
+
   color: #202124;
   text-align: center;
 }
@@ -170,7 +168,6 @@ button.google {
   padding: 10px 20px;
   margin: 5px;
   text-transform: uppercase;
-  font-size: 16px;
   background-color: white;
   color: black;
   border: none;
@@ -218,8 +215,6 @@ button.google {
   margin: 15px 0; /* 상하 마진 추가 */
   overflow: hidden;
   border: 1px solid #ffffff;
-  font-family: "Lato", sans-serif;
-  font-weight: 300;
   transition: 0.5s;
   letter-spacing: 1px;
   border-radius: 8px;
@@ -227,9 +222,6 @@ button.google {
   button {
     width: 100%;
     height: 100%;
-    font-family: "Lato", sans-serif;
-    font-weight: 300;
-    font-size: 16px;
     letter-spacing: 1px;
     font-weight: bold;
     color: #fff;
@@ -257,12 +249,9 @@ button.google {
   color: #65adff;
   text-align: center;
   width: 100%;
-  font-family: "Lato", sans-serif;
-  font-weight: 300;
-  font-size: 16px;
+  font-family: "BMJUa";
   margin-top: 15px;
   overflow: hidden;
-  font-weight: bold;
 }
 
 @-webkit-keyframes ani {

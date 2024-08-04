@@ -129,6 +129,7 @@ const SearchBar = ({ user }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}
           inputProps={{ "aria-label": "search" }}
+          style={{ fontFamily: "BMJUA" }}
         />
         <IconButton
           className="Searchicon"
@@ -142,13 +143,15 @@ const SearchBar = ({ user }) => {
         <Paper
           style={{
             position: "absolute",
-            top: "80px", // Adjust as needed
+            top: "170px", // Adjust as needed
             left: "48%", // Adjust as needed
+            width: "250px",
             transform: "translateX(-50%)",
             padding: "20px",
             zIndex: 9999,
             maxHeight: "300px", // Adjust as needed
             overflowY: "auto", // Enable vertical scrolling
+            backgroundColor: "rgb(255,255,255,1",
           }}
         >
           <ul>
@@ -158,8 +161,12 @@ const SearchBar = ({ user }) => {
                   <Button
                     variant="text"
                     onClick={() => handleProfileClick(user.uid)}
+                    style={{ fontFamily: "BMJUA" }}
                   >
-                    <ProfileImage uid={user.uid} />
+                    <ProfileImage
+                      uid={user.uid}
+                      style={{ fontFamily: "BMJUA" }}
+                    />
                     {user.displayName} (ID: {user.uid.substring(0, 6)})
                   </Button>
                 </div>

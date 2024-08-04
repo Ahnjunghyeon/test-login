@@ -41,8 +41,10 @@ const Logopage = () => {
     <div className="main-page">
       <section className="hero">
         <div className="hero-content">
-          <h1 className="hero-title">GREAP에 오신 것을 환영합니다!</h1>
-          <p className="hero-text">
+          <h1 className="hero-title" style={{ fontFamily: "BMJUA" }}>
+            GREAP에 오신 것을 환영합니다!
+          </h1>
+          <p className="hero-text" style={{ fontFamily: "BMJUA" }}>
             친한 사람들과 본인의 이야기를 공유해보세요
           </p>
           <button className="view-button" onClick={handleViewClick}>

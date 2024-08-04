@@ -27,6 +27,7 @@ const style = {
     "0px 8px 16px rgba(0, 0, 0, 0.3), 0px 0px 0px 1px rgba(0, 0, 0, 0.1)", // 그림자 추가
   borderRadius: 10, // 테두리를 둥글게 만듦
   p: 4,
+  fontfamily: "BMJUA",
 };
 
 const LoginModal = ({ isOpen, onClose }) => {
@@ -205,7 +206,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               onChange={(e) => setPassword(e.target.value)}
               className="input-field-Password"
             />
-            <div className="button-container-3">
+            <div className="button-container-3" stlye={{ fontfamily: "BMJUA" }}>
               <span className="mas">로그인</span>
               <button type="submit">로그인</button>
             </div>

@@ -228,12 +228,13 @@ function Uploadpage() {
     <>
       <CustomNavbar />
       <Container className="Dashboard">
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography className="text" variant="h4" component="h1" gutterBottom>
           업로드 페이지
         </Typography>
         <form onSubmit={handleSubmit}>
           <Box mb={2}>
             <TextField
+              className="text"
               fullWidth
               label="내용"
               variant="outlined"
@@ -245,22 +246,43 @@ function Uploadpage() {
           </Box>
           <Box mb={2}>
             <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
-              <InputLabel id="category-label">주제</InputLabel>
+              <InputLabel className="text" id="category-label">
+                주제
+              </InputLabel>
               <Select
+                className="text"
                 labelId="category-label"
                 value={category}
                 onChange={handleCategoryChange}
                 label="Category"
               >
-                <MenuItem value="">주제</MenuItem>
-                <MenuItem value="None">그냥</MenuItem>
-                <MenuItem value="Travel">여행</MenuItem>
-                <MenuItem value="Food">음식</MenuItem>
-                <MenuItem value="Cooking">요리</MenuItem>
-                <MenuItem value="Culture">일상</MenuItem>
-                <MenuItem value="Games">게임</MenuItem>
-                <MenuItem value="Music">음악</MenuItem>
-                <MenuItem value="Study">자기계발</MenuItem>
+                <MenuItem className="text" value="">
+                  주제
+                </MenuItem>
+                <MenuItem className="text" value="None">
+                  그냥
+                </MenuItem>
+                <MenuItem className="text" value="Travel">
+                  여행
+                </MenuItem>
+                <MenuItem className="text" value="Food">
+                  음식
+                </MenuItem>
+                <MenuItem className="text" value="Cooking">
+                  요리
+                </MenuItem>
+                <MenuItem className="text" value="Culture">
+                  일상
+                </MenuItem>
+                <MenuItem className="text" value="Games">
+                  게임
+                </MenuItem>
+                <MenuItem className="text" value="Music">
+                  음악
+                </MenuItem>
+                <MenuItem className="text" value="Study">
+                  자기계발
+                </MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -274,7 +296,7 @@ function Uploadpage() {
               style={{ display: "none" }}
             />
             <label htmlFor="upload-button">
-              <Button variant="contained" component="span">
+              <Button className="text" variant="contained" component="span">
                 사진을 등록해보세요
               </Button>
             </label>
@@ -304,19 +326,29 @@ function Uploadpage() {
           {loading ? (
             <CircularProgress />
           ) : (
-            <Button type="submit" variant="contained" color="primary">
+            <Button
+              className="text"
+              type="submit"
+              variant="contained"
+              color="primary"
+              style={{ fontSize: "20px" }}
+            >
               저장
             </Button>
           )}
         </form>
       </Container>
-      <Dialog open={confirmDialogOpen} onClose={handleCancel}>
-        <DialogTitle>게시물을 등록하시겠습니까?</DialogTitle>
+      <Dialog
+        className="dialog"
+        open={confirmDialogOpen}
+        onClose={handleCancel}
+      >
+        <DialogTitle className="text1">게시물을 등록하시겠습니까?</DialogTitle>
         <DialogActions>
-          <Button onClick={handleCancel} color="primary">
+          <Button className="text1" onClick={handleCancel} color="primary">
             아니요
           </Button>
-          <Button onClick={handleConfirm} color="primary">
+          <Button className="text1" onClick={handleConfirm} color="primary">
             네
           </Button>
         </DialogActions>

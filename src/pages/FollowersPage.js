@@ -51,19 +51,23 @@ const FollowersPage = () => {
   }
 
   return (
-    <div className="followers">
+    <div className="followers" style={{ fontFamily: "BMJUA" }}>
       <List>
-        <ListItem button onClick={() => navigate(`/profile/${user.uid}`)}>
+        <ListItem onClick={() => navigate(`/profile/${user.uid}`)}>
           <ProfileImage className="MyPage" uid={user.uid} />
-          <ListItemText primary={user.displayName} secondary={user.email} />
+          <ListItemText
+            primary={user.displayName}
+            secondary={user.email}
+            className="text"
+            style={{ fontFamily: "BMJUA" }}
+          />
         </ListItem>
         {followers.length === 0 ? (
-          <Typography>팔로워가 없습니다.</Typography>
+          <Typography className="text">팔로워가 없습니다.</Typography>
         ) : (
           followers.slice(0, 5).map((follower) => (
             <ListItem
               key={follower.id}
-              button
               onClick={() => handleProfileClick(follower.id)}
             >
               <ProfileImage uid={follower.id} />

@@ -1,14 +1,24 @@
 /* src/index.css */
 
+/* 구글 폰트 불러오기 */
 @import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Serif+KR:wght@200..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200..900&display=swap");
 
+/* 직접 불러오는 폰트 정의 */
+@font-face {
+  font-family: "HSSaemaul-Regular";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/HSSaemaul-Regular.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 글로벌 스타일 */
 body {
   margin: 0;
   font-weight: 600;
-  font-family: "Gowun Dodum", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-    "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
+  font-family: "Gowun Dodum", "Noto Serif KR", "HSSaemaul-Regular", "BMJUA",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

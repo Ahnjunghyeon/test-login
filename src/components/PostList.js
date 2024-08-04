@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { styled } from "@mui/system";
+
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import {
   getFirestore,
@@ -77,6 +79,12 @@ const PostList = ({
   const [editCommentContent, setEditCommentContent] = useState("");
   const [commentMenuAnchorEl, setCommentMenuAnchorEl] = useState({});
   const navigate = useNavigate(); // Initialize useNavigate
+
+  const StyledTextField = styled(TextField)({
+    "& .MuiInputBase-input": {
+      fontFamily: "BMJUA, sans-serif",
+    },
+  });
 
   const db = getFirestore();
 
@@ -407,35 +415,61 @@ const PostList = ({
         <div className="Posts">
           {user ? (
             <>
-              <h2>게시물 목록</h2>
-              <Button onClick={handleCategoryMenuOpen}>주제 필터</Button>
+              <h2 className="text">게시물 목록</h2>
+              <Button className="text" onClick={handleCategoryMenuOpen}>
+                주제 필터
+              </Button>
               <Menu
                 anchorEl={categoryMenuAnchorEl}
                 open={Boolean(categoryMenuAnchorEl)}
                 onClose={handleCategoryMenuClose}
               >
-                <MenuItem onClick={() => handleCategorySelect("")}>
+                <MenuItem
+                  className="text"
+                  onClick={() => handleCategorySelect("")}
+                >
                   전체
                 </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Travel")}>
+                <MenuItem
+                  className="text"
+                  onClick={() => handleCategorySelect("Travel")}
+                >
                   여행
                 </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Food")}>
+                <MenuItem
+                  className="text"
+                  onClick={() => handleCategorySelect("Food")}
+                >
                   음식
                 </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Cooking")}>
+                <MenuItem
+                  className="text"
+                  onClick={() => handleCategorySelect("Cooking")}
+                >
                   요리
                 </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Culture")}>
+                <MenuItem
+                  className="text"
+                  onClick={() => handleCategorySelect("Culture")}
+                >
                   일상
                 </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Games")}>
+                <MenuItem
+                  className="text"
+                  onClick={() => handleCategorySelect("Games")}
+                >
                   게임
                 </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Music")}>
+                <MenuItem
+                  className="text"
+                  onClick={() => handleCategorySelect("Music")}
+                >
                   음악
                 </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Study")}>
+                <MenuItem
+                  className="text"
+                  onClick={() => handleCategorySelect("Study")}
+                >
                   자기계발
                 </MenuItem>
               </Menu>
@@ -464,11 +498,13 @@ const PostList = ({
                               onClose={() => handleMenuClose(post)}
                             >
                               <MenuItem
+                                className="text"
                                 onClick={() => handleOpenEditDialog(post)}
                               >
                                 글 수정
                               </MenuItem>
                               <MenuItem
+                                className="text"
                                 onClick={() => handleDeletePost(post.id)}
                               >
                                 글 삭제
@@ -478,7 +514,7 @@ const PostList = ({
                         )
                       }
                       title={
-                        <Typography variant="subtitle1">
+                        <Typography className="text" variant="subtitle1">
                           {post.uid === user.uid
                             ? user.displayName
                             : post.userDisplayName}
@@ -494,7 +530,12 @@ const PostList = ({
                       </div>
                     </CardMedia>
                     <CardContent className="content">
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        className="text"
+                        variant="body2"
+                        color="text.secondary"
+                        style={{ fontFamily: "BMJUA" }}
+                      >
                         {post.content.length > 20
                           ? contentExpanded[post.id]
                             ? post.content
@@ -521,13 +562,15 @@ const PostList = ({
                         </Tooltip>
                       </IconButton>
 
-                      <Typography>{likesCount[post.id]} </Typography>
+                      <Typography className="text">
+                        {likesCount[post.id]}개의 좋아요{" "}
+                      </Typography>
 
                       <IconButton
                         aria-label="share"
                         onClick={() => handleShare(post)}
                       >
-                        <Tooltip title="공유">
+                        <Tooltip className="text" title="공유">
                           <ShareIcon />
                         </Tooltip>
                       </IconButton>
@@ -537,7 +580,7 @@ const PostList = ({
                         aria-label="show more"
                         onClick={() => handleExpandClick(post.id)}
                       >
-                        <Tooltip title="댓글">
+                        <Tooltip className="text" title="댓글">
                           <MapsUgcRoundedIcon />
                         </Tooltip>
                       </IconButton>
@@ -545,7 +588,7 @@ const PostList = ({
                       <IconButton
                         onClick={() => handleMoreClick(post.id, post.uid)}
                       >
-                        <Tooltip title="글보기">
+                        <Tooltip className="text" title="글보기">
                           <MoreHorizRoundedIcon />
                         </Tooltip>
                       </IconButton>
@@ -557,7 +600,9 @@ const PostList = ({
                       unmountOnExit
                     >
                       <CardContent>
-                        <Typography>주제 = {post.category}</Typography>
+                        <Typography className="text">
+                          주제 = {post.category}
+                        </Typography>
                         <Typography variant="subtitle3">
                           {post.createdAt instanceof Date
                             ? post.createdAt.toLocaleString()
@@ -566,7 +611,9 @@ const PostList = ({
                               ).toLocaleString()}
                         </Typography>
                         <div>
-                          <Typography variant="h6">댓글</Typography>
+                          <Typography className="text" variant="h6">
+                            댓글
+                          </Typography>
                           <List className="comments-list">
                             {comments[post.id]?.map((comment) => (
                               <ListItem
@@ -578,8 +625,12 @@ const PostList = ({
                                   padding: "10px 0",
                                 }}
                               >
-                                <ProfileImage uid={comment.userId} />
+                                <ProfileImage
+                                  className="text"
+                                  uid={comment.userId}
+                                />
                                 <ListItemText
+                                  className="text"
                                   primary={
                                     <div
                                       style={{
@@ -589,6 +640,7 @@ const PostList = ({
                                       }}
                                     >
                                       <Typography
+                                        className="text"
                                         variant="body2"
                                         color="textPrimary"
                                         style={{ fontWeight: "bold" }}
@@ -596,6 +648,7 @@ const PostList = ({
                                         {comment.displayName}
                                       </Typography>
                                       <Typography
+                                        className="text"
                                         variant="body2"
                                         color="textPrimary"
                                         style={{ marginTop: "4px" }}
@@ -628,8 +681,9 @@ const PostList = ({
                                 }}
                               />
                               <TextField
+                                className="text"
                                 id={`comment-${post.id}`}
-                                label="댓글 추가"
+                                label="입력"
                                 value={newComment}
                                 onChange={(e) =>
                                   handleCommentChange(post.id, e.target.value)
@@ -639,6 +693,7 @@ const PostList = ({
                                 margin="normal"
                               />
                               <Button
+                                className="text"
                                 onClick={() => handleAddComment(post.id)}
                                 variant="contained"
                                 color="primary"
@@ -653,11 +708,15 @@ const PostList = ({
                   </Card>
                 ))
               ) : (
-                <Typography variant="body1">게시물이 없습니다.</Typography>
+                <Typography className="text" variant="body1">
+                  게시물이 없습니다.
+                </Typography>
               )}
             </>
           ) : (
-            <Typography variant="body1">로그인 해주세요.</Typography>
+            <Typography className="text" variant="body1">
+              로그인 해주세요.
+            </Typography>
           )}
         </div>
         {window.innerWidth >= 869 && (
@@ -667,7 +726,7 @@ const PostList = ({
         )}
       </div>
       <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
-        <DialogTitle>게시물 수정</DialogTitle>
+        <DialogTitle className="text">게시물 수정</DialogTitle>
         <DialogContent>
           {imageUrls.map((imageUrl, index) => (
             <div
@@ -680,6 +739,7 @@ const PostList = ({
                 style={{ maxWidth: "100%" }}
               />
               <Button
+                className="text"
                 onClick={() => handleRemoveImage(index)}
                 style={{ position: "absolute", top: 0, right: 0 }}
               >
@@ -696,23 +756,48 @@ const PostList = ({
             fullWidth
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            sx={{ fontFamily: "BMJUA" }} // 여기에 원하는 스타일 적용
           />
-          <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
-            <InputLabel id="category-label">주제</InputLabel>
+          <FormControl
+            className="text"
+            fullWidth
+            variant="outlined"
+            sx={{ mt: 2 }}
+          >
+            <InputLabel className="text" id="category-label">
+              주제
+            </InputLabel>
             <Select
+              className="text"
               labelId="category-label"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               label="Category"
             >
-              <MenuItem value="">주제 선택</MenuItem>
-              <MenuItem value="Travel">여행</MenuItem>
-              <MenuItem value="Food">음식</MenuItem>
-              <MenuItem value="Cooking">요리</MenuItem>
-              <MenuItem value="Culture">일상</MenuItem>
-              <MenuItem value="Games">게임</MenuItem>
-              <MenuItem value="Music">음악</MenuItem>
-              <MenuItem value="Study">자기계발</MenuItem>
+              <MenuItem className="text" value="">
+                주제 선택
+              </MenuItem>
+              <MenuItem className="text" value="Travel">
+                여행
+              </MenuItem>
+              <MenuItem className="text" value="Food">
+                음식
+              </MenuItem>
+              <MenuItem className="text" value="Cooking">
+                요리
+              </MenuItem>
+              <MenuItem className="text" value="Culture">
+                일상
+              </MenuItem>
+              <MenuItem className="text" value="Games">
+                게임
+              </MenuItem>
+              <MenuItem className="text" value="Music">
+                음악
+              </MenuItem>
+              <MenuItem className="text" value="Study">
+                자기계발
+              </MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

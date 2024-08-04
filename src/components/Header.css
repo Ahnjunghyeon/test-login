@@ -1,6 +1,14 @@
-/* 기본 헤더 스타일 */
+@font-face {
+  font-family: "BMJUA";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff")
+    format("woff");
+
+  font-weight: normal;
+  font-style: normal;
+}
+
 * {
-  font-family: "IBM Plex Sans KR", sans-serif;
+  font-family: "BMJUA";
   font-weight: 500;
   font-style: normal;
 }
@@ -87,7 +95,6 @@
 
 .header .text,
 .header .menutext {
-  font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
   color: black;
@@ -150,7 +157,6 @@
 }
 
 .header2 .sidehomebtn .sideuploadbtn {
-  font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
 }

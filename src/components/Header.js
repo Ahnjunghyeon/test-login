@@ -233,15 +233,16 @@ const Header = ({ refreshProfileImage }) => {
               <img src={logo} alt="Logo" className="logo-image" />
             </div>
           </div>
-          <div className="search">
-            <SearchBar className="sidesearch" />
-          </div>
+
           <MenuItem className="sidehomebtn" onClick={() => navigate("/home")}>
             <AddHomeRoundedIcon sx={{ color: "#83769C" }} />
             <div className="text" style={{ marginLeft: "30px" }}>
               홈
             </div>
           </MenuItem>
+          <div className="search">
+            <SearchBar className="sidesearch" />
+          </div>
         </div>
       </div>
 
