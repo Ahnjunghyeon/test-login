@@ -191,11 +191,11 @@ const PostPage = () => {
         >
           <FavoriteIcon />
         </IconButton>
-        <Typography>{likesCount} Likes</Typography>
+        <Typography>{likesCount} 좋아요</Typography>
       </Box>
       <Box className="comments-section">
         <Typography variant="h6" className="comments-title">
-          Comments
+          댓글
         </Typography>
         <Box className="comments-list">
           {comments.map((comment, index) => (
@@ -226,7 +226,7 @@ const PostPage = () => {
             variant="contained"
             color="primary"
           >
-            Add Comment
+            댓글을 추가해보세요!
           </Button>
         </Box>
       </Box>

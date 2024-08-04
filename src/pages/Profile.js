@@ -182,7 +182,7 @@ const Profile = () => {
                       <TextField
                         className="yourname"
                         fullWidth
-                        label="Your Name"
+                        label="이름"
                         variant="outlined"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
@@ -196,7 +196,7 @@ const Profile = () => {
                         disabled={loading}
                         sx={{ mt: 2 }}
                       >
-                        {loading ? <CircularProgress size={24} /> : "Save"}
+                        {loading ? <CircularProgress size={24} /> : "저장"}
                       </Button>
                     </form>
                   ) : (
@@ -205,7 +205,7 @@ const Profile = () => {
                       <Typography variant="body1">User UID: {uid}</Typography>
                     </Box>
                   )}
-                  <Typography variant="body1">Email: {userEmail}</Typography>
+                  <Typography variant="body1">이메일: {userEmail}</Typography>
 
                   {currentUser && currentUser.uid !== uid && (
                     <>
@@ -215,7 +215,7 @@ const Profile = () => {
                           color="secondary"
                           onClick={handleUnfollow}
                         >
-                          Unfollow
+                          언팔로우
                         </Button>
                       ) : (
                         <Button
@@ -223,7 +223,7 @@ const Profile = () => {
                           color="primary"
                           onClick={handleFollow}
                         >
-                          Follow
+                          팔로우
                         </Button>
                       )}
                     </>
@@ -234,7 +234,7 @@ const Profile = () => {
 
             {/* Right side - User's Posts */}
             <Box className="Userpost">
-              <Typography variant="h4">User's Posts</Typography>
+              <Typography variant="h4">게시물</Typography>
               <div className="posts-container">
                 {profilePosts.map((post) => (
                   <div

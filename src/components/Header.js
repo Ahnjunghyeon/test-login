@@ -126,7 +126,6 @@ const Header = ({ refreshProfileImage }) => {
               color="inherit"
               aria-label="open drawer"
               onClick={handleIconClick}
-              sx={{ color: "#83769C", fontSize: "1.5rem" }} // Adjust icon size
             >
               <MenuIcon />
             </IconButton>
@@ -134,70 +133,21 @@ const Header = ({ refreshProfileImage }) => {
           <img
             src={logo}
             alt="Logo"
-            style={{ cursor: "pointer", height: "40px", marginRight: "10px" }}
+            className="logo-image" // Apply CSS class instead of inline style
           />
         </div>
         <div className="search">
           <SearchBar />
         </div>
         <div className="menulist">
-          <div
-            className="homebt"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "45px",
-              height: "45px",
-              padding: "8px",
-              borderRadius: "15%",
-              transition: "background-color 0.3s",
-              backgroundColor: "transparent",
-            }}
-            onClick={() => navigate("/home")}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.08)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            <AddHomeRoundedIcon
-              sx={{
-                color: "#83769C",
-                fontSize: "1.7rem",
-              }}
-            />
+          <div className="homebt" onClick={() => navigate("/home")}>
+            <AddHomeRoundedIcon sx={{ color: "#83769C", fontSize: "1.7rem" }} />
           </div>
 
           {user && (
-            <div
-              className="uploadbt"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "45px",
-                height: "45px",
-                padding: "8px",
-                borderRadius: "15%",
-                transition: "background-color 0.3s",
-                backgroundColor: "transparent",
-                marginRight: "5px",
-              }}
-              onClick={() => navigate("/uploadpage")}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
+            <div className="uploadbt" onClick={() => navigate("/uploadpage")}>
               <UploadFileRoundedIcon
-                sx={{
-                  color: "#83769C",
-                  fontSize: "1.7rem",
-                }}
+                sx={{ color: "#83769C", fontSize: "1.7rem" }}
               />
             </div>
           )}
@@ -276,40 +226,20 @@ const Header = ({ refreshProfileImage }) => {
               color="inherit"
               aria-label="open drawer"
               onClick={handleIconClick}
-              sx={{ color: "#83769C", fontSize: "1.5rem", margin: "0 7px" }} // Adjust icon size
             >
               <MenuOpenRoundedIcon />
             </IconButton>
             <div className="mainlogo" onClick={() => navigate("/")}>
-              <img
-                src={logo}
-                alt="Logo"
-                style={{
-                  cursor: "pointer",
-                  height: "40px",
-                  marginRight: "10px",
-                }}
-              />
+              <img src={logo} alt="Logo" className="logo-image" />
             </div>
           </div>
-          <div
-            className="search"
-            style={{
-              maxWidth: "220px",
-              marginLeft: "20px",
-              marginRight: "20px",
-            }}
-          >
+          <div className="search">
             <SearchBar className="sidesearch" />
           </div>
-          <MenuItem
-            className="sidehomebtn"
-            style={{ marginLeft: "2px" }}
-            onClick={() => navigate("/home")}
-          >
+          <MenuItem className="sidehomebtn" onClick={() => navigate("/home")}>
             <AddHomeRoundedIcon sx={{ color: "#83769C" }} />
             <div className="text" style={{ marginLeft: "30px" }}>
-              Home
+              홈
             </div>
           </MenuItem>
         </div>

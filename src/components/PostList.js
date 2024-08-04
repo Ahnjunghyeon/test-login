@@ -408,35 +408,35 @@ const PostList = ({
           {user ? (
             <>
               <h2>게시물 목록</h2>
-              <Button onClick={handleCategoryMenuOpen}>카테고리 필터</Button>
+              <Button onClick={handleCategoryMenuOpen}>주제 필터</Button>
               <Menu
                 anchorEl={categoryMenuAnchorEl}
                 open={Boolean(categoryMenuAnchorEl)}
                 onClose={handleCategoryMenuClose}
               >
                 <MenuItem onClick={() => handleCategorySelect("")}>
-                  All
+                  전체
                 </MenuItem>
                 <MenuItem onClick={() => handleCategorySelect("Travel")}>
-                  Travel
+                  여행
                 </MenuItem>
                 <MenuItem onClick={() => handleCategorySelect("Food")}>
-                  Food
+                  음식
                 </MenuItem>
                 <MenuItem onClick={() => handleCategorySelect("Cooking")}>
-                  Cooking
+                  요리
                 </MenuItem>
                 <MenuItem onClick={() => handleCategorySelect("Culture")}>
-                  Culture
+                  일상
                 </MenuItem>
                 <MenuItem onClick={() => handleCategorySelect("Games")}>
-                  Games
+                  게임
                 </MenuItem>
                 <MenuItem onClick={() => handleCategorySelect("Music")}>
-                  Music
+                  음악
                 </MenuItem>
                 <MenuItem onClick={() => handleCategorySelect("Study")}>
-                  Study
+                  자기계발
                 </MenuItem>
               </Menu>
               {filteredPosts.length > 0 ? (
@@ -521,7 +521,7 @@ const PostList = ({
                         </Tooltip>
                       </IconButton>
 
-                      <Typography>{likesCount[post.id]} Likes</Typography>
+                      <Typography>{likesCount[post.id]} </Typography>
 
                       <IconButton
                         aria-label="share"
@@ -557,7 +557,7 @@ const PostList = ({
                       unmountOnExit
                     >
                       <CardContent>
-                        <Typography>Category = {post.category}</Typography>
+                        <Typography>주제 = {post.category}</Typography>
                         <Typography variant="subtitle3">
                           {post.createdAt instanceof Date
                             ? post.createdAt.toLocaleString()
@@ -698,21 +698,21 @@ const PostList = ({
             onChange={(e) => setContent(e.target.value)}
           />
           <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
-            <InputLabel id="category-label">Category</InputLabel>
+            <InputLabel id="category-label">주제</InputLabel>
             <Select
               labelId="category-label"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               label="Category"
             >
-              <MenuItem value="">Select Category</MenuItem>
-              <MenuItem value="Travel">Travel</MenuItem>
-              <MenuItem value="Food">Food</MenuItem>
-              <MenuItem value="Cooking">Cooking</MenuItem>
-              <MenuItem value="Culture">Culture</MenuItem>
-              <MenuItem value="Games">Games</MenuItem>
-              <MenuItem value="Music">Music</MenuItem>
-              <MenuItem value="Study">Study</MenuItem>
+              <MenuItem value="">주제 선택</MenuItem>
+              <MenuItem value="Travel">여행</MenuItem>
+              <MenuItem value="Food">음식</MenuItem>
+              <MenuItem value="Cooking">요리</MenuItem>
+              <MenuItem value="Culture">일상</MenuItem>
+              <MenuItem value="Games">게임</MenuItem>
+              <MenuItem value="Music">음악</MenuItem>
+              <MenuItem value="Study">자기계발</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

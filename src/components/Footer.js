@@ -11,7 +11,7 @@ const Footer = () => {
   return (
     <footer className="footer" id="contact">
       <div className="footer-content">
-        <p>&copy; 2024 Your Company. All rights reserved.</p>
+        <p>&copy; 2024. 08. 04 업데이트</p>
         <div className="social-links">
           <a href="#!">
             <i className="fab fa-facebook"></i>

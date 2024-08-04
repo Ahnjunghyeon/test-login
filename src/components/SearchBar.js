@@ -130,7 +130,11 @@ const SearchBar = ({ user }) => {
           onKeyDown={handleKeyDown}
           inputProps={{ "aria-label": "search" }}
         />
-        <IconButton onClick={handleButtonClick} aria-label="search">
+        <IconButton
+          className="Searchicon"
+          onClick={handleButtonClick}
+          aria-label="search"
+        >
           <SearchIcon />
         </IconButton>
       </div>

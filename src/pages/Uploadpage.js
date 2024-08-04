@@ -229,13 +229,13 @@ function Uploadpage() {
       <CustomNavbar />
       <Container className="Dashboard">
         <Typography variant="h4" component="h1" gutterBottom>
-          Write a Post
+          업로드 페이지
         </Typography>
         <form onSubmit={handleSubmit}>
           <Box mb={2}>
             <TextField
               fullWidth
-              label="Content"
+              label="내용"
               variant="outlined"
               multiline
               rows={4}
@@ -245,22 +245,22 @@ function Uploadpage() {
           </Box>
           <Box mb={2}>
             <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
-              <InputLabel id="category-label">Category</InputLabel>
+              <InputLabel id="category-label">주제</InputLabel>
               <Select
                 labelId="category-label"
                 value={category}
                 onChange={handleCategoryChange}
                 label="Category"
               >
-                <MenuItem value="">Select Category</MenuItem>
-                <MenuItem value="None">None</MenuItem>
-                <MenuItem value="Travel">Travel</MenuItem>
-                <MenuItem value="Food">Food</MenuItem>
-                <MenuItem value="Cooking">Cooking</MenuItem>
-                <MenuItem value="Culture">Culture</MenuItem>
-                <MenuItem value="Games">Games</MenuItem>
-                <MenuItem value="Music">Music</MenuItem>
-                <MenuItem value="Study">Study</MenuItem>
+                <MenuItem value="">주제</MenuItem>
+                <MenuItem value="None">그냥</MenuItem>
+                <MenuItem value="Travel">여행</MenuItem>
+                <MenuItem value="Food">음식</MenuItem>
+                <MenuItem value="Cooking">요리</MenuItem>
+                <MenuItem value="Culture">일상</MenuItem>
+                <MenuItem value="Games">게임</MenuItem>
+                <MenuItem value="Music">음악</MenuItem>
+                <MenuItem value="Study">자기계발</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -275,7 +275,7 @@ function Uploadpage() {
             />
             <label htmlFor="upload-button">
               <Button variant="contained" component="span">
-                Upload Images
+                사진을 등록해보세요
               </Button>
             </label>
           </Box>
@@ -305,7 +305,7 @@ function Uploadpage() {
             <CircularProgress />
           ) : (
             <Button type="submit" variant="contained" color="primary">
-              Submit
+              저장
             </Button>
           )}
         </form>
@@ -313,11 +313,11 @@ function Uploadpage() {
       <Dialog open={confirmDialogOpen} onClose={handleCancel}>
         <DialogTitle>게시물을 등록하시겠습니까?</DialogTitle>
         <DialogActions>
-          <Button onClick={handleConfirm} color="primary">
-            Yes
-          </Button>
           <Button onClick={handleCancel} color="primary">
-            No
+            아니요
+          </Button>
+          <Button onClick={handleConfirm} color="primary">
+            네
           </Button>
         </DialogActions>
       </Dialog>

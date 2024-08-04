@@ -141,13 +141,13 @@ const LoginModal = ({ isOpen, onClose }) => {
           <label htmlFor="reg-log" className="checkbox-label">
             {isSignUp ? <AssignmentIndRoundedIcon /> : <LockOpenRoundedIcon />}
           </label>
-          <div className="assignlogo">{isSignUp ? "Sign Up" : "Log In"}</div>
+          <div className="assignlogo">{isSignUp ? "회원가입" : "로그인"}</div>
         </div>
 
         {isSignUp ? (
           <>
             <TextField
-              label="Name"
+              label="이름을 입력해주세요."
               variant="outlined"
               fullWidth
               value={displayName}
@@ -155,7 +155,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               className="input-field-Name"
             />
             <TextField
-              label="Email"
+              label="이메일을 입력해주세요."
               variant="outlined"
               fullWidth
               value={email}
@@ -163,7 +163,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               className="input-field-Email"
             />
             <TextField
-              label="Password"
+              label="비밀번호를 입력해주세요."
               variant="outlined"
               fullWidth
               type="password"
@@ -172,20 +172,23 @@ const LoginModal = ({ isOpen, onClose }) => {
               className="input-field-Password"
             />
             <div className="button-container-3">
-              <span className="mas">Sign Up</span>
-              <button onClick={handleSignup}>Sign Up</button>
+              <span className="mas">회원가입</span>
+              <button onClick={handleSignup}>회원가입</button>
             </div>
             <div className="button-container-3">
-              <span className="mas">Sign Up with Google</span>
-              <button onClick={handleGoogleLogin}>Sign Up with Google</button>
+              <span className="mas">구글 계정으로 회원가입</span>
+              <button onClick={handleGoogleLogin}>
+                구글 계정으로 회원가입
+              </button>
             </div>
           </>
         ) : (
           <form onSubmit={handleLogin}>
             <TextField
+              style={{ marginBottom: "10px" }}
               type="email"
               name="email"
-              label="Email"
+              label="이메일을 입력해주세요."
               variant="outlined"
               fullWidth
               value={email}
@@ -195,7 +198,7 @@ const LoginModal = ({ isOpen, onClose }) => {
             <TextField
               type="password"
               name="password"
-              label="Password"
+              label="비밀번호를 입력해주세요."
               variant="outlined"
               fullWidth
               value={password}
@@ -203,21 +206,12 @@ const LoginModal = ({ isOpen, onClose }) => {
               className="input-field-Password"
             />
             <div className="button-container-3">
-              <span className="mas">Log In</span>
-              <button type="submit">Log In</button>
+              <span className="mas">로그인</span>
+              <button type="submit">로그인</button>
             </div>
             <div className="button-container-3">
-              <span className="mas">Log In with Google</span>
-              <button onClick={handleGoogleLogin}>Log In with Google</button>
-            </div>
-            <div className="text-center">
-              <Button
-                variant="text"
-                color="primary"
-                onClick={handleResetPassword}
-              >
-                Forgot Password?
-              </Button>
+              <span className="mas">구글 계정으로 로그인</span>
+              <button onClick={handleGoogleLogin}>구글 계정으로 로그인</button>
             </div>
           </form>
         )}

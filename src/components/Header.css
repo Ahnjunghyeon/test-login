@@ -39,6 +39,12 @@
   align-items: center;
 }
 
+.header .logo-image {
+  cursor: pointer;
+  height: 40px; /* 기본 높이 */
+  margin-right: 10px;
+}
+
 .header .menulist {
   display: flex;
   justify-content: space-between;
@@ -54,8 +60,29 @@
 
 .header .homebt,
 .header .uploadbt {
-  width: 55px;
-  padding: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  padding: 8px;
+  border-radius: 15%;
+  transition: background-color 0.3s;
+  background-color: transparent;
+}
+
+.header .homebt:hover,
+.header .uploadbt:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.header .homebt {
+  margin-left: 20px;
+  margin-right: 10px;
+}
+
+.header .uploadbt {
+  margin-right: 5px;
 }
 
 .header .text,
@@ -67,8 +94,7 @@
 }
 
 .header .menutext {
-  font-size: 16px;
-  margin: 0 8px;
+  font-size: 15px;
 }
 
 .header .imgmenu {
@@ -129,8 +155,9 @@
   font-style: normal;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 720px) {
   /* 모바일 화면에 대한 반응형 스타일 */
+
   .header2 {
     width: 250px;
     left: -250px; /* 초기에는 왼쪽으로 숨김 */
@@ -148,15 +175,44 @@
     padding: 10px;
   }
 
+  .header {
+    height: 60px;
+    margin: 0 0px;
+  }
+
+  .header .mainlogo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .header .search {
+    margin-left: 4px;
+  }
+
+  .header .menulist .homebt {
+    margin-left: 0px;
+    margin-right: 1px;
+    width: 55px;
+    padding: 5px;
+  }
+
   .header .homebt,
   .header .uploadbt {
     width: 35px; /* 더 작은 너비로 조정 */
     padding: 3px; /* 작은 패딩으로 조정 */
   }
 
+  .header .signupbutton {
+    width: 75px;
+  }
+
   .header .menutext {
     font-size: 14px; /* 작은 글자 크기로 조정 */
-    margin: 0 10px; /* 작은 마진으로 조정 */
+  }
+
+  .header .logo-image {
+    height: 32px; /* 화면 너비가 600px 이하일 때 높이를 32px로 조정 */
   }
 }
 
@@ -181,10 +237,41 @@
 }
 
 .header2-menu-button {
-  margin-left: 15px;
+  color: #83769c;
+  font-size: 1.5rem;
+  margin: 0 7px;
 }
 
 .header2-menuopenBtn {
   display: flex;
   align-items: center;
+}
+
+.header2 .logo-image {
+  cursor: pointer;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.header2 .search {
+  max-width: 220px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.header2-menu .sidehomebtn {
+  margin-left: 2px;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.header2 .sidehomebtn {
+  margin-bottom: 15px;
+}
+
+.header2-menu .menutext {
+  padding: 12px;
+  cursor: pointer;
 }

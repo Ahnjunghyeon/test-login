@@ -47,7 +47,7 @@ const FollowersPage = () => {
   };
 
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return <Typography>로딩중...</Typography>;
   }
 
   return (
@@ -58,7 +58,7 @@ const FollowersPage = () => {
           <ListItemText primary={user.displayName} secondary={user.email} />
         </ListItem>
         {followers.length === 0 ? (
-          <Typography>No followers found.</Typography>
+          <Typography>팔로워가 없습니다.</Typography>
         ) : (
           followers.slice(0, 5).map((follower) => (
             <ListItem
