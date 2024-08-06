@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Button, Modal, TextField, Backdrop, Box } from "@mui/material";
+import React, { useState } from "react";
+import { Modal, TextField, Backdrop, Box } from "@mui/material";
 import {
   getAuth,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   updateProfile,
+  signInWithPopup,
+  GoogleAuthProvider,
 } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
-import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
-import "./SignupModal.css";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../Firebase/firebase"; // firebase.js에서 export된 db import
+import "./LsModal.css";
 
 const style = {
   position: "absolute",
@@ -20,46 +18,50 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: "90vw",
   maxWidth: 400,
-  height: "450px",
-  maxHeight: "450px",
+  height: "650px",
   bgcolor: "background.paper",
   boxShadow:
-    "0px 8px 16px rgba(0, 0, 0, 0.3), 0px 0px 0px 1px rgba(0, 0, 0, 0.1)", // 그림자 추가
-  borderRadius: 10, // 테두리를 둥글게 만듦
+    "0px 8px 16px rgba(0, 0, 0, 0.3), 0px 0px 0px 1px rgba(0, 0, 0, 0.1)",
+  borderRadius: 10,
   p: 4,
+  fontfamily: "BMJUA",
+  color: "#626284",
 };
 
-const SignupModal = ({ isOpen, onClose }) => {
+const SignupModal = ({ isOpen, onClose, onSwitch }) => {
   const auth = getAuth();
-  const db = getFirestore();
-  const [isSignUp, setIsSignUp] = useState(true); // 초기값을 true로 설정하여 항상 Sign Up 창 먼저 보이기
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [errorTooltip, setErrorTooltip] = useState(false);
 
-  useEffect(() => {
-    setIsSignUp(true); // Modal이 열릴 때마다 Sign Up 창으로 시작하도록 설정
-    setEmail("");
-    setPassword("");
-    setDisplayName("");
-  }, [isOpen]);
+  const handleSignup = async () => {
+    if (email === "" || password === "" || displayName === "") {
+      return;
+    }
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      await updateProfile(user, { displayName });
 
-  const handleLogin = (event) => {
-    event.preventDefault();
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log("Logged in as:", user.email);
-        onClose();
-        setEmail("");
-        setPassword("");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error("Login error:", errorCode, errorMessage);
+      // Firestore에 사용자 정보 저장
+      await setDoc(doc(db, "users", user.uid), {
+        displayName: displayName,
+        email: email,
+        uid: user.uid,
       });
+
+      console.log("Signed up as:", user.email);
+      onClose();
+      setEmail("");
+      setPassword("");
+      setDisplayName("");
+    } catch (error) {
+      console.error("Error signing up: ", error);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -79,145 +81,73 @@ const SignupModal = ({ isOpen, onClose }) => {
       });
   };
 
-  const handleSignup = async () => {
-    if (email === "" || password === "" || displayName === "") {
-      setErrorTooltip(true);
-      return;
-    }
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-      await updateProfile(user, { displayName });
-      await setDoc(doc(db, "users", user.uid), {
-        displayName,
-        email,
-        profileImage: "",
-      });
-      console.log("Signed up as:", user.email);
-      onClose();
-      setEmail("");
-      setPassword("");
-      setDisplayName("");
-    } catch (error) {
-      console.error("Error signing up: ", error);
-    }
-  };
-
-  const handleCheckboxChange = (event) => {
-    setIsSignUp(event.target.checked);
-    if (!event.target.checked) {
-      setEmail("");
-      setPassword("");
-      setDisplayName("");
-    }
-  };
-
-  const handleResetPassword = () => {
-    console.log("Reset password clicked");
-  };
-
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
       BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
+      BackdropProps={{ timeout: 500 }}
     >
       <Box sx={style}>
-        <div className="text-center">
-          <input
-            className="checkbox"
-            type="checkbox"
-            id="reg-log"
-            name="reg-log"
-            onChange={handleCheckboxChange}
-            checked={isSignUp} // 체크박스 상태를 isSignUp에 맞춰 변경
-          />
-          <label htmlFor="reg-log" className="checkbox-label">
-            {isSignUp ? <AssignmentIndRoundedIcon /> : <LockOpenRoundedIcon />}
-          </label>
-          <div className="assignlogo">{isSignUp ? "회원가입" : "로그인"}</div>
+        <div className="Signpage">
+          <div className="assignlogo">SNSWEB 회원가입</div>
         </div>
 
-        {isSignUp ? (
-          <>
-            <TextField
-              style={{ marginBottom: "10px" }}
-              label="이름을 입력해주세요."
-              variant="outlined"
-              fullWidth
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="input-field-Name"
-            />
-            <TextField
-              style={{ marginBottom: "10px" }}
-              label="이메일을 입력해주세요."
-              variant="outlined"
-              fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input-field-Email"
-            />
-            <TextField
-              label="비밀번호를 입력해주세요"
-              variant="outlined"
-              fullWidth
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field-Password"
-            />
-            <div className="button-container-3">
-              <span className="mas">회원가입</span>
-              <button onClick={handleSignup}>회원가입</button>
-            </div>
-            <div className="button-container-3">
-              <span className="mas">구글 계정으로 회원가입</span>
-              <button onClick={handleGoogleLogin}>
-                구글 계정으로 회원가입
-              </button>
-            </div>
-          </>
-        ) : (
-          <form onSubmit={handleLogin}>
-            <TextField
-              style={{ marginBottom: "10px" }}
-              type="email"
-              name="email"
-              label="이메일을 입력해주세요."
-              variant="outlined"
-              fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input-field-Email"
-            />
-            <TextField
-              type="password"
-              name="password"
-              label="비밀번호를 입력해주세요."
-              variant="outlined"
-              fullWidth
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field-Password"
-            />
-            <div className="button-container-3">
-              <span className="mas">로그인</span>
-              <button type="submit">로그인</button>
-            </div>
-            <div className="button-container-3">
-              <span className="mas">구글 계정으로 로그인</span>
-              <button onClick={handleGoogleLogin}>구글 계정으로 로그인</button>
-            </div>
-          </form>
-        )}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSignup();
+          }}
+        >
+          <div className="label">
+            <div className="text-wrapper">이름</div>
+          </div>
+          <TextField
+            style={{ marginBottom: "10px" }}
+            label="이름을 입력해주세요."
+            variant="outlined"
+            fullWidth
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="input-field-Name"
+          />
+          <div className="label">
+            <div className="text-wrapper">이메일</div>
+          </div>
+          <TextField
+            style={{ marginBottom: "10px" }}
+            label="이메일을 입력해주세요."
+            variant="outlined"
+            fullWidth
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input-field-Email"
+          />
+          <div className="label">
+            <div className="text-wrapper">비밀번호</div>
+          </div>
+          <TextField
+            label="비밀번호를 입력해주세요"
+            variant="outlined"
+            fullWidth
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input-field-Password"
+          />
+
+          <div className="button-container-3">
+            <button type="submit">회원가입</button>
+          </div>
+          <div className="lines">
+            <div className="line" />
+            <div className="linetext"> OR </div>
+            <div className="line2" />
+          </div>
+          <div className="button-container-4">
+            <button onClick={handleGoogleLogin}>구글 계정으로 회원가입</button>
+          </div>
+        </form>
       </Box>
     </Modal>
   );

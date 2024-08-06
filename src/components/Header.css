@@ -39,6 +39,7 @@
   align-items: center;
   height: 60px;
   margin: 0 20px;
+  margin-bottom: 5px;
 }
 
 .header .mainlogo {
@@ -47,10 +48,10 @@
   align-items: center;
 }
 
-.header .logo-image {
+.header .Logo {
   cursor: pointer;
-  height: 40px; /* 기본 높이 */
-  margin-right: 10px;
+  font-size: 25px;
+  margin: 0 10px;
 }
 
 .header .menulist {

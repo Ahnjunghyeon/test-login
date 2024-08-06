@@ -42,13 +42,13 @@ const Logopage = () => {
       <section className="hero">
         <div className="hero-content">
           <h1 className="hero-title" style={{ fontFamily: "BMJUA" }}>
-            GREAP에 오신 것을 환영합니다!
+            SNSWEB 에 오신 것을 환영합니다!
           </h1>
           <p className="hero-text" style={{ fontFamily: "BMJUA" }}>
-            친한 사람들과 본인의 이야기를 공유해보세요
+            친한 사람들과 당신의 이야기를 공유해보세요
           </p>
           <button className="view-button" onClick={handleViewClick}>
-            바로보기
+            바로가기
           </button>
         </div>
       </section>
@@ -58,22 +58,36 @@ const Logopage = () => {
           <h2 className="section-title">기능 소개</h2>
           <div className="feature-box">
             <div className="feature-item">
-              <h3 className="feature-item-title">사람과의 연결</h3>
+              <h3 className="feature-item-title">팔로우</h3>
               <p className="feature-item-text">
-                친구 또는 지인 혹은 모르는 사람과 Follow라는 인연을 맺어보세요.
+                기능 설명 : 서로 계정간의 팔로우가 추가,
+                <br /> 각자 팔로우한 사람이 업로드한 게시물은 홈페이지에서 출력
               </p>
             </div>
             <div className="feature-item">
-              <h3 className="feature-item-title">순간의 저장</h3>
+              <h3 className="feature-item-title">게시물 업로드</h3>
               <p className="feature-item-text">
-                당신이 무엇을 하는지를 공유하여 보세요!
+                주제를 선택 , 내용 , 사진을 업로드
+                <br /> 수정 및 제거
               </p>
             </div>
             <div className="feature-item">
-              <h3 className="feature-item-title">새로운 탐색</h3>
+              <h3 className="feature-item-title">댓글</h3>
+              <p className="feature-item-text">게시물에 댓글 입력</p>
+            </div>
+            <div className="feature-item">
+              <h3 className="feature-item-title">프로필 및 검색</h3>
               <p className="feature-item-text">
-                당신의 소중한 순간을 보낼 동안, 다른 사람은 어떤 소중한 순간을
-                보냈는지 구경해보세요!
+                프로필 이름 변경 및 이름으로 검색 하여 프로필 방문
+              </p>
+            </div>
+            <div className="feature-item">
+              <h3 className="feature-item-title">
+                카테고리별 <br />
+                출력
+              </h3>
+              <p className="feature-item-text">
+                원하는 카테고리를 선택하여 보기
               </p>
             </div>
           </div>

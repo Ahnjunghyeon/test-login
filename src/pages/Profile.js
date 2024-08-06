@@ -26,7 +26,6 @@ import ProfileImage from "../components/ProfileImage";
 import Footer from "../components/Footer";
 import UploadPost from "../components/UploadPost";
 import "./Profile.css";
-import { ClassNames } from "@emotion/react";
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -201,21 +200,12 @@ const Profile = () => {
                       </Button>
                     </form>
                   ) : (
-                    <Box className="UserInfo" style={{ fontFamily: "BMJUA" }}>
-                      <Typography variant="h5" style={{ fontFamily: "BMJUA" }}>
-                        {displayName}
-                      </Typography>
-                      <Typography
-                        variant="body1 "
-                        style={{ fontFamily: "BMJUA" }}
-                      >
-                        User UID: {uid}
-                      </Typography>
+                    <Box className="UserInfo">
+                      <Typography variant="h5">{displayName}</Typography>
+                      <Typography variant="body1">User UID: {uid}</Typography>
                     </Box>
                   )}
-                  <Typography variant="body1" style={{ fontFamily: "BMJUA" }}>
-                    이메일: {userEmail}
-                  </Typography>
+                  <Typography variant="body1">이메일: {userEmail}</Typography>
 
                   {currentUser && currentUser.uid !== uid && (
                     <>
@@ -224,7 +214,6 @@ const Profile = () => {
                           variant="contained"
                           color="secondary"
                           onClick={handleUnfollow}
-                          style={{ fontFamily: "BMJUA" }}
                         >
                           언팔로우
                         </Button>
@@ -233,7 +222,6 @@ const Profile = () => {
                           variant="contained"
                           color="primary"
                           onClick={handleFollow}
-                          style={{ fontFamily: "BMJUA" }}
                         >
                           팔로우
                         </Button>
@@ -246,9 +234,7 @@ const Profile = () => {
 
             {/* Right side - User's Posts */}
             <Box className="Userpost">
-              <Typography variant="h4" style={{ fontFamily: "BMJUA" }}>
-                게시물
-              </Typography>
+              <Typography variant="h4">게시물</Typography>
               <div className="posts-container">
                 {profilePosts.map((post) => (
                   <div
@@ -258,21 +244,13 @@ const Profile = () => {
                   >
                     <Card className="post-card-content">
                       <CardContent>
-                        <Typography
-                          variant="body2"
-                          className="post-category"
-                          style={{ fontFamily: "BMJUA" }}
-                        >
+                        <Typography variant="body2" className="post-category">
                           {post.category}
                         </Typography>
                         {post.imageUrls && post.imageUrls.length > 0 && (
                           <UploadPost imageUrls={post.imageUrls} />
                         )}
-                        <Typography
-                          variant="body2"
-                          className="post-content"
-                          style={{ fontFamily: "BMJUA" }}
-                        >
+                        <Typography variant="body2" className="post-content">
                           {post.content}
                         </Typography>
                       </CardContent>

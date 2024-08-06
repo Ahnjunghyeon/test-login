@@ -74,22 +74,6 @@ const Header = ({ refreshProfileImage }) => {
     }
   };
 
-  const addToFavorites = () => {
-    const url = "https://login-test-a417d.web.app";
-    const title = "My Home Page";
-
-    if (window.external && window.external.AddFavorite) {
-      // Internet Explorer
-      window.external.AddFavorite(url, title);
-    } else if (window.sidebar && window.sidebar.addPanel) {
-      // Firefox <=22
-      window.sidebar.addPanel(title, url, "");
-    } else {
-      // Other browsers
-      alert("Press Ctrl+D (Windows) or Command+D (Mac) to bookmark this page.");
-    }
-  };
-
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -109,11 +93,6 @@ const Header = ({ refreshProfileImage }) => {
       });
   };
 
-  const handleLoginOpen = () => {
-    setIsSignupModalOpen(false);
-    setIsLoginModalOpen(true);
-  };
-
   return (
     <>
       <div className="header">
@@ -130,11 +109,7 @@ const Header = ({ refreshProfileImage }) => {
               <MenuIcon />
             </IconButton>
           </div>
-          <img
-            src={logo}
-            alt="Logo"
-            className="logo-image" // Apply CSS class instead of inline style
-          />
+          <div className="Logo">SNSWEB</div>
         </div>
         <div className="search">
           <SearchBar />
@@ -257,7 +232,6 @@ const Header = ({ refreshProfileImage }) => {
         isOpen={isSignupModalOpen}
         onClose={() => setIsSignupModalOpen(false)}
         onSignup={handleSignup}
-        onLoginOpen={handleLoginOpen} // Pass the handleLoginOpen function to SignupModal
       />
     </>
   );

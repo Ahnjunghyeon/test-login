@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { styled } from "@mui/system";
-
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import {
   getFirestore,
@@ -11,6 +9,8 @@ import {
   getDocs,
   addDoc,
   onSnapshot,
+  deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import {
   FormControl,
@@ -58,6 +58,7 @@ const PostList = ({
   displayName,
   handleUpdatePost,
   handleDeletePost,
+  postId,
 }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
@@ -75,16 +76,10 @@ const PostList = ({
   const [newComment, setNewComment] = useState("");
   const [likedPosts, setLikedPosts] = useState({});
   const [likesCount, setLikesCount] = useState({});
-  const [commentToEdit, setCommentToEdit] = useState(null);
-  const [editCommentContent, setEditCommentContent] = useState("");
-  const [commentMenuAnchorEl, setCommentMenuAnchorEl] = useState({});
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [editComment, setEditComment] = useState(null); // 댓글 수정 상태
+  const [editCommentContent, setEditCommentContent] = useState(""); // 댓글 수정 내용
 
-  const StyledTextField = styled(TextField)({
-    "& .MuiInputBase-input": {
-      fontFamily: "BMJUA, sans-serif",
-    },
-  });
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const db = getFirestore();
 
@@ -124,7 +119,7 @@ const PostList = ({
       }
     };
     fetchFollowedPosts();
-  }, [user, db]);
+  }, [db]); // 'db' 추가
 
   useEffect(() => {
     const fetchLikedPosts = async () => {
@@ -151,7 +146,7 @@ const PostList = ({
     };
 
     fetchLikedPosts();
-  }, [user, posts, followedPosts, db]);
+  }, [user, posts, followedPosts, db]); // 'db' 추가
 
   useEffect(() => {
     const fetchLikesCount = async () => {
@@ -178,7 +173,7 @@ const PostList = ({
     };
 
     fetchLikesCount();
-  }, [posts, followedPosts, db]);
+  }, [posts, followedPosts, db]); // 'db' 추가
 
   useEffect(() => {
     const unsubscribeLikes = {};
@@ -206,12 +201,19 @@ const PostList = ({
     const unsubscribeComments = {};
 
     for (const post of [...posts, ...followedPosts]) {
-      const commentsRef = collection(db, `posts/${post.id}/comments`);
+      const commentsRef = collection(
+        db,
+        `users/${post.uid}/posts/${post.id}/comments`
+      );
       unsubscribeComments[post.id] = onSnapshot(commentsRef, (snapshot) => {
         const commentsData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
+
+        // Sort comments by createdAt in descending order
+        commentsData.sort((a, b) => b.createdAt - a.createdAt);
+
         setComments((prevComments) => ({
           ...prevComments,
           [post.id]: commentsData,
@@ -280,24 +282,6 @@ const PostList = ({
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const fetchComments = async (postId) => {
-    try {
-      const commentsRef = collection(db, `posts/${postId}/comments`);
-      const commentsSnapshot = await getDocs(commentsRef);
-      const commentsData = commentsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      console.log("Fetched comments:", commentsData); // Debugging line
-      setComments((prevComments) => ({
-        ...prevComments,
-        [postId]: commentsData,
-      }));
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-    }
-  };
-
   // 댓글 입력 핸들러
   const handleCommentChange = (postId, content) => {
     setNewComment(content);
@@ -307,16 +291,39 @@ const PostList = ({
     if (newComment.trim() === "") return;
 
     try {
-      const commentRef = collection(db, `posts/${postId}/comments`);
+      // Generate a unique comment ID
+      const commentId = `${user.uid}${new Date().getTime()}`;
+
+      const commentRef = collection(
+        db,
+        `users/${user.uid}/posts/${postId}/comments`
+      );
+
+      // Add a comment to Firestore
       await addDoc(commentRef, {
+        commentsid: commentId, // Include the generated commentsid
         content: newComment,
         createdAt: new Date(),
         userId: user.uid,
         displayName: user.displayName,
       });
+
+      // Reset the input field
       setNewComment("");
-      // 댓글 추가 후 다시 댓글을 가져오기
-      fetchComments(postId);
+
+      // Update local state with the new comment
+      const updatedComments = comments[postId] || [];
+      updatedComments.push({
+        id: commentId, // Use the generated commentsid
+        content: newComment,
+        createdAt: new Date(),
+        userId: user.uid,
+        displayName: user.displayName,
+      });
+      setComments((prevComments) => ({
+        ...prevComments,
+        [postId]: updatedComments,
+      }));
     } catch (error) {
       console.error("Error adding comment:", error);
     }
@@ -409,67 +416,140 @@ const PostList = ({
     }
   };
 
+  //댓글수정처리함수
+  const handleEditComment = (comment) => {
+    setEditComment(comment);
+    setEditCommentContent(comment.content);
+  };
+
+  const handleSaveCommentEdit = async (commentId) => {
+    const postId = Object.keys(comments).find((postId) =>
+      comments[postId].some((comment) => comment.id === commentId)
+    );
+
+    if (postId) {
+      try {
+        const commentsRef = collection(
+          db,
+          `users/${user.uid}/posts/${postId}/comments`
+        );
+        const commentsSnapshot = await getDocs(commentsRef);
+        const commentDoc = commentsSnapshot.docs.find(
+          (doc) => doc.id === commentId // Firestore 자동 생성 ID 사용
+        );
+
+        if (commentDoc) {
+          const commentRef = doc(
+            db,
+            `users/${user.uid}/posts/${postId}/comments`,
+            commentDoc.id
+          );
+
+          await updateDoc(commentRef, {
+            content: editCommentContent,
+          });
+
+          const updatedComments = comments[postId].map((comment) =>
+            comment.id === commentId
+              ? { ...comment, content: editCommentContent }
+              : comment
+          );
+          setComments((prevComments) => ({
+            ...prevComments,
+            [postId]: updatedComments,
+          }));
+
+          setEditComment(null);
+          setEditCommentContent("");
+        } else {
+          console.error("Comment not found!");
+        }
+      } catch (error) {
+        console.error("Error updating comment:", error);
+      }
+    } else {
+      console.error("Post not found for comment update.");
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    const postId = Object.keys(comments).find((postId) =>
+      comments[postId].some((comment) => comment.id === commentId)
+    );
+
+    if (postId) {
+      try {
+        const commentsRef = collection(
+          db,
+          `users/${user.uid}/posts/${postId}/comments`
+        );
+        const commentsSnapshot = await getDocs(commentsRef);
+        const commentDoc = commentsSnapshot.docs.find(
+          (doc) => doc.id === commentId // Firestore 자동 생성 ID 사용
+        );
+
+        if (commentDoc) {
+          const commentRef = doc(
+            db,
+            `users/${user.uid}/posts/${postId}/comments`,
+            commentDoc.id
+          );
+
+          await deleteDoc(commentRef);
+
+          const updatedComments = comments[postId].filter(
+            (comment) => comment.id !== commentId
+          );
+          setComments((prevComments) => ({
+            ...prevComments,
+            [postId]: updatedComments,
+          }));
+        } else {
+          console.error("Comment not found!");
+        }
+      } catch (error) {
+        console.error("Error deleting comment:", error);
+      }
+    } else {
+      console.error("Post not found for comment deletion.");
+    }
+  };
+
   return (
     <>
       <div className="PostList">
         <div className="Posts">
           {user ? (
             <>
-              <h2 className="text">게시물 목록</h2>
-              <Button className="text" onClick={handleCategoryMenuOpen}>
-                주제 필터
-              </Button>
+              <h2>게시물 목록</h2>
+              <Button onClick={handleCategoryMenuOpen}>주제 필터</Button>
               <Menu
                 anchorEl={categoryMenuAnchorEl}
                 open={Boolean(categoryMenuAnchorEl)}
                 onClose={handleCategoryMenuClose}
               >
-                <MenuItem
-                  className="text"
-                  onClick={() => handleCategorySelect("")}
-                >
+                <MenuItem onClick={() => handleCategorySelect("")}>
                   전체
                 </MenuItem>
-                <MenuItem
-                  className="text"
-                  onClick={() => handleCategorySelect("Travel")}
-                >
+                <MenuItem onClick={() => handleCategorySelect("Travel")}>
                   여행
                 </MenuItem>
-                <MenuItem
-                  className="text"
-                  onClick={() => handleCategorySelect("Food")}
-                >
+                <MenuItem onClick={() => handleCategorySelect("Food")}>
                   음식
                 </MenuItem>
-                <MenuItem
-                  className="text"
-                  onClick={() => handleCategorySelect("Cooking")}
-                >
+                <MenuItem onClick={() => handleCategorySelect("Cooking")}>
                   요리
                 </MenuItem>
-                <MenuItem
-                  className="text"
-                  onClick={() => handleCategorySelect("Culture")}
-                >
+                <MenuItem onClick={() => handleCategorySelect("Culture")}>
                   일상
                 </MenuItem>
-                <MenuItem
-                  className="text"
-                  onClick={() => handleCategorySelect("Games")}
-                >
+                <MenuItem onClick={() => handleCategorySelect("Games")}>
                   게임
                 </MenuItem>
-                <MenuItem
-                  className="text"
-                  onClick={() => handleCategorySelect("Music")}
-                >
+                <MenuItem onClick={() => handleCategorySelect("Music")}>
                   음악
                 </MenuItem>
-                <MenuItem
-                  className="text"
-                  onClick={() => handleCategorySelect("Study")}
-                >
+                <MenuItem onClick={() => handleCategorySelect("Study")}>
                   자기계발
                 </MenuItem>
               </Menu>
@@ -498,13 +578,11 @@ const PostList = ({
                               onClose={() => handleMenuClose(post)}
                             >
                               <MenuItem
-                                className="text"
                                 onClick={() => handleOpenEditDialog(post)}
                               >
                                 글 수정
                               </MenuItem>
                               <MenuItem
-                                className="text"
                                 onClick={() => handleDeletePost(post.id)}
                               >
                                 글 삭제
@@ -514,7 +592,7 @@ const PostList = ({
                         )
                       }
                       title={
-                        <Typography className="text" variant="subtitle1">
+                        <Typography variant="subtitle1">
                           {post.uid === user.uid
                             ? user.displayName
                             : post.userDisplayName}
@@ -530,12 +608,7 @@ const PostList = ({
                       </div>
                     </CardMedia>
                     <CardContent className="content">
-                      <Typography
-                        className="text"
-                        variant="body2"
-                        color="text.secondary"
-                        style={{ fontFamily: "BMJUA" }}
-                      >
+                      <Typography variant="body2" color="text.secondary">
                         {post.content.length > 20
                           ? contentExpanded[post.id]
                             ? post.content
@@ -562,33 +635,33 @@ const PostList = ({
                         </Tooltip>
                       </IconButton>
 
-                      <Typography className="text">
-                        {likesCount[post.id]}개의 좋아요{" "}
-                      </Typography>
+                      <Typography>{likesCount[post.id]} </Typography>
 
                       <IconButton
                         aria-label="share"
                         onClick={() => handleShare(post)}
                       >
-                        <Tooltip className="text" title="공유">
+                        <Tooltip title="공유">
                           <ShareIcon />
                         </Tooltip>
                       </IconButton>
 
-                      <IconButton
-                        aria-expanded={expanded[post.id]}
-                        aria-label="show more"
-                        onClick={() => handleExpandClick(post.id)}
-                      >
-                        <Tooltip className="text" title="댓글">
-                          <MapsUgcRoundedIcon />
-                        </Tooltip>
-                      </IconButton>
+                      <Typography component="div">
+                        <IconButton
+                          aria-expanded={expanded[post.id]}
+                          aria-label="show more"
+                          onClick={() => handleExpandClick(post.id)}
+                        >
+                          <Tooltip title="댓글">
+                            <MapsUgcRoundedIcon />
+                          </Tooltip>
+                        </IconButton>
+                      </Typography>
 
                       <IconButton
                         onClick={() => handleMoreClick(post.id, post.uid)}
                       >
-                        <Tooltip className="text" title="글보기">
+                        <Tooltip title="글보기">
                           <MoreHorizRoundedIcon />
                         </Tooltip>
                       </IconButton>
@@ -600,9 +673,7 @@ const PostList = ({
                       unmountOnExit
                     >
                       <CardContent>
-                        <Typography className="text">
-                          주제 = {post.category}
-                        </Typography>
+                        <Typography>주제 = {post.category}</Typography>
                         <Typography variant="subtitle3">
                           {post.createdAt instanceof Date
                             ? post.createdAt.toLocaleString()
@@ -611,56 +682,110 @@ const PostList = ({
                               ).toLocaleString()}
                         </Typography>
                         <div>
-                          <Typography className="text" variant="h6">
-                            댓글
-                          </Typography>
+                          <Typography variant="h6">댓글</Typography>
                           <List className="comments-list">
-                            {comments[post.id]?.map((comment) => (
-                              <ListItem
-                                key={comment.id}
-                                alignItems="flex-start"
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  padding: "10px 0",
-                                }}
-                              >
-                                <ProfileImage
-                                  className="text"
-                                  uid={comment.userId}
-                                />
-                                <ListItemText
-                                  className="text"
-                                  primary={
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        marginLeft: "10px",
-                                      }}
-                                    >
-                                      <Typography
-                                        className="text"
-                                        variant="body2"
-                                        color="textPrimary"
-                                        style={{ fontWeight: "bold" }}
-                                      >
-                                        {comment.displayName}
-                                      </Typography>
-                                      <Typography
-                                        className="text"
-                                        variant="body2"
-                                        color="textPrimary"
-                                        style={{ marginTop: "4px" }}
-                                      >
-                                        {comment.content}{" "}
-                                        {/* Make sure you are using the correct field name */}
-                                      </Typography>
-                                    </div>
-                                  }
-                                />
-                              </ListItem>
-                            ))}
+                            {comments[post.id]?.length > 0 ? (
+                              comments[post.id].map((comment) => (
+                                <ListItem
+                                  key={comment.id}
+                                  alignItems="flex-start"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "10px 0",
+                                  }}
+                                >
+                                  <ProfileImage uid={comment.userId} />
+                                  <ListItemText
+                                    primary={
+                                      <>
+                                        <Typography
+                                          variant="body2"
+                                          color="textPrimary"
+                                          style={{ fontWeight: "bold" }}
+                                        >
+                                          {comment.displayName}
+                                        </Typography>
+                                        <Typography
+                                          variant="body2"
+                                          color="textPrimary"
+                                          style={{ marginTop: "4px" }}
+                                          component="span"
+                                        >
+                                          {editComment &&
+                                          editComment.id === comment.id ? (
+                                            <>
+                                              <TextField
+                                                id={`edit-comment-${comment.id}`}
+                                                value={editCommentContent}
+                                                onChange={(e) =>
+                                                  setEditCommentContent(
+                                                    e.target.value
+                                                  )
+                                                }
+                                                multiline
+                                                fullWidth
+                                              />
+                                              <Button
+                                                onClick={() =>
+                                                  handleSaveCommentEdit(
+                                                    comment.id
+                                                  )
+                                                }
+                                                variant="contained"
+                                                color="primary"
+                                              >
+                                                저장
+                                              </Button>
+                                              <Button
+                                                onClick={() =>
+                                                  setEditComment(null)
+                                                }
+                                                variant="outlined"
+                                                color="secondary"
+                                              >
+                                                취소
+                                              </Button>
+                                            </>
+                                          ) : (
+                                            <>
+                                              {comment.content}
+                                              {user &&
+                                                comment.userId === user.uid && (
+                                                  <Button
+                                                    onClick={() =>
+                                                      handleEditComment(comment)
+                                                    }
+                                                    variant="text"
+                                                    color="primary"
+                                                  >
+                                                    수정
+                                                  </Button>
+                                                )}
+                                              <div style={{ marginTop: "8px" }}>
+                                                <Button
+                                                  onClick={() =>
+                                                    handleDeleteComment(
+                                                      comment.id
+                                                    )
+                                                  }
+                                                >
+                                                  삭제
+                                                </Button>
+                                              </div>
+                                            </>
+                                          )}
+                                        </Typography>
+                                      </>
+                                    }
+                                  />
+                                </ListItem>
+                              ))
+                            ) : (
+                              <Typography variant="body2">
+                                댓글이 없습니다.
+                              </Typography>
+                            )}
                           </List>
 
                           {user && (
@@ -681,9 +806,8 @@ const PostList = ({
                                 }}
                               />
                               <TextField
-                                className="text"
                                 id={`comment-${post.id}`}
-                                label="입력"
+                                label="댓글 추가"
                                 value={newComment}
                                 onChange={(e) =>
                                   handleCommentChange(post.id, e.target.value)
@@ -693,7 +817,6 @@ const PostList = ({
                                 margin="normal"
                               />
                               <Button
-                                className="text"
                                 onClick={() => handleAddComment(post.id)}
                                 variant="contained"
                                 color="primary"
@@ -708,15 +831,11 @@ const PostList = ({
                   </Card>
                 ))
               ) : (
-                <Typography className="text" variant="body1">
-                  게시물이 없습니다.
-                </Typography>
+                <Typography variant="body1">게시물이 없습니다.</Typography>
               )}
             </>
           ) : (
-            <Typography className="text" variant="body1">
-              로그인 해주세요.
-            </Typography>
+            <Typography variant="body1">로그인 해주세요.</Typography>
           )}
         </div>
         {window.innerWidth >= 869 && (
@@ -726,7 +845,7 @@ const PostList = ({
         )}
       </div>
       <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
-        <DialogTitle className="text">게시물 수정</DialogTitle>
+        <DialogTitle>게시물 수정</DialogTitle>
         <DialogContent>
           {imageUrls.map((imageUrl, index) => (
             <div
@@ -739,7 +858,6 @@ const PostList = ({
                 style={{ maxWidth: "100%" }}
               />
               <Button
-                className="text"
                 onClick={() => handleRemoveImage(index)}
                 style={{ position: "absolute", top: 0, right: 0 }}
               >
@@ -756,48 +874,23 @@ const PostList = ({
             fullWidth
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            sx={{ fontFamily: "BMJUA" }} // 여기에 원하는 스타일 적용
           />
-          <FormControl
-            className="text"
-            fullWidth
-            variant="outlined"
-            sx={{ mt: 2 }}
-          >
-            <InputLabel className="text" id="category-label">
-              주제
-            </InputLabel>
+          <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
+            <InputLabel id="category-label">주제</InputLabel>
             <Select
-              className="text"
               labelId="category-label"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               label="Category"
             >
-              <MenuItem className="text" value="">
-                주제 선택
-              </MenuItem>
-              <MenuItem className="text" value="Travel">
-                여행
-              </MenuItem>
-              <MenuItem className="text" value="Food">
-                음식
-              </MenuItem>
-              <MenuItem className="text" value="Cooking">
-                요리
-              </MenuItem>
-              <MenuItem className="text" value="Culture">
-                일상
-              </MenuItem>
-              <MenuItem className="text" value="Games">
-                게임
-              </MenuItem>
-              <MenuItem className="text" value="Music">
-                음악
-              </MenuItem>
-              <MenuItem className="text" value="Study">
-                자기계발
-              </MenuItem>
+              <MenuItem value="">주제 선택</MenuItem>
+              <MenuItem value="Travel">여행</MenuItem>
+              <MenuItem value="Food">음식</MenuItem>
+              <MenuItem value="Cooking">요리</MenuItem>
+              <MenuItem value="Culture">일상</MenuItem>
+              <MenuItem value="Games">게임</MenuItem>
+              <MenuItem value="Music">음악</MenuItem>
+              <MenuItem value="Study">자기계발</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

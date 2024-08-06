@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+
 import "./Uploadpage.css";
 import CustomNavbar from "../components/Header";
 import Footer from "../components/Footer"; // Footer 컴포넌트 추가
+
 import {
   Container,
   TextField,
@@ -228,13 +230,12 @@ function Uploadpage() {
     <>
       <CustomNavbar />
       <Container className="Dashboard">
-        <Typography className="text" variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom>
           업로드 페이지
         </Typography>
         <form onSubmit={handleSubmit}>
           <Box mb={2}>
             <TextField
-              className="text"
               fullWidth
               label="내용"
               variant="outlined"
@@ -246,43 +247,22 @@ function Uploadpage() {
           </Box>
           <Box mb={2}>
             <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
-              <InputLabel className="text" id="category-label">
-                주제
-              </InputLabel>
+              <InputLabel id="category-label">주제</InputLabel>
               <Select
-                className="text"
                 labelId="category-label"
                 value={category}
                 onChange={handleCategoryChange}
                 label="Category"
               >
-                <MenuItem className="text" value="">
-                  주제
-                </MenuItem>
-                <MenuItem className="text" value="None">
-                  그냥
-                </MenuItem>
-                <MenuItem className="text" value="Travel">
-                  여행
-                </MenuItem>
-                <MenuItem className="text" value="Food">
-                  음식
-                </MenuItem>
-                <MenuItem className="text" value="Cooking">
-                  요리
-                </MenuItem>
-                <MenuItem className="text" value="Culture">
-                  일상
-                </MenuItem>
-                <MenuItem className="text" value="Games">
-                  게임
-                </MenuItem>
-                <MenuItem className="text" value="Music">
-                  음악
-                </MenuItem>
-                <MenuItem className="text" value="Study">
-                  자기계발
-                </MenuItem>
+                <MenuItem value="">주제</MenuItem>
+                <MenuItem value="None">그냥</MenuItem>
+                <MenuItem value="Travel">여행</MenuItem>
+                <MenuItem value="Food">음식</MenuItem>
+                <MenuItem value="Cooking">요리</MenuItem>
+                <MenuItem value="Culture">일상</MenuItem>
+                <MenuItem value="Games">게임</MenuItem>
+                <MenuItem value="Music">음악</MenuItem>
+                <MenuItem value="Study">자기계발</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -296,7 +276,7 @@ function Uploadpage() {
               style={{ display: "none" }}
             />
             <label htmlFor="upload-button">
-              <Button className="text" variant="contained" component="span">
+              <Button variant="contained" component="span">
                 사진을 등록해보세요
               </Button>
             </label>
@@ -314,41 +294,32 @@ function Uploadpage() {
                   alt={`preview-${index}`}
                   className="image-preview"
                 />
-                <Button
+                <button
                   onClick={() => handleRemoveImage(index)}
                   className="remove-image-button"
                 >
                   X
-                </Button>
+                </button>
+                {console.log("Button rendered for image index:", index)}
               </div>
             ))}
           </Box>
           {loading ? (
             <CircularProgress />
           ) : (
-            <Button
-              className="text"
-              type="submit"
-              variant="contained"
-              color="primary"
-              style={{ fontSize: "20px" }}
-            >
+            <Button type="submit" variant="contained" color="primary">
               저장
             </Button>
           )}
         </form>
       </Container>
-      <Dialog
-        className="dialog"
-        open={confirmDialogOpen}
-        onClose={handleCancel}
-      >
-        <DialogTitle className="text1">게시물을 등록하시겠습니까?</DialogTitle>
+      <Dialog open={confirmDialogOpen} onClose={handleCancel}>
+        <DialogTitle>게시물을 등록하시겠습니까?</DialogTitle>
         <DialogActions>
-          <Button className="text1" onClick={handleCancel} color="primary">
+          <Button onClick={handleCancel} color="primary">
             아니요
           </Button>
-          <Button className="text1" onClick={handleConfirm} color="primary">
+          <Button onClick={handleConfirm} color="primary">
             네
           </Button>
         </DialogActions>

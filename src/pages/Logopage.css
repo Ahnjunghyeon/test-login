@@ -79,25 +79,9 @@ body {
   border-radius: 25px;
 }
 
-.view-button span {
-  position: relative;
-  z-index: 1;
-}
-
-.view-button:after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 490%;
-  width: 140%;
-  background: #d096ff;
-  transition: all 0.5s ease-in-out;
-  transform: translateX(-100%) translateY(-23%) rotate(45deg);
-}
-
-.view-button:hover:after {
-  transform: translateX(-9%) translateY(-25%) rotate(45deg);
+.view-button:hover {
+  background-color: #3273ff;
+  color: #ffffff;
 }
 
 .section-title {

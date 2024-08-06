@@ -8,6 +8,7 @@ import {
   addDoc,
   deleteDoc,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
 import {
   Container,
@@ -18,8 +19,11 @@ import {
   TextField,
   Button,
   Avatar,
+  Tooltip,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import UploadPost from "../components/UploadPost";
 import Profilelogo from "../components/ProfileLogo";
 import "./PostPage.css";
@@ -33,6 +37,8 @@ const PostPage = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [currentUserId, setCurrentUserId] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -95,10 +101,21 @@ const PostPage = () => {
       const commentsList = await Promise.all(
         commentsSnapshot.docs.map(async (commentDoc) => {
           const commentData = commentDoc.data();
-          const userDoc = await getDoc(doc(db, `users/${commentData.userId}`));
+          let userProfile = {};
+
+          try {
+            const userDoc = await getDoc(
+              doc(db, `users/${commentData.userId}`)
+            );
+            userProfile = userDoc.exists() ? userDoc.data() : {};
+          } catch (error) {
+            console.error("Error fetching user profile:", error);
+          }
+
           return {
+            id: commentDoc.id,
             ...commentData,
-            userProfile: userDoc.exists() ? userDoc.data() : {},
+            userProfile,
           };
         })
       );
@@ -149,20 +166,45 @@ const PostPage = () => {
         timestamp: new Date(),
       });
       setNewComment("");
-      const commentsSnapshot = await getDocs(commentsRef);
-      const commentsList = await Promise.all(
-        commentsSnapshot.docs.map(async (commentDoc) => {
-          const commentData = commentDoc.data();
-          const userDoc = await getDoc(doc(db, `users/${commentData.userId}`));
-          return {
-            ...commentData,
-            userProfile: userDoc.exists() ? userDoc.data() : {},
-          };
-        })
-      );
-      setComments(commentsList);
+      fetchComments(); // Refresh comments list after adding a new comment
     } catch (error) {
       console.error("Error adding comment:", error);
+    }
+  };
+
+  const handleEditCommentChange = (event) => {
+    setEditCommentContent(event.target.value);
+  };
+
+  const handleEditComment = async (commentId) => {
+    if (editCommentContent.trim() === "") return;
+
+    try {
+      const commentDocRef = doc(
+        db,
+        `users/${uid}/posts/${postId}/comments`,
+        commentId
+      );
+      await updateDoc(commentDocRef, { content: editCommentContent });
+      setEditingCommentId(null);
+      setEditCommentContent("");
+      fetchComments(); // Refresh comments list after editing a comment
+    } catch (error) {
+      console.error("Error updating comment:", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const commentDocRef = doc(
+        db,
+        `users/${uid}/posts/${postId}/comments`,
+        commentId
+      );
+      await deleteDoc(commentDocRef);
+      fetchComments(); // Refresh comments list after deleting a comment
+    } catch (error) {
+      console.error("Error deleting comment:", error);
     }
   };
 
@@ -198,8 +240,8 @@ const PostPage = () => {
           댓글
         </Typography>
         <Box className="comments-list">
-          {comments.map((comment, index) => (
-            <Box key={index} className="comment">
+          {comments.map((comment) => (
+            <Box key={comment.id} className="comment">
               <Box className="comment-header">
                 <Profilelogo uid={comment.userId} />{" "}
                 {/* Profilelogo 컴포넌트 사용 */}
@@ -207,9 +249,58 @@ const PostPage = () => {
                   {comment.userProfile.displayName || "Unknown User"}
                 </Typography>
               </Box>
-              <Typography variant="body1" className="comment-content">
-                {comment.content}
-              </Typography>
+              {editingCommentId === comment.id ? (
+                <Box className="edit-comment">
+                  <TextField
+                    variant="outlined"
+                    fullWidth
+                    value={editCommentContent}
+                    onChange={handleEditCommentChange}
+                    placeholder="댓글을 수정하세요"
+                  />
+                  <Button
+                    onClick={() => handleEditComment(comment.id)}
+                    variant="contained"
+                    color="primary"
+                  >
+                    저장
+                  </Button>
+                  <Button
+                    onClick={() => setEditingCommentId(null)}
+                    variant="outlined"
+                    color="secondary"
+                  >
+                    취소
+                  </Button>
+                </Box>
+              ) : (
+                <>
+                  <Typography variant="body1" className="comment-content">
+                    {comment.content}
+                  </Typography>
+                  {comment.userId === currentUserId && (
+                    <Box className="comment-actions">
+                      <Tooltip title="수정">
+                        <IconButton
+                          onClick={() => {
+                            setEditingCommentId(comment.id);
+                            setEditCommentContent(comment.content);
+                          }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="삭제">
+                        <IconButton
+                          onClick={() => handleDeleteComment(comment.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
+                </>
+              )}
             </Box>
           ))}
         </Box>

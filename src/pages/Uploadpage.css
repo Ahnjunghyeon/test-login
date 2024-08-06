@@ -105,6 +105,8 @@ body {
   object-fit: cover;
 }
 
+/* 기존 스타일은 그대로 두고, remove-image-button의 스타일을 명확히 지정합니다. */
+
 .remove-image-button {
   position: absolute;
   top: 5px;
@@ -119,6 +121,22 @@ body {
   border-radius: 50%;
   border: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center; /* 텍스트 중앙 정렬 */
+  line-height: 30px; /* 버튼의 높이와 동일하게 설정하여 텍스트가 중앙에 위치하도록 함 */
+}
+
+/* Hover 효과 및 색상 변경 */
+.remove-image-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* 필요에 따라 포커스 상태 추가 */
+.remove-image-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 600px) {
