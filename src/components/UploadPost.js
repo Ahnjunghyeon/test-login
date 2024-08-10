@@ -2,32 +2,51 @@ import React, { useState, useEffect } from "react";
 import { Box, CardMedia, IconButton } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { styled } from "@mui/system";
+
+// 스타일링을 위한 스타일드 컴포넌트
+const ImageContainer = styled(Box)({
+  width: "100%",
+  position: "relative",
+  maxWidth: "800px",
+  maxHeight: "600px",
+});
+
+const StyledCardMedia = styled(CardMedia)({
+  width: "100%",
+  height: "500px",
+  objectFit: "contain", // 수정된 부분: 비율을 유지하며 이미지가 영역 내에 맞추어지도록 설정
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+const NavigationButton = styled(IconButton)({
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  color: "white",
+});
 
 function UploadPost({ imageUrls }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // imageUrls가 변경될 때마다 새로운 이미지 목록으로 currentImageIndex를 초기화
   useEffect(() => {
-    setCurrentImageIndex(0); // 이미지 목록이 변경될 때마다 첫 번째 이미지를 보여주도록 인덱스를 초기화
+    if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+      setCurrentImageIndex(0);
+    }
   }, [imageUrls]);
 
   const handlePrevImage = () => {
-    setCurrentImageIndex((prevIndex) => {
-      if (prevIndex === 0) {
-        return imageUrls.length - 1;
-      } else {
-        return prevIndex - 1;
-      }
-    });
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? imageUrls.length - 1 : prevIndex - 1
+    );
   };
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prevIndex) => {
-      if (prevIndex === imageUrls.length - 1) {
-        return 0;
-      } else {
-        return prevIndex + 1;
-      }
-    });
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === imageUrls.length - 1 ? 0 : prevIndex + 1
+    );
   };
 
   if (!imageUrls || imageUrls.length === 0) {
@@ -35,48 +54,23 @@ function UploadPost({ imageUrls }) {
   }
 
   return (
-    <Box className="img" style={{ width: "100%", position: "relative" }}>
-      <CardMedia
+    <ImageContainer>
+      <StyledCardMedia
         component="img"
         image={imageUrls[currentImageIndex]}
         alt={`image-${currentImageIndex}`}
-        style={{
-          width: "100%", // 카드의 너비에 맞게 이미지 크기 조정
-          height: "auto", // 원본 비율 유지
-          objectFit: "cover", // 이미지를 요소에 맞게 잘라서 보여줌
-          maxWidth: "100%", // 최대 너비 100%로 설정
-          maxHeight: "100%", // 최대 높이 100%로 설정
-        }}
       />
       {imageUrls.length > 1 && (
         <>
-          <IconButton
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: 0,
-              transform: "translateY(-50%)",
-              color: "white",
-            }}
-            onClick={handlePrevImage}
-          >
+          <NavigationButton style={{ left: 0 }} onClick={handlePrevImage}>
             <ChevronLeftIcon />
-          </IconButton>
-          <IconButton
-            style={{
-              position: "absolute",
-              top: "50%",
-              right: 0,
-              transform: "translateY(-50%)",
-              color: "white",
-            }}
-            onClick={handleNextImage}
-          >
+          </NavigationButton>
+          <NavigationButton style={{ right: 0 }} onClick={handleNextImage}>
             <ChevronRightIcon />
-          </IconButton>
+          </NavigationButton>
         </>
       )}
-    </Box>
+    </ImageContainer>
   );
 }
 

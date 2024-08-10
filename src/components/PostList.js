@@ -44,8 +44,8 @@ import { red } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import NotesIcon from "@mui/icons-material/Notes";
 import MapsUgcRoundedIcon from "@mui/icons-material/MapsUgcRounded";
 import FollowersPage from "../pages/FollowersPage";
 import UploadPost from "./UploadPost";
@@ -78,6 +78,8 @@ const PostList = ({
   const [likesCount, setLikesCount] = useState({});
   const [editComment, setEditComment] = useState(null); // 댓글 수정 상태
   const [editCommentContent, setEditCommentContent] = useState(""); // 댓글 수정 내용
+  const [showFollowers, setShowFollowers] = useState(false); // 상태 추가
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 869);
 
   const navigate = useNavigate(); // Initialize useNavigate
 
@@ -311,15 +313,14 @@ const PostList = ({
       // Reset the input field
       setNewComment("");
 
-      // Update local state with the new comment
-      const updatedComments = comments[postId] || [];
-      updatedComments.push({
-        id: commentId, // Use the generated commentsid
-        content: newComment,
-        createdAt: new Date(),
-        userId: user.uid,
-        displayName: user.displayName,
-      });
+      // Fetch and update comments immediately
+      const commentsSnapshot = await getDocs(commentRef);
+      const updatedComments = commentsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      updatedComments.sort((a, b) => b.createdAt - a.createdAt);
+
       setComments((prevComments) => ({
         ...prevComments,
         [postId]: updatedComments,
@@ -515,6 +516,19 @@ const PostList = ({
     }
   };
 
+  //슬라이드 버튼
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 869);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <>
       <div className="PostList">
@@ -603,7 +617,7 @@ const PostList = ({
                       <div style={{ position: "relative" }}>
                         <UploadPost
                           imageUrls={post.imageUrls || []}
-                          currentImageIndex={currentImageIndex}
+                          style={{ width: "300px" }}
                         />
                       </div>
                     </CardMedia>
@@ -628,7 +642,9 @@ const PostList = ({
                     <CardActions disableSpacing>
                       <IconButton
                         onClick={() => handleLikePost(post)}
-                        color={likedPosts[post.id] ? "secondary" : "default"}
+                        style={{
+                          color: likedPosts[post.id] ? "#e57373" : "#858585",
+                        }}
                       >
                         <Tooltip title="좋아요">
                           <FavoriteIcon />
@@ -636,15 +652,6 @@ const PostList = ({
                       </IconButton>
 
                       <Typography>{likesCount[post.id]} </Typography>
-
-                      <IconButton
-                        aria-label="share"
-                        onClick={() => handleShare(post)}
-                      >
-                        <Tooltip title="공유">
-                          <ShareIcon />
-                        </Tooltip>
-                      </IconButton>
 
                       <Typography component="div">
                         <IconButton
@@ -662,7 +669,16 @@ const PostList = ({
                         onClick={() => handleMoreClick(post.id, post.uid)}
                       >
                         <Tooltip title="글보기">
-                          <MoreHorizRoundedIcon />
+                          <NotesIcon />
+                        </Tooltip>
+                      </IconButton>
+
+                      <IconButton
+                        aria-label="share"
+                        onClick={() => handleShare(post)}
+                      >
+                        <Tooltip title="공유">
+                          <ShareIcon />
                         </Tooltip>
                       </IconButton>
                     </CardActions>
@@ -838,11 +854,23 @@ const PostList = ({
             <Typography variant="body1">로그인 해주세요.</Typography>
           )}
         </div>
-        {window.innerWidth >= 869 && (
+        {isLargeScreen && (
           <div className="Followers">
             <FollowersPage />
           </div>
         )}
+        <button
+          className="innerbtn"
+          onClick={() => setShowFollowers(!showFollowers)}
+        >
+          {showFollowers ? ">" : "<"}
+        </button>
+
+        {/* 슬라이드 메뉴 */}
+        <div className={`slide-menu ${showFollowers ? "open" : ""}`}>
+          <div className="slidelist">팔로우 리스트</div>
+          {showFollowers && !isLargeScreen && <FollowersPage />}
+        </div>
       </div>
       <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
         <DialogTitle>게시물 수정</DialogTitle>

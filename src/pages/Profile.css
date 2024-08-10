@@ -10,42 +10,35 @@
   font-family: "IBM Plex Sans KR", sans-serif;
   font-weight: 600;
   font-style: normal;
-
-  min-height: 100vh; /* 최소 높이를 100vh로 설정 */
-
+  min-height: 100vh;
   max-width: 600px;
   padding: 20px;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-
-  margin: 10px 0; /* 위 아래 모두에 20px 마진 적용 */
+  margin: 10px 0;
 }
 
 .Profile .ProfileContainer {
   display: flex;
   width: 100%;
   flex: 1;
-  flex-direction: row; /* 세로 방향에서 가로 방향으로 변경 */
+  flex-direction: row;
 }
 
 .Profile .ProfileBox {
   display: flex;
   flex: 1;
-  flex-direction: row; /* 세로 방향에서 가로 방향으로 변경 */
-  align-items: flex-start; /* 좌측 정렬 */
+  flex-direction: row;
+  align-items: flex-start;
   justify-content: center;
-}
-
-.Profile .ProfileBox .Profileimg {
-  /* margin-bottom: 20px; */
 }
 
 .Profile .LeftSide {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1; /* 유동적인 높이 설정 */
+  flex: 1;
   margin-top: 50px;
 }
 
@@ -69,10 +62,10 @@
 }
 
 .Profile .Userpost {
-  flex: 1.5; /* 기존 2에서 변경 */
+  flex: 1.5;
   display: flex;
   flex-direction: column;
-  align-items: center; /* 가운데 정렬 */
+  align-items: center;
   margin-top: 50px;
 }
 
@@ -84,21 +77,43 @@
 
 .post-card-content {
   width: auto;
-  height: 300px; /* 고정된 높이 설정 */
+  height: 300px;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 중앙 정렬 */
-  align-items: center; /* 중앙 정렬 */
+  justify-content: center;
+  align-items: center;
 }
 
 .post-card-content img {
-  height: 150px; /* 이미지 높이 제한 */
+  height: 150px;
   object-fit: cover;
   display: block;
   margin: auto;
 }
 
-.Userpost .Profileuploadimg {
+.ProfileImageContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.ProfileImageContainer .MuiIconButton-root {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.ProfileImageContainer .MuiAvatar-root {
+  background-color: #e0e0e0;
+}
+
+.ProfileImageContainer .MuiAvatar-root img {
+  display: block;
 }
 
 @media (max-width: 1000px) {
@@ -114,22 +129,22 @@
   .Profile .Namefield,
   .Profile .UserInfo,
   .Profile .Userpost {
-    width: 100%; /* 컨테이너에 맞춰 전체 너비 사용 */
-    margin-bottom: 20px; /* 아래 여백 추가 */
+    width: 100%;
+    margin-bottom: 20px;
   }
 
   .posts-container {
-    grid-template-columns: 1fr; /* 한 열로 배치 */
+    grid-template-columns: 1fr;
   }
 
   .post-card-content {
     width: auto;
-    height: auto; /* 카드 높이 자동 조정 */
+    height: auto;
     align-items: center;
     justify-content: center;
   }
 }
 
 .footer {
-  margin-top: auto; /* Footer를 항상 페이지 하단에 고정 */
+  margin-top: auto;
 }

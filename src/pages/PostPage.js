@@ -9,6 +9,7 @@ import {
   deleteDoc,
   getDocs,
   updateDoc,
+  setDoc,
 } from "firebase/firestore";
 import {
   Container,
@@ -49,7 +50,6 @@ const PostPage = () => {
       }
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
@@ -131,15 +131,18 @@ const PostPage = () => {
 
   const handleLikePost = async () => {
     try {
-      const likesRef = collection(db, `users/${uid}/posts/${postId}/likes`);
-      const likeDocRef = doc(likesRef, currentUserId);
+      const likeDocRef = doc(
+        db,
+        `users/${uid}/posts/${postId}/likes`,
+        currentUserId
+      );
 
       if (liked) {
         await deleteDoc(likeDocRef);
         setLiked(false);
         setLikesCount((prevCount) => prevCount - 1);
       } else {
-        await addDoc(likesRef, { userId: currentUserId });
+        await setDoc(likeDocRef, { userId: currentUserId });
         setLiked(true);
         setLikesCount((prevCount) => prevCount + 1);
       }
@@ -147,6 +150,14 @@ const PostPage = () => {
       console.error("Error handling like:", error);
     }
   };
+
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (!post) {
+    return <Typography variant="h5">게시물을 찾을 수 없습니다.</Typography>;
+  }
 
   const handleCommentChange = (event) => {
     setNewComment(event.target.value);
@@ -166,7 +177,7 @@ const PostPage = () => {
         timestamp: new Date(),
       });
       setNewComment("");
-      fetchComments(); // Refresh comments list after adding a new comment
+      fetchComments();
     } catch (error) {
       console.error("Error adding comment:", error);
     }
@@ -188,7 +199,7 @@ const PostPage = () => {
       await updateDoc(commentDocRef, { content: editCommentContent });
       setEditingCommentId(null);
       setEditCommentContent("");
-      fetchComments(); // Refresh comments list after editing a comment
+      fetchComments();
     } catch (error) {
       console.error("Error updating comment:", error);
     }
@@ -202,37 +213,34 @@ const PostPage = () => {
         commentId
       );
       await deleteDoc(commentDocRef);
-      fetchComments(); // Refresh comments list after deleting a comment
+      fetchComments();
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
   };
 
-  if (loading) {
-    return <CircularProgress />;
-  }
-
-  if (!post) {
-    return <Typography variant="h5">게시물을 찾을 수 없습니다.</Typography>;
-  }
-
   return (
-    <Container className="container">
+    <Container className="container" style={{ width: "750px" }}>
       <Typography variant="h3" className="text">
         {post.category}
       </Typography>
-      <UploadPost imageUrls={post.imageUrls} />
+
+      <Box className="upload-post-container">
+        <UploadPost imageUrls={post.imageUrls} />
+      </Box>
+
       <Typography variant="h5" className="content">
         {post.content}
       </Typography>
+
       <Box className="actions">
         <IconButton
           onClick={handleLikePost}
-          color={liked ? "secondary" : "default"}
-          className={liked ? "liked" : ""}
+          style={{ color: liked ? "#e57373" : "#858585" }}
         >
           <FavoriteIcon />
         </IconButton>
+
         <Typography className="text">{likesCount} 좋아요</Typography>
       </Box>
       <Box className="comments-section">
@@ -243,8 +251,7 @@ const PostPage = () => {
           {comments.map((comment) => (
             <Box key={comment.id} className="comment">
               <Box className="comment-header">
-                <Profilelogo uid={comment.userId} />{" "}
-                {/* Profilelogo 컴포넌트 사용 */}
+                <Profilelogo uid={comment.userId} />
                 <Typography variant="body2" className="comment-author">
                   {comment.userProfile.displayName || "Unknown User"}
                 </Typography>
@@ -315,11 +322,11 @@ const PostPage = () => {
           />
           <Button
             onClick={handleAddComment}
-            className="text"
+            className="cmtaddbtn"
             variant="contained"
             color="primary"
           >
-            댓글을 추가해보세요!
+            추가하기
           </Button>
         </Box>
       </Box>

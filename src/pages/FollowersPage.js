@@ -3,7 +3,13 @@ import { getAuth } from "firebase/auth";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import { List, ListItem, ListItemText, Typography } from "@mui/material";
+import {
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+  Avatar,
+} from "@mui/material";
 import ProfileImage from "../components/ProfileImage";
 import "./FollowersPage.css";
 
@@ -54,7 +60,9 @@ const FollowersPage = () => {
     <div className="followers" style={{ fontFamily: "BMJUA" }}>
       <List>
         <ListItem onClick={() => navigate(`/profile/${user.uid}`)}>
-          <ProfileImage className="MyPage" uid={user.uid} />
+          <Avatar>
+            <ProfileImage uid={user.uid} />
+          </Avatar>
           <ListItemText
             primary={user.displayName}
             secondary={user.email}
@@ -63,14 +71,16 @@ const FollowersPage = () => {
           />
         </ListItem>
         {followers.length === 0 ? (
-          <Typography className="text">팔로워가 없습니다.</Typography>
+          <Typography className="text"> </Typography>
         ) : (
           followers.slice(0, 5).map((follower) => (
             <ListItem
               key={follower.id}
               onClick={() => handleProfileClick(follower.id)}
             >
-              <ProfileImage uid={follower.id} />
+              <Avatar>
+                <ProfileImage uid={follower.id} />
+              </Avatar>
               <ListItemText
                 primary={follower.displayName}
                 secondary={follower.email}

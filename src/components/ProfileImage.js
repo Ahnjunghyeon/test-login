@@ -1,27 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { Avatar } from "@mui/material";
-import Modal from "@mui/material/Modal";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const ProfileImage = ({ uid }) => {
   const [photoURL, setPhotoURL] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const storage = getStorage();
   const db = getFirestore();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        // Fallback to checking Firestore for the profile image based on uid
         const userDoc = await getDoc(doc(db, "users", uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          if (userData.profileImage) {
-            setPhotoURL(userData.profileImage);
-          } else {
-            console.log("No profile image found for user:", uid);
-          }
+          setPhotoURL(userData.profileImage || null); // 기본 이미지로 null 설정
         } else {
           console.log("No such user!");
         }
@@ -35,43 +27,28 @@ const ProfileImage = ({ uid }) => {
     }
   }, [uid, db]);
 
-  const handleModalOpen = () => {
-    setModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
-
   return (
     <div>
-      {photoURL && (
-        <div onClick={handleModalOpen} style={{ cursor: "pointer" }}>
-          <Avatar src={photoURL} alt="Profile" sx={{ width: 40, height: 40 }} />
-        </div>
-      )}
-      <Modal
-        open={modalOpen}
-        onClose={handleModalClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            border: "none",
+      <div style={{ cursor: "pointer" }}>
+        <Avatar
+          src={photoURL || ""}
+          alt="Profile"
+          sx={{
+            width: 90,
+            height: 90,
+            backgroundColor: photoURL ? "transparent" : "#e0e0e0",
           }}
         >
-          <Avatar
-            src={photoURL}
-            alt="Profile"
-            sx={{ width: 200, height: 200 }}
-          />
-        </div>
-      </Modal>
+          {!photoURL && (
+            <AccountCircleIcon
+              sx={{
+                color: "#858585",
+                fontSize: 60, // Avatar의 크기에 비례하여 조정
+              }}
+            />
+          )}
+        </Avatar>
+      </div>
     </div>
   );
 };

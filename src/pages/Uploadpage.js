@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-
 import "./Uploadpage.css";
 import CustomNavbar from "../components/Header";
 import Footer from "../components/Footer"; // Footer 컴포넌트 추가
-
 import {
   Container,
   TextField,
@@ -124,7 +122,10 @@ function Uploadpage() {
     setConfirmDialogOpen(false);
     setLoading(true);
 
-    const folderRef = ref(storage, `users/${user.uid}/postimage/`);
+    // 게시물 ID를 생성합니다. (예: 현재 시간을 사용하여 고유한 ID를 생성)
+    const postId = new Date().getTime().toString();
+
+    const folderRef = ref(storage, `users/${user.uid}/posts/${postId}/`);
 
     // 이미지 업로드 및 저장을 위한 함수
     const uploadImages = async () => {
@@ -178,7 +179,7 @@ function Uploadpage() {
       const imageUrls = await uploadImages();
 
       // Firestore에 데이터 저장 및 페이지 네비게이션
-      await savePostData(imageUrls);
+      await savePostData(imageUrls, postId);
     } catch (error) {
       console.error("Error uploading images or saving data:", error);
       setLoading(false);
@@ -189,7 +190,7 @@ function Uploadpage() {
     setConfirmDialogOpen(false);
   };
 
-  const savePostData = async (imageUrls) => {
+  const savePostData = async (imageUrls, postId) => {
     try {
       const postNumber = categoryPostsCount + 1;
       const userPostId = category
@@ -201,6 +202,7 @@ function Uploadpage() {
         category: category || "Uncategorized",
         createdAt: new Date(),
         uid: user.uid, // 유저의 uid를 추가합니다.
+        postId: postId, // 새로 추가된 postId
       });
       setContent("");
       setImages([]);

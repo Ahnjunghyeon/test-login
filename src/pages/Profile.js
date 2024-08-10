@@ -9,6 +9,7 @@ import {
   deleteDoc,
   getFirestore,
 } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   Container,
   Typography,
@@ -19,12 +20,14 @@ import {
   Card,
   CardContent,
   Avatar,
+  IconButton,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import CustomNavbar from "../components/Header";
-import ProfileImage from "../components/ProfileImage";
 import Footer from "../components/Footer";
 import UploadPost from "../components/UploadPost";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import "./Profile.css";
 
 const Profile = () => {
@@ -36,8 +39,11 @@ const Profile = () => {
   const [userEmail, setUserEmail] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
   const [profilePosts, setProfilePosts] = useState([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   const auth = getAuth();
   const db = getFirestore();
+  const storage = getStorage();
   const currentUser = auth.currentUser;
   const { uid } = useParams();
   const navigate = useNavigate();
@@ -50,8 +56,8 @@ const Profile = () => {
           const userData = userDoc.data();
           setProfileUser(userData);
           setDisplayName(userData.displayName);
-          setProfileImage(userData.profileImage);
-          setUserEmail(userData.email); // Set the email from user data
+          setProfileImage(userData.profileImage || ""); // 기본 이미지 설정 제거
+          setUserEmail(userData.email);
         } else {
           console.log("No such user!");
         }
@@ -88,7 +94,7 @@ const Profile = () => {
       const userPostsRef = collection(db, `users/${uid}/posts`);
       const querySnapshot = await getDocs(userPostsRef);
       const userPosts = querySnapshot.docs.map((doc) => ({
-        id: doc.id, // 게시물 ID를 추가
+        id: doc.id,
         ...doc.data(),
       }));
       return userPosts;
@@ -146,12 +152,33 @@ const Profile = () => {
       });
   };
 
-  const handleImageUpload = () => {
-    setRefreshProfileImage(!refreshProfileImage);
+  const handleImageUpload = async (event) => {
+    if (event.target.files[0]) {
+      setUploadingImage(true);
+      const file = event.target.files[0];
+      const storageRef = ref(storage, `profileImages/${uid}`);
+      try {
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        await setDoc(
+          doc(db, "users", uid),
+          { profileImage: downloadURL },
+          { merge: true }
+        );
+        setProfileImage(downloadURL);
+        setRefreshProfileImage(!refreshProfileImage);
+        alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
+      } catch (error) {
+        console.error("Error uploading profile image: ", error);
+        alert("프로필 이미지를 업데이트하는 중에 오류가 발생했습니다.");
+      } finally {
+        setUploadingImage(false);
+      }
+    }
   };
 
   const handlePostClick = (postId) => {
-    navigate(`/posts/${uid}/${postId}`); // 해당 게시물의 URL로 이동
+    navigate(`/posts/${uid}/${postId}`);
   };
 
   return (
@@ -160,22 +187,51 @@ const Profile = () => {
       <Container className="Profile">
         <Box className="ProfileContainer">
           <Box className="ProfileBox">
-            {/* Left side - User Info */}
             <Box className="LeftSide">
               {profileUser && (
                 <>
-                  {profileImage && (
+                  <Box className="ProfileImageContainer">
                     <Avatar
-                      src={profileImage}
+                      src={profileImage || undefined} // 이미지가 없으면 기본 아이콘으로 대체
                       alt="Profile"
                       style={{
                         maxWidth: "100%",
                         maxHeight: "200px",
                         width: "90px",
                         height: "90px",
+                        backgroundColor: profileImage
+                          ? "transparent"
+                          : "#e0e0e0",
                       }}
-                    />
-                  )}
+                    >
+                      {!profileImage && (
+                        <AccountCircleIcon
+                          sx={{ color: "#858585", width: 90, height: 90 }}
+                        />
+                      )}
+                    </Avatar>
+
+                    {currentUser && currentUser.uid === uid && (
+                      <IconButton
+                        color="primary"
+                        aria-label="upload picture"
+                        component="label"
+                        disabled={uploadingImage}
+                      >
+                        <input
+                          hidden
+                          accept="image/*"
+                          type="file"
+                          onChange={handleImageUpload}
+                        />
+                        {uploadingImage ? (
+                          <CircularProgress size={24} />
+                        ) : (
+                          <PhotoCamera />
+                        )}
+                      </IconButton>
+                    )}
+                  </Box>
 
                   {currentUser && currentUser.uid === uid ? (
                     <form className="Namefield" onSubmit={handleSubmit}>
@@ -232,7 +288,6 @@ const Profile = () => {
               )}
             </Box>
 
-            {/* Right side - User's Posts */}
             <Box className="Userpost">
               <Typography variant="h4">게시물</Typography>
               <div className="posts-container">
@@ -240,7 +295,7 @@ const Profile = () => {
                   <div
                     className="post-card"
                     key={post.id}
-                    onClick={() => handlePostClick(post.id)} // 게시물 클릭 시 이벤트 핸들러 추가
+                    onClick={() => handlePostClick(post.id)}
                   >
                     <Card className="post-card-content">
                       <CardContent>

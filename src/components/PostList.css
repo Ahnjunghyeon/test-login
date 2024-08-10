@@ -1,20 +1,12 @@
-@font-face {
-  font-family: "BMJUA";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff")
-      format("woff"),
-    url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff")
-      format("woff2");
-  font-weight: normal;
-  font-style: normal;
-}
+/* @font-face 및 기존 스타일 유지 */
 
-/* 기존 스타일 유지 */
 .PostList {
+  position: relative; /* 버튼과 메뉴 위치를 조정하기 위해 상대 포지션 사용 */
   display: flex;
   align-items: flex-start;
   padding: 20px;
   justify-content: center;
-  margin: 10px 0; /* 위아래 20px, 좌우 100px */
+  margin: 10px 0;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
@@ -25,6 +17,7 @@
 }
 
 .Posts {
+  width: 600px;
   flex: 2;
   margin-right: 50px; /* 우측 여백 줄임 */
   max-width: 100%; /* 최대 너비 100% */
@@ -126,6 +119,46 @@
   font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
+/* 팔로워 버튼 */
+.innerbtn {
+  position: fixed; /* 고정 위치 */
+  top: 20px; /* 화면의 위에서 20px 아래 */
+  right: 10px; /* 화면의 오른쪽에서 10px 떨어진 위치 */
+  z-index: 1001; /* 메뉴 위에 버튼이 보이도록 z-index 설정 */
+  background-color: #d6d6d638; /* 버튼 색상 */
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.innerbtn:focus {
+  outline: none;
+}
+
+.slide-menu {
+  position: fixed; /* 고정 위치 */
+  top: 0;
+  right: -100%; /* 처음에 화면 밖에 위치 */
+  width: 80%; /* 메뉴 너비 설정 */
+  max-width: 300px; /* 최대 너비 설정 */
+  height: 100%;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  transition: right 0.3s ease-in-out; /* 슬라이드 애니메이션 */
+  z-index: 1000;
+}
+
+.slide-menu.open {
+  right: 0; /* open 클래스가 추가되면 화면 안으로 이동 */
+}
+
+.slide-menu .slidelist {
+  align-items: center;
+  margin: 25px;
+}
+
 /* 반응형 스타일 조정 */
 @media (max-width: 600px) {
   .PostList {
@@ -134,6 +167,7 @@
 
   .Posts {
     margin-right: 0;
+    width: 100%;
   }
 
   .PostList .Posts .Post {
@@ -150,8 +184,18 @@
   }
 }
 
-@media (max-width: 869px) {
+@media (min-width: 868px) {
+  .innerbtn {
+    display: none; /* 601px 이상일 때 버튼 숨기기 */
+  }
+}
+
+@media (max-width: 867px) {
   .Followers {
     display: none;
+  }
+  .innerbtn {
+    display: block; /* 600px 이하일 때 버튼 보이기 */
+    top: 400px;
   }
 }
