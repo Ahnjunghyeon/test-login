@@ -14,7 +14,8 @@ const ImageContainer = styled(Box)({
 
 const StyledCardMedia = styled(CardMedia)({
   width: "100%",
-  height: "500px",
+  height: "auto",
+  maxHeight: "500px",
   objectFit: "contain", // 수정된 부분: 비율을 유지하며 이미지가 영역 내에 맞추어지도록 설정
   alignItems: "center",
   justifyContent: "center",

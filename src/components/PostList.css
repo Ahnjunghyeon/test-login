@@ -6,7 +6,7 @@
   align-items: flex-start;
   padding: 20px;
   justify-content: center;
-  margin: 10px 0;
+  margin: 30px 0px;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
@@ -17,31 +17,30 @@
 }
 
 .Posts {
-  width: 600px;
-  flex: 2;
-  margin-right: 50px; /* 우측 여백 줄임 */
-  max-width: 100%; /* 최대 너비 100% */
+  width: 700px;
+  flex: 4;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center; /* 요소를 세로 방향으로 가운데 정렬 */
+  align-items: center;
 }
 
 .Followers {
-  flex: 1;
-  max-width: 100%; /* 최대 너비 100% */
-  display: block; /* 기본적으로 Followers 노출 */
+  flex: 0.5; /* 작은 비율로 공간을 차지하도록*/
+  width: 100%;
+  display: block; /* 평소에 보이도록 */
 }
 
 .PostList .Post {
-  width: 345px; /* 카드의 고정된 너비 */
-  height: auto; /* 높이 자동 조정 */
+  width: 345px;
+  height: auto;
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   padding: 20px;
   overflow-y: auto;
-  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
-  font-weight: normal; /* BMJUA는 보통 400과 같은 일반적인 두께를 사용합니다 */
+  font-family: "BMJUA", sans-serif;
+  font-weight: normal;
   font-style: normal;
 }
 
@@ -89,6 +88,10 @@
 .PostList .comments-list .MuiListItem-root .MuiListItemText-secondary {
   color: #333;
   margin-top: 4px;
+}
+
+.Postlist .comments-list .comments-index {
+  display: flex;
 }
 
 /* 댓글 입력 섹션 스타일 */
@@ -162,7 +165,7 @@
 /* 반응형 스타일 조정 */
 @media (max-width: 600px) {
   .PostList {
-    margin: 10px;
+    margin: 30px 0px;
   }
 
   .Posts {
@@ -191,6 +194,9 @@
 }
 
 @media (max-width: 867px) {
+  .PostList {
+    margin: 30px 0px;
+  }
   .Followers {
     display: none;
   }

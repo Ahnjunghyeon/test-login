@@ -67,7 +67,7 @@ const FollowersPage = () => {
             primary={user.displayName}
             secondary={user.email}
             className="text"
-            style={{ fontFamily: "BMJUA" }}
+            style={{ fontFamily: "BMJUA", marginLeft: "5px" }}
           />
         </ListItem>
         {followers.length === 0 ? (
@@ -84,6 +84,7 @@ const FollowersPage = () => {
               <ListItemText
                 primary={follower.displayName}
                 secondary={follower.email}
+                style={{ fontFamily: "BMJUA", marginLeft: "5px" }}
               />
             </ListItem>
           ))

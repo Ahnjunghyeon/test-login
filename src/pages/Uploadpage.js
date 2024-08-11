@@ -257,14 +257,14 @@ function Uploadpage() {
                 label="Category"
               >
                 <MenuItem value="">주제</MenuItem>
-                <MenuItem value="None">그냥</MenuItem>
-                <MenuItem value="Travel">여행</MenuItem>
-                <MenuItem value="Food">음식</MenuItem>
-                <MenuItem value="Cooking">요리</MenuItem>
-                <MenuItem value="Culture">일상</MenuItem>
-                <MenuItem value="Games">게임</MenuItem>
-                <MenuItem value="Music">음악</MenuItem>
-                <MenuItem value="Study">자기계발</MenuItem>
+                <MenuItem value="..">그냥</MenuItem>
+                <MenuItem value="여행">여행</MenuItem>
+                <MenuItem value="음식">음식</MenuItem>
+                <MenuItem value="요리">요리</MenuItem>
+                <MenuItem value="일상">일상</MenuItem>
+                <MenuItem value="게임">게임</MenuItem>
+                <MenuItem value="음악">음악</MenuItem>
+                <MenuItem value="자기계발">자기계발</MenuItem>
               </Select>
             </FormControl>
           </Box>

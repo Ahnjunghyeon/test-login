@@ -21,7 +21,6 @@
   color: #333;
 }
 
-/* 추가된 CSS */
 .container .upload-post-container {
   display: flex;
   justify-content: center;
@@ -61,6 +60,14 @@
 .comments-list {
   margin-bottom: 20px;
   font-family: "BMJUA";
+}
+
+.comments-list .comment-actions {
+  justify-content: flex-start;
+}
+
+.comments-list .post-comment-edit {
+  display: flex;
 }
 
 .comment {
@@ -104,4 +111,63 @@
   font-family: "BMJUA";
   min-width: 50px;
   width: 100px;
+}
+
+@media (max-width: 784px) {
+  .container {
+    max-width: 100%; /* 컨테이너 너비를 화면에 맞게 조정 */
+    padding: 15px;
+  }
+
+  .container .content {
+    font-size: 1.2rem; /* 글자 크기 조정 */
+    line-height: 1.5;
+  }
+
+  .container .upload-post-container {
+    margin-bottom: 15px;
+  }
+
+  .container .actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .comments-title {
+    font-size: 1.5rem; /* 글자 크기 조정 */
+  }
+
+  .comment {
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+
+  .comment-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .comment-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .comment-author {
+    margin-top: 5px;
+  }
+
+  .comment-content {
+    font-size: 0.9rem;
+  }
+
+  .add-comment {
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+
+  .add-comment .cmtaddbtn {
+    width: 100%;
+  }
 }

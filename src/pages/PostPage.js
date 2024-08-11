@@ -171,13 +171,20 @@ const PostPage = () => {
         db,
         `users/${uid}/posts/${postId}/comments`
       );
-      await addDoc(commentsRef, {
-        content: newComment,
-        userId: currentUserId,
-        timestamp: new Date(),
-      });
-      setNewComment("");
-      fetchComments();
+      const user = auth.currentUser;
+
+      if (user) {
+        await addDoc(commentsRef, {
+          content: newComment,
+          userId: currentUserId,
+          displayName: user.displayName || "Unknown User", // displayName 추가
+          timestamp: new Date(),
+        });
+        setNewComment("");
+        fetchComments();
+      } else {
+        console.error("No user is signed in");
+      }
     } catch (error) {
       console.error("Error adding comment:", error);
     }
@@ -250,12 +257,44 @@ const PostPage = () => {
         <Box className="comments-list">
           {comments.map((comment) => (
             <Box key={comment.id} className="comment">
-              <Box className="comment-header">
+              <Box
+                className="comment-header"
+                style={{ display: "flex", alignItems: "center" }}
+              >
                 <Profilelogo uid={comment.userId} />
-                <Typography variant="body2" className="comment-author">
+                <Typography
+                  variant="body2"
+                  className="comment-author"
+                  style={{ marginLeft: "10px" }}
+                >
                   {comment.userProfile.displayName || "Unknown User"}
                 </Typography>
+                {comment.userId === currentUserId && (
+                  <Box
+                    className="comment-actions"
+                    style={{ marginLeft: "auto", display: "flex" }}
+                  >
+                    <Tooltip title="수정">
+                      <IconButton
+                        onClick={() => {
+                          setEditingCommentId(comment.id);
+                          setEditCommentContent(comment.content);
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="삭제">
+                      <IconButton
+                        onClick={() => handleDeleteComment(comment.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                )}
               </Box>
+
               {editingCommentId === comment.id ? (
                 <Box className="edit-comment">
                   <TextField
@@ -282,30 +321,19 @@ const PostPage = () => {
                 </Box>
               ) : (
                 <>
-                  <Typography variant="body1" className="comment-content">
-                    {comment.content}
-                  </Typography>
-                  {comment.userId === currentUserId && (
-                    <Box className="comment-actions">
-                      <Tooltip title="수정">
-                        <IconButton
-                          onClick={() => {
-                            setEditingCommentId(comment.id);
-                            setEditCommentContent(comment.content);
-                          }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="삭제">
-                        <IconButton
-                          onClick={() => handleDeleteComment(comment.id)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  )}
+                  <div className="post-comment-edit">
+                    <Typography
+                      variant="body1"
+                      className="comment-content"
+                      style={{
+                        marginLeft: "50px",
+                        width: "100%",
+                        hegiht: "auto",
+                      }}
+                    >
+                      {comment.content}
+                    </Typography>
+                  </div>
                 </>
               )}
             </Box>

@@ -689,7 +689,7 @@ const PostList = ({
                       unmountOnExit
                     >
                       <CardContent>
-                        <Typography>주제 = {post.category}</Typography>
+                        <Typography>카테고리 {post.category}</Typography>
                         <Typography variant="subtitle3">
                           {post.createdAt instanceof Date
                             ? post.createdAt.toLocaleString()
@@ -711,28 +711,40 @@ const PostList = ({
                                     padding: "10px 0",
                                   }}
                                 >
-                                  <ProfileImage uid={comment.userId} />
+                                  <div style={{ width: "50px" }}>
+                                    <ProfileImage uid={comment.userId} />
+                                    <div
+                                      className="comments-displayName"
+                                      style={{
+                                        fontWeight: "bold",
+                                      }}
+                                    >
+                                      {comment.displayName}
+                                    </div>
+                                  </div>
+
                                   <ListItemText
+                                    className="comments-index"
+                                    style={{ display: "flex" }}
                                     primary={
                                       <>
-                                        <Typography
-                                          variant="body2"
+                                        <div
+                                          className="commentedit"
                                           color="textPrimary"
-                                          style={{ fontWeight: "bold" }}
-                                        >
-                                          {comment.displayName}
-                                        </Typography>
-                                        <Typography
-                                          variant="body2"
-                                          color="textPrimary"
-                                          style={{ marginTop: "4px" }}
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                          }}
                                           component="span"
                                         >
                                           {editComment &&
                                           editComment.id === comment.id ? (
                                             <>
                                               <TextField
-                                                id={`edit-comment-${comment.id}`}
+                                                style={{
+                                                  display: "flex",
+                                                  width: "225px",
+                                                }}
                                                 value={editCommentContent}
                                                 onChange={(e) =>
                                                   setEditCommentContent(
@@ -742,56 +754,74 @@ const PostList = ({
                                                 multiline
                                                 fullWidth
                                               />
-                                              <Button
-                                                onClick={() =>
-                                                  handleSaveCommentEdit(
-                                                    comment.id
-                                                  )
-                                                }
-                                                variant="contained"
-                                                color="primary"
-                                              >
-                                                저장
-                                              </Button>
-                                              <Button
-                                                onClick={() =>
-                                                  setEditComment(null)
-                                                }
-                                                variant="outlined"
-                                                color="secondary"
-                                              >
-                                                취소
-                                              </Button>
-                                            </>
-                                          ) : (
-                                            <>
-                                              {comment.content}
-                                              {user &&
-                                                comment.userId === user.uid && (
-                                                  <Button
-                                                    onClick={() =>
-                                                      handleEditComment(comment)
-                                                    }
-                                                    variant="text"
-                                                    color="primary"
-                                                  >
-                                                    수정
-                                                  </Button>
-                                                )}
-                                              <div style={{ marginTop: "8px" }}>
+                                              <div className="comments-edit-after">
                                                 <Button
                                                   onClick={() =>
-                                                    handleDeleteComment(
+                                                    handleSaveCommentEdit(
                                                       comment.id
                                                     )
                                                   }
                                                 >
-                                                  삭제
+                                                  저장
+                                                </Button>
+                                                <Button
+                                                  onClick={() =>
+                                                    setEditComment(null)
+                                                  }
+                                                >
+                                                  취소
                                                 </Button>
                                               </div>
                                             </>
+                                          ) : (
+                                            <>
+                                              <div>
+                                                <div
+                                                  className="comments-content"
+                                                  style={{
+                                                    marginLeft: "15px",
+                                                    marginTop: "0px",
+                                                    width: "175px",
+                                                  }}
+                                                >
+                                                  {comment.content}
+                                                </div>
+                                              </div>
+                                              <div
+                                                className="comments-editbtn"
+                                                style={{}}
+                                              >
+                                                {user &&
+                                                  comment.userId ===
+                                                    user.uid && (
+                                                    <Button
+                                                      onClick={() =>
+                                                        handleEditComment(
+                                                          comment
+                                                        )
+                                                      }
+                                                      color="primary"
+                                                    >
+                                                      수정
+                                                    </Button>
+                                                  )}
+                                                <div
+                                                  style={{ marginTop: "8px" }}
+                                                >
+                                                  <Button
+                                                    onClick={() =>
+                                                      handleDeleteComment(
+                                                        comment.id
+                                                      )
+                                                    }
+                                                  >
+                                                    삭제
+                                                  </Button>
+                                                </div>
+                                              </div>
+                                            </>
                                           )}
-                                        </Typography>
+                                        </div>
                                       </>
                                     }
                                   />
@@ -912,13 +942,14 @@ const PostList = ({
               label="Category"
             >
               <MenuItem value="">주제 선택</MenuItem>
-              <MenuItem value="Travel">여행</MenuItem>
-              <MenuItem value="Food">음식</MenuItem>
-              <MenuItem value="Cooking">요리</MenuItem>
-              <MenuItem value="Culture">일상</MenuItem>
-              <MenuItem value="Games">게임</MenuItem>
-              <MenuItem value="Music">음악</MenuItem>
-              <MenuItem value="Study">자기계발</MenuItem>
+              <MenuItem value="..">그냥</MenuItem>
+              <MenuItem value="여행">여행</MenuItem>
+              <MenuItem value="음식">음식</MenuItem>
+              <MenuItem value="요리">요리</MenuItem>
+              <MenuItem value="일상">일상</MenuItem>
+              <MenuItem value="게임">게임</MenuItem>
+              <MenuItem value="음악">음악</MenuItem>
+              <MenuItem value="자기계발">자기계발</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
