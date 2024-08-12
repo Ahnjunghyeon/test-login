@@ -11,7 +11,7 @@
   font-weight: 600;
   font-style: normal;
   min-height: 100vh;
-  max-width: 600px;
+  max-width: 600px; /* 기본 최대 가로넓이 */
   padding: 20px;
   background-color: #ffffff;
   border-radius: 8px;
@@ -73,6 +73,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
+  width: 100%;
 }
 
 .post-card-content {
@@ -116,6 +117,16 @@
   display: block;
 }
 
+@media (max-width: 1200px) and (min-width: 1001px) {
+  .Profile {
+    max-width: 800px; /* 200px 넓힘 */
+  }
+
+  .posts-container {
+    grid-template-columns: repeat(2, 1fr); /* 2열로 설정 */
+  }
+}
+
 @media (max-width: 1000px) {
   .Profile .ProfileContainer {
     flex-direction: column;
@@ -134,7 +145,10 @@
   }
 
   .posts-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(200px, 1fr)
+    ); /* 2열 이하로 줄어듬 */
   }
 
   .post-card-content {
@@ -142,6 +156,12 @@
     height: auto;
     align-items: center;
     justify-content: center;
+  }
+}
+
+@media (max-width: 784px) {
+  .posts-container {
+    grid-template-columns: 1fr; /* 1열로 설정 */
   }
 }
 

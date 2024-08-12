@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Uploadpage.css";
 import CustomNavbar from "../components/Header";
-import Footer from "../components/Footer"; // Footer 컴포넌트 추가
+import Footer from "../components/Footer";
 import {
   Container,
   TextField,
@@ -29,7 +29,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from "react-router-dom"; // useNavigate import 추가
+import { useNavigate } from "react-router-dom";
 
 function Uploadpage() {
   const [content, setContent] = useState("");
@@ -39,10 +39,10 @@ function Uploadpage() {
   const [user, setUser] = useState(null);
   const [category, setCategory] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [displayName, setDisplayName] = useState(""); // displayName 상태 추가
-  const [categoryPostsCount, setCategoryPostsCount] = useState(0); // 카테고리별 게시물 수 상태 추가
-  const [imageError, setImageError] = useState(""); // 이미지 에러 상태 추가
-  const navigate = useNavigate(); // useNavigate hook 추가
+  const [displayName, setDisplayName] = useState("");
+  const [categoryPostsCount, setCategoryPostsCount] = useState(0);
+  const [imageError, setImageError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const auth = getAuth();
@@ -122,25 +122,24 @@ function Uploadpage() {
     setConfirmDialogOpen(false);
     setLoading(true);
 
-    // 게시물 ID를 생성합니다. (예: 현재 시간을 사용하여 고유한 ID를 생성)
     const postId = new Date().getTime().toString();
+    const userPostId = category
+      ? `${displayName}_${category}_${categoryPostsCount + 1}`
+      : `${displayName}_${categoryPostsCount + 1}`;
 
-    const folderRef = ref(storage, `users/${user.uid}/posts/${postId}/`);
+    const folderRef = ref(storage, `users/${user.uid}/posts/${userPostId}/`);
 
-    // 이미지 업로드 및 저장을 위한 함수
     const uploadImages = async () => {
       const uploadedImageUrls = [];
 
-      // 각 이미지에 대해 순차적으로 업로드 처리
       for (let i = 0; i < images.length; i++) {
         const image = images[i];
-        const imageName = `image${i}`; // 이미지 이름을 image0, image1, image2, ... 형태로 지정
+        const imageName = `image${i}`;
 
         const fileRef = ref(folderRef, imageName);
         const uploadTask = uploadBytesResumable(fileRef, image);
 
         try {
-          // 업로드가 진행됨에 따라 발생하는 이벤트 처리
           await new Promise((resolve, reject) => {
             uploadTask.on(
               "state_changed",
@@ -155,7 +154,6 @@ function Uploadpage() {
                 reject(error);
               },
               async () => {
-                // 업로드 완료 후 이미지 다운로드 URL 획득
                 const downloadURL = await getDownloadURL(
                   uploadTask.snapshot.ref
                 );
@@ -175,11 +173,8 @@ function Uploadpage() {
     };
 
     try {
-      // 이미지 업로드 및 URL 획득
       const imageUrls = await uploadImages();
-
-      // Firestore에 데이터 저장 및 페이지 네비게이션
-      await savePostData(imageUrls, postId);
+      await savePostData(imageUrls, userPostId, postId);
     } catch (error) {
       console.error("Error uploading images or saving data:", error);
       setLoading(false);
@@ -190,27 +185,21 @@ function Uploadpage() {
     setConfirmDialogOpen(false);
   };
 
-  const savePostData = async (imageUrls, postId) => {
+  const savePostData = async (imageUrls, userPostId, postId) => {
     try {
-      const postNumber = categoryPostsCount + 1;
-      const userPostId = category
-        ? `${displayName}_${category}_${postNumber}`
-        : `${displayName}_${postNumber}`;
       await setDoc(doc(db, `users/${user.uid}/posts`, userPostId), {
         content: content,
         imageUrls: imageUrls,
         category: category || "Uncategorized",
         createdAt: new Date(),
-        uid: user.uid, // 유저의 uid를 추가합니다.
-        postId: postId, // 새로 추가된 postId
+        uid: user.uid,
+        postId: postId,
       });
       setContent("");
       setImages([]);
       setPreviews([]);
       setLoading(false);
       console.log("Document successfully written!");
-
-      // 새로 생성된 게시물 페이지로 이동
       navigate("/home");
     } catch (error) {
       console.error("Error writing document: ", error);
@@ -302,7 +291,6 @@ function Uploadpage() {
                 >
                   X
                 </button>
-                {console.log("Button rendered for image index:", index)}
               </div>
             ))}
           </Box>
@@ -326,7 +314,7 @@ function Uploadpage() {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* <Footer /> */}
+      <Footer />
     </>
   );
 }

@@ -156,7 +156,7 @@ const Profile = () => {
     if (event.target.files[0]) {
       setUploadingImage(true);
       const file = event.target.files[0];
-      const storageRef = ref(storage, `profileImages/${uid}`);
+      const storageRef = ref(storage, `users/${uid}/profileImages`);
       try {
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
