@@ -6,7 +6,8 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
-import "./LsModal.css";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import "./LoginModal.css";
 
 const style = {
   position: "absolute",
@@ -15,7 +16,7 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: "90vw",
   maxWidth: 400,
-  height: "600px",
+  height: "630px",
   bgcolor: "background.paper",
   boxShadow:
     "0px 8px 16px rgba(0, 0, 0, 0.3), 0px 0px 0px 1px rgba(0, 0, 0, 0.1)",
@@ -28,6 +29,7 @@ const style = {
 
 const LoginModal = ({ isOpen, onClose, onSwitch }) => {
   const auth = getAuth();
+  const db = getFirestore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -51,9 +53,22 @@ const LoginModal = ({ isOpen, onClose, onSwitch }) => {
   const handleGoogleLogin = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
-      .then((result) => {
+      .then(async (result) => {
         const user = result.user;
         console.log("Logged in with Google as:", user.email);
+
+        // Save user data to Firestore
+        const userRef = doc(db, "users", user.uid);
+        await setDoc(
+          userRef,
+          {
+            displayName: user.displayName,
+            email: user.email,
+            profileImage: user.photoURL,
+          },
+          { merge: true }
+        );
+
         onClose();
         setEmail("");
         setPassword("");

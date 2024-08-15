@@ -97,42 +97,54 @@ const PostList = ({
   const db = getFirestore();
 
   useEffect(() => {
-    const fetchFollowedPosts = async () => {
-      if (user) {
-        const followRef = collection(db, `users/${user.uid}/follow`);
-        const followSnapshot = await getDocs(followRef);
-        const uids = followSnapshot.docs.map((doc) => doc.id);
+    if (user) {
+      const unsubscribeMap = {};
 
-        if (uids.length > 0) {
+      const followRef = collection(db, `users/${user.uid}/follow`);
+      const unsubscribeFollow = onSnapshot(
+        followRef,
+        async (followSnapshot) => {
+          const uids = followSnapshot.docs.map((doc) => doc.id);
+
+          Object.values(unsubscribeMap).forEach((unsubscribe) => unsubscribe());
+
           const followedPostsData = [];
-
           for (const uid of uids) {
             const postsRef = collection(db, `users/${uid}/posts`);
-            const postsSnapshot = await getDocs(postsRef);
-
-            for (const postDoc of postsSnapshot.docs) {
-              const postData = postDoc.data();
-              const userDoc = await getDoc(doc(db, "users", uid));
-              const userDisplayName = userDoc.exists()
-                ? userDoc.data().displayName
-                : "Unknown User";
-
-              followedPostsData.push({
+            const unsubscribePosts = onSnapshot(postsRef, (postsSnapshot) => {
+              const posts = postsSnapshot.docs.map((postDoc) => ({
                 id: postDoc.id,
                 uid,
-                userDisplayName,
-                ...postData,
-              });
-            }
-          }
+                userDisplayName: "",
+                ...postDoc.data(),
+              }));
 
-          followedPostsData.sort((a, b) => b.createdAt - a.createdAt);
-          setFollowedPosts(followedPostsData);
+              Promise.all(
+                posts.map(async (post) => {
+                  const userDoc = await getDoc(doc(db, "users", uid));
+                  post.userDisplayName = userDoc.exists()
+                    ? userDoc.data().displayName
+                    : "Unknown User";
+                  return post;
+                })
+              ).then((postsWithDisplayName) => {
+                followedPostsData.push(...postsWithDisplayName);
+                followedPostsData.sort((a, b) => b.createdAt - a.createdAt);
+                setFollowedPosts(followedPostsData);
+              });
+            });
+
+            unsubscribeMap[uid] = unsubscribePosts;
+          }
         }
-      }
-    };
-    fetchFollowedPosts();
-  }, [db]); // 'db' 추가
+      );
+
+      return () => {
+        unsubscribeFollow();
+        Object.values(unsubscribeMap).forEach((unsubscribe) => unsubscribe());
+      };
+    }
+  }, [user, db]);
 
   useEffect(() => {
     const fetchLikedPosts = async () => {
@@ -784,7 +796,7 @@ const PostList = ({
                                     padding: "10px 0",
                                   }}
                                 >
-                                  <div style={{ width: "50px" }}>
+                                  <div style={{ width: "50px", left: "50px" }}>
                                     <ProfileImage uid={comment.userId} />
                                     <div
                                       className="comments-displayName"
@@ -915,15 +927,6 @@ const PostList = ({
                                 marginTop: "20px",
                               }}
                             >
-                              <Avatar
-                                src={user.photoURL}
-                                alt={user.displayName}
-                                style={{
-                                  width: "38px",
-                                  height: "38px",
-                                  borderRadius: "19px",
-                                }}
-                              />
                               <TextField
                                 id={`comment-${post.id}`}
                                 label="댓글 추가"
@@ -938,9 +941,14 @@ const PostList = ({
                               <Button
                                 onClick={() => handleAddComment(post.id)}
                                 variant="contained"
-                                color="primary"
+                                style={{
+                                  fontFamily: "BMJUA, sans-serif",
+                                  top: "3px",
+                                  height: "50px",
+                                  color: "6084e7cc",
+                                }}
                               >
-                                댓글 달기
+                                추가
                               </Button>
                             </div>
                           )}

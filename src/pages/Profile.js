@@ -27,7 +27,6 @@ import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import CustomNavbar from "../components/Header";
 import Footer from "../components/Footer";
 import UploadPost from "../components/UploadPost";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import "./Profile.css";
 
 const Profile = () => {
@@ -54,10 +53,11 @@ const Profile = () => {
         const userDoc = await getDoc(doc(db, "users", uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          console.log("Fetched User Data:", userData); // 로깅 추가
           setProfileUser(userData);
-          setDisplayName(userData.displayName);
-          setProfileImage(userData.profileImage || ""); // 기본 이미지 설정 제거
-          setUserEmail(userData.email);
+          setDisplayName(userData.displayName || ""); // 기본값 설정
+          setProfileImage(userData.profileImage || ""); // 기본값 설정
+          setUserEmail(userData.email || ""); // 기본값 설정
         } else {
           console.log("No such user!");
         }
@@ -66,9 +66,7 @@ const Profile = () => {
           const followDoc = await getDoc(
             doc(db, `users/${currentUser.uid}/follow`, uid)
           );
-          if (followDoc.exists()) {
-            setIsFollowing(true);
-          }
+          setIsFollowing(followDoc.exists());
         }
 
         if (uid) {
@@ -86,6 +84,8 @@ const Profile = () => {
   useEffect(() => {
     if (currentUser) {
       setDisplayName(currentUser.displayName || "");
+      setProfileImage(currentUser.photoURL || "");
+      setUserEmail(currentUser.email || "");
     }
   }, [currentUser]);
 
@@ -192,31 +192,21 @@ const Profile = () => {
                 <>
                   <Box className="ProfileImageContainer">
                     <Avatar
-                      src={profileImage || undefined} // 이미지가 없으면 기본 아이콘으로 대체
-                      alt="Profile"
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "200px",
-                        width: "90px",
-                        height: "90px",
-                        backgroundColor: profileImage
-                          ? "transparent"
-                          : "#e0e0e0",
-                      }}
-                    >
-                      {!profileImage && (
-                        <AccountCircleIcon
-                          sx={{ color: "#858585", width: 90, height: 90 }}
-                        />
-                      )}
-                    </Avatar>
-
+                      src={profileImage || "/default-avatar.png"}
+                      alt={displayName}
+                      sx={{ width: 100, height: 100 }}
+                    />
                     {currentUser && currentUser.uid === uid && (
                       <IconButton
+                        style={{
+                          top: "-25px",
+                          left: "30px",
+                          backgroundColor: "white",
+                          color: "purple",
+                        }}
                         color="primary"
                         aria-label="upload picture"
                         component="label"
-                        disabled={uploadingImage}
                       >
                         <input
                           hidden
@@ -224,11 +214,7 @@ const Profile = () => {
                           type="file"
                           onChange={handleImageUpload}
                         />
-                        {uploadingImage ? (
-                          <CircularProgress size={24} />
-                        ) : (
-                          <PhotoCamera />
-                        )}
+                        <PhotoCamera />
                       </IconButton>
                     )}
                   </Box>
@@ -236,32 +222,34 @@ const Profile = () => {
                   {currentUser && currentUser.uid === uid ? (
                     <form className="Namefield" onSubmit={handleSubmit}>
                       <TextField
-                        className="yourname"
-                        fullWidth
-                        label="이름"
+                        label="Display Name"
                         variant="outlined"
+                        fullWidth
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        disabled={loading}
+                        sx={{ marginBottom: 2 }}
                       />
-
                       <Button
-                        className="savebt"
                         type="submit"
                         variant="contained"
                         disabled={loading}
-                        sx={{ mt: 2 }}
+                        style={{
+                          color: "purple",
+                          backgroundColor: "white",
+                        }}
                       >
-                        {loading ? <CircularProgress size={24} /> : "저장"}
+                        {loading ? <CircularProgress size={24} /> : "Update"}
                       </Button>
                     </form>
                   ) : (
                     <Box className="UserInfo">
                       <Typography variant="h5">{displayName}</Typography>
                       <Typography variant="body1">User UID: {uid}</Typography>
+                      <Typography variant="body1">
+                        이메일: {userEmail}
+                      </Typography>
                     </Box>
                   )}
-                  <Typography variant="body1">이메일: {userEmail}</Typography>
 
                   {currentUser && currentUser.uid !== uid && (
                     <>

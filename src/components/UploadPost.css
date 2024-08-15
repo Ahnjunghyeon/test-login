@@ -1,4 +1,7 @@
 .img {
   width: 345px;
-  height: 210px;
+  height: 200px; /* 모든 이미지의 세로 높이를 210px로 설정 */
+  object-fit: cover; /* 비율을 유지하면서 이미지가 영역을 채우도록 설정 */
+  margin-top: 20px; /* 상하 여백을 20px 추가 */
+  margin-bottom: 20px;
 }

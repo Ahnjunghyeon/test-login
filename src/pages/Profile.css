@@ -11,18 +11,17 @@
   font-weight: 600;
   font-style: normal;
   min-height: 100vh;
-  max-width: 600px; /* 기본 최대 가로넓이 */
+  max-width: 600px; /* 기본 최대 가로 넓이 */
   padding: 20px;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-  margin: 10px 0;
+  margin: 10px auto; /* 중앙 정렬을 위해 auto 설정 */
 }
 
 .Profile .ProfileContainer {
   display: flex;
   width: 100%;
-  flex: 1;
   flex-direction: row;
 }
 
@@ -32,6 +31,7 @@
   flex-direction: row;
   align-items: flex-start;
   justify-content: center;
+  gap: 20px; /* ProfileBox 내부 요소 간의 간격 추가 */
 }
 
 .Profile .LeftSide {
@@ -46,12 +46,12 @@
   display: flex;
   align-items: center;
   margin-top: 20px;
+  gap: 10px; /* 입력 필드와 버튼 사이의 간격 */
 }
 
 .Profile .Namefield .savebt {
   width: 100px;
   height: 50px;
-  margin: auto;
   background-color: #ad85f7;
 }
 
@@ -59,6 +59,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center; /* 텍스트 중앙 정렬 */
 }
 
 .Profile .Userpost {
@@ -67,6 +68,7 @@
   flex-direction: column;
   align-items: center;
   margin-top: 50px;
+  width: 100%; /* Userpost가 가로 공간을 다 사용하도록 설정 */
 }
 
 .posts-container {
@@ -100,15 +102,6 @@
   flex-direction: column;
 }
 
-.ProfileImageContainer .MuiIconButton-root {
-  position: absolute;
-  bottom: -10px;
-  right: -10px;
-  background-color: white;
-  border-radius: 50%;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-}
-
 .ProfileImageContainer .MuiAvatar-root {
   background-color: #e0e0e0;
 }
@@ -128,6 +121,10 @@
 }
 
 @media (max-width: 1000px) {
+  .Profile {
+    max-width: 90%; /* 최대 너비 90%로 설정 */
+  }
+
   .Profile .ProfileContainer {
     flex-direction: column;
   }
@@ -152,7 +149,7 @@
   }
 
   .post-card-content {
-    width: auto;
+    width: 100%;
     height: auto;
     align-items: center;
     justify-content: center;
@@ -161,7 +158,11 @@
 
 @media (max-width: 784px) {
   .posts-container {
-    grid-template-columns: 1fr; /* 1열로 설정 */
+    grid-template-columns: repeat(2, 1fr); /* 2열로 설정 */
+  }
+
+  .Profile .ProfileContainer {
+    padding: 10px; /* 작은 화면에서 padding 감소 */
   }
 }
 

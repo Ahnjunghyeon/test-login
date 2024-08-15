@@ -9,7 +9,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../Firebase/firebase"; // firebase.js에서 export된 db import
-import "./LsModal.css";
+import "./SignupModal.css";
 
 const style = {
   position: "absolute",
@@ -18,7 +18,7 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: "90vw",
   maxWidth: 400,
-  height: "650px",
+  height: "700px",
   bgcolor: "background.paper",
   boxShadow:
     "0px 8px 16px rgba(0, 0, 0, 0.3), 0px 0px 0px 1px rgba(0, 0, 0, 0.1)",
@@ -64,21 +64,28 @@ const SignupModal = ({ isOpen, onClose, onSwitch }) => {
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        console.log("Logged in with Google as:", user.email);
-        onClose();
-        setEmail("");
-        setPassword("");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error("Google login error:", errorCode, errorMessage);
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Firestore에 사용자 정보 저장
+      await setDoc(doc(db, "users", user.uid), {
+        displayName: user.displayName,
+        email: user.email,
+        uid: user.uid,
+        profileImage: user.photoURL, // 프로필 이미지 추가 저장
       });
+
+      console.log("Logged in with Google as:", user.email);
+      onClose();
+      setEmail("");
+      setPassword("");
+      setDisplayName("");
+    } catch (error) {
+      console.error("Google login error:", error.code, error.message);
+    }
   };
 
   return (
@@ -145,7 +152,9 @@ const SignupModal = ({ isOpen, onClose, onSwitch }) => {
             <div className="line2" />
           </div>
           <div className="button-container-4">
-            <button onClick={handleGoogleLogin}>구글 계정으로 회원가입</button>
+            <button type="button" onClick={handleGoogleLogin}>
+              구글 계정으로 회원가입
+            </button>
           </div>
         </form>
       </Box>

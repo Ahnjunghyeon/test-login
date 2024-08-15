@@ -221,7 +221,12 @@ function Uploadpage() {
     <>
       <CustomNavbar />
       <Container className="Dashboard">
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          style={{ fontFamily: "BMJUA, sans-serif" }}
+        >
           업로드 페이지
         </Typography>
         <form onSubmit={handleSubmit}>
@@ -234,18 +239,28 @@ function Uploadpage() {
               rows={4}
               value={content}
               onChange={handleContentChange}
+              InputProps={{ style: { fontFamily: "BMJUA, sans-serif" } }}
+              InputLabelProps={{ style: { fontFamily: "BMJUA, sans-serif" } }}
             />
           </Box>
           <Box mb={2}>
             <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
-              <InputLabel id="category-label">주제</InputLabel>
+              <InputLabel
+                id="category-label"
+                style={{ fontFamily: "BMJUA, sans-serif" }}
+              >
+                주제
+              </InputLabel>
               <Select
                 labelId="category-label"
                 value={category}
                 onChange={handleCategoryChange}
                 label="Category"
+                style={{ fontFamily: "BMJUA, sans-serif" }}
               >
-                <MenuItem value="">주제</MenuItem>
+                <MenuItem value="" style={{ fontFamily: "BMJUA, sans-serif" }}>
+                  주제
+                </MenuItem>
                 <MenuItem value="..">그냥</MenuItem>
                 <MenuItem value="여행">여행</MenuItem>
                 <MenuItem value="음식">음식</MenuItem>
@@ -267,13 +282,22 @@ function Uploadpage() {
               style={{ display: "none" }}
             />
             <label htmlFor="upload-button">
-              <Button variant="contained" component="span">
+              <Button
+                variant="contained"
+                component="span"
+                style={{ fontFamily: "BMJUA, sans-serif" }}
+              >
                 사진을 등록해보세요
               </Button>
             </label>
           </Box>
           {imageError && (
-            <Typography color="error" variant="body2" mb={2}>
+            <Typography
+              color="error"
+              variant="body2"
+              mb={2}
+              style={{ fontFamily: "BMJUA, sans-serif" }}
+            >
               {imageError}
             </Typography>
           )}
@@ -297,19 +321,34 @@ function Uploadpage() {
           {loading ? (
             <CircularProgress />
           ) : (
-            <Button type="submit" variant="contained" color="primary">
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              style={{ fontFamily: "BMJUA, sans-serif" }}
+            >
               저장
             </Button>
           )}
         </form>
       </Container>
       <Dialog open={confirmDialogOpen} onClose={handleCancel}>
-        <DialogTitle>게시물을 등록하시겠습니까?</DialogTitle>
+        <DialogTitle style={{ fontFamily: "BMJUA, sans-serif" }}>
+          게시물을 등록하시겠습니까?
+        </DialogTitle>
         <DialogActions>
-          <Button onClick={handleCancel} color="primary">
+          <Button
+            onClick={handleCancel}
+            color="primary"
+            style={{ fontFamily: "BMJUA, sans-serif" }}
+          >
             아니요
           </Button>
-          <Button onClick={handleConfirm} color="primary">
+          <Button
+            onClick={handleConfirm}
+            color="primary"
+            style={{ fontFamily: "BMJUA, sans-serif" }}
+          >
             네
           </Button>
         </DialogActions>

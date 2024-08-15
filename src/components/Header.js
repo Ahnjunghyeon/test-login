@@ -15,20 +15,22 @@ import { getFirestore } from "firebase/firestore";
 import "./Header.css";
 import SearchBar from "./SearchBar";
 import ProfileImage from "./ProfileLogo";
-import logo from "../img/GREAPP.png"; // 로고 이미지 경로
-import LoginModal from "./LoginModal"; // Import LoginModal
-import SignupModal from "./SignupModal"; // Import SignupModal
+import LoginModal from "./LoginModal";
+import SignupModal from "./SignupModal";
 
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State to manage menu open/close
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // State to manage login modal
-  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false); // State to manage signup modal
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [prevScrollPos, setPrevScrollPos] = useState(window.pageYOffset);
+  const [isVisible, setIsVisible] = useState(true);
+
   const auth = getAuth();
   const db = getFirestore();
   const navigate = useNavigate();
-  const menuRef = useRef(null); // Ref to access the menu DOM element
+  const menuRef = useRef(null);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -62,13 +64,39 @@ const Header = ({ refreshProfileImage }) => {
     return () => unsubscribe();
   }, [auth, refreshProfileImage]);
 
+  const handleSignup = (email, password) => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("User signed up:", user);
+      })
+      .catch((error) => {
+        console.error("Error signing up:", error);
+      });
+  };
+
+  // Effect to handle scroll and hide/show header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.pageYOffset;
+      const visible = prevScrollPos > currentScrollPos || currentScrollPos < 10;
+      setIsVisible(visible);
+      setPrevScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [prevScrollPos]);
+
   const handleIconClick = (event) => {
-    event.stopPropagation(); // Prevent event bubbling to parent elements
-    setIsMenuOpen(!isMenuOpen); // Toggle menu open/close
+    event.stopPropagation();
+    setIsMenuOpen(!isMenuOpen);
   };
 
   const handleClickOutside = (event) => {
-    // Close menu if clicked outside
     if (menuRef.current && !menuRef.current.contains(event.target)) {
       setIsMenuOpen(false);
     }
@@ -81,21 +109,9 @@ const Header = ({ refreshProfileImage }) => {
     };
   }, []);
 
-  const handleSignup = (email, password) => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log("User signed up:", user);
-        // Optionally, you can navigate or perform additional actions here
-      })
-      .catch((error) => {
-        console.error("Error signing up:", error);
-      });
-  };
-
   return (
     <>
-      <div className="header">
+      <div className={`header ${isVisible ? "visible" : "hidden"}`}>
         <div className="mainlogo" onClick={() => navigate("/")}>
           <div className="Sidebtn">
             <IconButton
@@ -116,14 +132,12 @@ const Header = ({ refreshProfileImage }) => {
         </div>
         <div className="menulist">
           <div className="homebt" onClick={() => navigate("/home")}>
-            <AddHomeRoundedIcon sx={{ color: "#83769C", fontSize: "1.7rem" }} />
+            홈
           </div>
 
           {user && (
             <div className="uploadbt" onClick={() => navigate("/uploadpage")}>
-              <UploadFileRoundedIcon
-                sx={{ color: "#83769C", fontSize: "1.7rem" }}
-              />
+              업로드
             </div>
           )}
 
@@ -186,9 +200,7 @@ const Header = ({ refreshProfileImage }) => {
 
       <hr className="topline" />
 
-      {/* Header2 */}
       <div className={`header2 ${isMenuOpen ? "open" : ""}`}>
-        {/* Conditional rendering for the menu */}
         <div
           ref={menuRef}
           className={`header2-menu ${isMenuOpen ? "open" : ""}`}
@@ -205,29 +217,50 @@ const Header = ({ refreshProfileImage }) => {
               <MenuOpenRoundedIcon />
             </IconButton>
             <div className="mainlogo" onClick={() => navigate("/")}>
-              <img src={logo} alt="Logo" className="logo-image" />
+              SNSWEB
             </div>
           </div>
 
           <MenuItem className="sidehomebtn" onClick={() => navigate("/home")}>
-            <AddHomeRoundedIcon sx={{ color: "#83769C" }} />
-            <div className="text" style={{ marginLeft: "30px" }}>
+            <AddHomeRoundedIcon sx={{ color: "#849aff" }} />
+            <div
+              className="text"
+              style={{
+                marginLeft: "30px",
+                fontFamily: "BMJUA, sans-serif",
+              }}
+            >
               홈
             </div>
           </MenuItem>
-          <div className="search">
+
+          <MenuItem
+            className="sidehomebtn"
+            onClick={() => navigate("/uploadpage")}
+          >
+            <UploadFileRoundedIcon sx={{ color: "#849aff" }} />
+            <div
+              className="text"
+              style={{
+                marginLeft: "30px",
+                fontFamily: "BMJUA, sans-serif",
+              }}
+            >
+              업로드
+            </div>
+          </MenuItem>
+
+          <div className="search" style={{ marginLeft: "20px" }}>
             <SearchBar className="sidesearch" />
           </div>
         </div>
       </div>
 
-      {/* Login Modal */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
       />
 
-      {/* Signup Modal */}
       <SignupModal
         isOpen={isSignupModalOpen}
         onClose={() => setIsSignupModalOpen(false)}

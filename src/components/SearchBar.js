@@ -9,16 +9,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
-
-import {
-  InputBase,
-  IconButton,
-  Paper,
-  Typography,
-  Button,
-} from "@mui/material";
+import { InputBase, IconButton, Paper, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ProfileImage from "./ProfileLogo"; // ProfileImage 컴포넌트를 import
+import "./SearchBar.css";
 
 const SearchBar = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +20,27 @@ const SearchBar = ({ user }) => {
   const [searchError, setSearchError] = useState(false);
   const searchContainerRef = useRef(null);
   const navigate = useNavigate();
+
+  const [inputWidth, setInputWidth] = useState("400px");
+
+  useEffect(() => {
+    // 화면 크기 조정 시 InputBase의 너비를 업데이트
+    const handleResize = () => {
+      if (window.innerWidth <= 730) {
+        setInputWidth("80%");
+      } else {
+        setInputWidth("400px");
+      }
+    };
+
+    // 초기 렌더링 및 윈도우 크기 변경 시 너비 업데이트
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     setSearchResults([]);
@@ -119,6 +134,19 @@ const SearchBar = ({ user }) => {
     navigate(`/profile/${uid}`); // UID를 이용하여 프로필 페이지로 이동
   };
 
+  const getPaperPosition = () => {
+    if (searchContainerRef.current) {
+      const { bottom } = searchContainerRef.current.getBoundingClientRect();
+      return {
+        top: bottom + window.scrollY,
+        left: searchContainerRef.current.getBoundingClientRect().left,
+      };
+    }
+    return { top: "65px", left: "48%" }; // 기본 위치
+  };
+
+  const paperPosition = getPaperPosition();
+
   return (
     <div ref={searchContainerRef}>
       <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
@@ -129,7 +157,7 @@ const SearchBar = ({ user }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}
           inputProps={{ "aria-label": "search" }}
-          style={{ fontFamily: "BMJUA" }}
+          style={{ fontFamily: "BMJUA", width: inputWidth }}
         />
         <IconButton
           className="Searchicon"
@@ -143,34 +171,40 @@ const SearchBar = ({ user }) => {
         <Paper
           style={{
             position: "absolute",
-            top: "170px", // Adjust as needed
-            left: "48%", // Adjust as needed
-            width: "250px",
+            top: paperPosition.top,
+            left: paperPosition.left + 110, // Move 100px to the right
+            width: "220px",
             transform: "translateX(-50%)",
             padding: "20px",
             zIndex: 9999,
-            maxHeight: "300px", // Adjust as needed
-            overflowY: "auto", // Enable vertical scrolling
-            backgroundColor: "rgb(255,255,255,1",
+            maxHeight: "300px",
+            overflowY: "auto",
+            backgroundColor: "rgb(255,255,255,1)",
           }}
         >
-          <ul>
+          <ul style={{ padding: 0, margin: 0 }}>
             {searchResults.map((user, index) => (
-              <li key={index}>
-                <div>
-                  <Button
-                    variant="text"
-                    onClick={() => handleProfileClick(user.uid)}
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  margin: 0,
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <Button
+                  variant="text"
+                  onClick={() => handleProfileClick(user.uid)}
+                  style={{ fontFamily: "BMJUA", textAlign: "left" }}
+                >
+                  <ProfileImage
+                    uid={user.uid}
                     style={{ fontFamily: "BMJUA" }}
-                  >
-                    <ProfileImage
-                      uid={user.uid}
-                      style={{ fontFamily: "BMJUA" }}
-                    />
-                    {user.displayName} (ID: {user.uid.substring(0, 6)})
-                  </Button>
-                </div>
-              </li>
+                  />
+                  {user.displayName} (ID: {user.uid.substring(0, 6)})
+                </Button>
+              </div>
             ))}
           </ul>
         </Paper>

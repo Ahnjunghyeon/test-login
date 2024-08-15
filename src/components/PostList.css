@@ -10,10 +10,11 @@
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .text {
-  font-family: "BMJUA";
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .Posts {
@@ -23,12 +24,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .Followers {
-  flex: 0.5; /* 작은 비율로 공간을 차지하도록*/
+  flex: 0.5; /* 작은 비율로 공간을 차지하도록 */
   width: 100%;
   display: block; /* 평소에 보이도록 */
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .PostList .Post {
@@ -50,9 +53,9 @@
   margin: 0 auto;
 }
 
-/* 댓글 영역 스타일 개선 */
 .PostList .comments-section {
   margin-top: 10px;
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .PostList .comments-list {
@@ -83,18 +86,20 @@
 
 .PostList .comments-list .MuiListItem-root .MuiListItemText-primary {
   font-weight: bold;
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .PostList .comments-list .MuiListItem-root .MuiListItemText-secondary {
   color: #333;
   margin-top: 4px;
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
-.Postlist .comments-list .comments-index {
+.PostList .comments-list .comments-index {
   display: flex;
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
-/* 댓글 입력 섹션 스타일 */
 .PostList .comment-input-section {
   display: flex;
   align-items: center;
@@ -103,6 +108,7 @@
   background-color: #f1f1f1;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .PostList .comment-input-section .MuiAvatar-root {
@@ -122,7 +128,6 @@
   font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
-/* 팔로워 버튼 */
 .innerbtn {
   position: fixed; /* 고정 위치 */
   top: 20px; /* 화면의 위에서 20px 아래 */
@@ -134,6 +139,7 @@
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .innerbtn:focus {
@@ -151,6 +157,7 @@
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
   transition: right 0.3s ease-in-out; /* 슬라이드 애니메이션 */
   z-index: 1000;
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 .slide-menu.open {
@@ -160,30 +167,36 @@
 .slide-menu .slidelist {
   align-items: center;
   margin: 25px;
+  font-family: "BMJUA", sans-serif; /* 폰트 변경 */
 }
 
 /* 반응형 스타일 조정 */
 @media (max-width: 600px) {
   .PostList {
     margin: 30px 0px;
+    font-family: "BMJUA", sans-serif; /* 폰트 변경 */
   }
 
   .Posts {
     margin-right: 0;
     width: 100%;
+    font-family: "BMJUA", sans-serif; /* 폰트 변경 */
   }
 
   .PostList .Posts .Post {
     width: 100%;
+    font-family: "BMJUA", sans-serif; /* 폰트 변경 */
   }
 
   .PostList .comments-list {
     max-height: 150px;
     overflow-y: auto;
+    font-family: "BMJUA", sans-serif; /* 폰트 변경 */
   }
 
   .PostList .comment-input-section .MuiButton-root {
     min-width: 80px;
+    font-family: "BMJUA", sans-serif; /* 폰트 변경 */
   }
 }
 
@@ -196,12 +209,16 @@
 @media (max-width: 867px) {
   .PostList {
     margin: 30px 0px;
+    font-family: "BMJUA", sans-serif; /* 폰트 변경 */
   }
+
   .Followers {
     display: none;
   }
+
   .innerbtn {
     display: block; /* 600px 이하일 때 버튼 보이기 */
     top: 400px;
+    font-family: "BMJUA", sans-serif; /* 폰트 변경 */
   }
 }

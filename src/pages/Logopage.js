@@ -21,20 +21,8 @@ const Logopage = () => {
     return () => unsubscribe();
   }, [auth]);
 
-  // "바로보기" 버튼 클릭 시 처리 함수
   const handleViewClick = () => {
-    // 홈 페이지로 이동
     navigate("/home");
-  };
-
-  // "글 업로드" 버튼 클릭 시 처리 함수
-  const handleUploadClick = () => {
-    if (!user) {
-      alert("로그인이 필요합니다."); // 로그인이 필요한 경우 경고창 출력 (실제로는 모달 등의 방식으로 변경 가능)
-    } else {
-      // 로그인이 되어 있으면 글 업로드 페이지로 이동
-      navigate("/uploadpage");
-    }
   };
 
   return (
@@ -45,7 +33,7 @@ const Logopage = () => {
             SNSWEB 에 오신 것을 환영합니다!
           </h1>
           <p className="hero-text" style={{ fontFamily: "BMJUA" }}>
-            친한 사람들과 당신의 이야기를 공유해보세요
+            당신의 이야기를 공유해보세요
           </p>
           <button className="view-button" onClick={handleViewClick}>
             바로가기
