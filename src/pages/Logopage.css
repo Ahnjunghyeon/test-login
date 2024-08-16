@@ -199,3 +199,31 @@ body {
 .next-button:hover {
   background-color: rgba(0, 0, 0, 0.8);
 }
+
+.navigation-buttons {
+  padding: 50px 0;
+  text-align: center;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.nav-button {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  padding: 15px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #3273ff;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: #0056b3;
+}

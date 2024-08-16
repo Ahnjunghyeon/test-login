@@ -22,4 +22,4 @@ const db = getFirestore(app); // Firestore 초기화
 const auth = getAuth(app);
 const functions = getFunctions(app);
 
-export { auth, storage, db, functions }; // Firestore를 export
+export { auth, storage, db, functions }; // 필요한 모듈들을 export

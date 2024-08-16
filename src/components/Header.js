@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import { IconButton, Menu, MenuItem, Button } from "@mui/material";
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  Button,
+  Dialog,
+  DialogContent,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenRoundedIcon from "@mui/icons-material/MenuOpenRounded";
 import AddHomeRoundedIcon from "@mui/icons-material/AddHomeRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded"; // 알림 아이콘 추가
 import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
@@ -17,6 +25,7 @@ import SearchBar from "./SearchBar";
 import ProfileImage from "./ProfileLogo";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
+import NotificationsPage from "../pages/NotificationsPage"; // NotificationsPage import
 
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
@@ -24,6 +33,7 @@ const Header = ({ refreshProfileImage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false); // 알림 모달 상태
   const [prevScrollPos, setPrevScrollPos] = useState(window.pageYOffset);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -75,7 +85,6 @@ const Header = ({ refreshProfileImage }) => {
       });
   };
 
-  // Effect to handle scroll and hide/show header
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollPos = window.pageYOffset;
@@ -136,9 +145,17 @@ const Header = ({ refreshProfileImage }) => {
           </div>
 
           {user && (
-            <div className="uploadbt" onClick={() => navigate("/uploadpage")}>
-              업로드
-            </div>
+            <>
+              <div className="uploadbt" onClick={() => navigate("/uploadpage")}>
+                업로드
+              </div>
+              <IconButton
+                className="notificationbt" // 스타일 추가
+                onClick={() => setIsNotificationsOpen(true)}
+              >
+                <NotificationsRoundedIcon />
+              </IconButton>
+            </>
           )}
 
           {user ? (
@@ -266,6 +283,18 @@ const Header = ({ refreshProfileImage }) => {
         onClose={() => setIsSignupModalOpen(false)}
         onSignup={handleSignup}
       />
+
+      {/* 알림 모달 추가 */}
+      <Dialog
+        open={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogContent>
+          <NotificationsPage />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -17,8 +17,8 @@ body {
 
 .Dashboard {
   max-width: 800px !important;
-  margin: 40px auto; /* 상하 마진 증가 */
-
+  margin: 50px auto; /* 기존 상하 마진 */
+  margin-top: calc(50px + 80px); /* 기존 상하 마진에 80 추가 */
   padding: 30px; /* 패딩 증가 */
   background-color: #ffffff;
   border-radius: 15px; /* 둥근 모서리 */
@@ -135,6 +135,7 @@ body {
 @media (max-width: 600px) {
   .Dashboard {
     padding: 16px;
+    margin-top: calc(16px + 100px); /* 미디어 쿼리의 상단 마진에 100px 추가 */
   }
 
   .Dashboard form .MuiFormControl-root {

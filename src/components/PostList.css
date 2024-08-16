@@ -3,6 +3,7 @@
 .PostList {
   position: relative; /* 버튼과 메뉴 위치를 조정하기 위해 상대 포지션 사용 */
   display: flex;
+  margin-top: "50px";
   align-items: flex-start;
   padding: 20px;
   justify-content: center;

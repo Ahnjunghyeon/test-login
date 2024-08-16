@@ -19,7 +19,6 @@ import {
   IconButton,
   TextField,
   Button,
-  Avatar,
   Tooltip,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -129,6 +128,30 @@ const PostPage = () => {
     fetchComments();
   }, [uid, postId]);
 
+  const addLikeNotification = async () => {
+    try {
+      const postOwnerRef = doc(db, `users/${uid}`);
+      const postOwnerDoc = await getDoc(postOwnerRef);
+
+      if (postOwnerDoc.exists()) {
+        const currentUser = auth.currentUser;
+        const currentUserName = currentUser
+          ? currentUser.displayName || "Unknown User"
+          : "Unknown User";
+
+        await addDoc(collection(db, `users/${uid}/notifications`), {
+          type: "like",
+          message: `${currentUserName} liked your post.`,
+          postId: postId,
+          timestamp: new Date(),
+          read: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error adding like notification:", error);
+    }
+  };
+
   const handleLikePost = async () => {
     try {
       const likeDocRef = doc(
@@ -136,15 +159,30 @@ const PostPage = () => {
         `users/${uid}/posts/${postId}/likes`,
         currentUserId
       );
+      const notificationRef = collection(db, `users/${uid}/notifications`);
 
       if (liked) {
+        // Remove the like
         await deleteDoc(likeDocRef);
         setLiked(false);
         setLikesCount((prevCount) => prevCount - 1);
+
+        // Remove the like notification
+        const notificationsSnapshot = await getDocs(notificationRef);
+        const notificationToRemove = notificationsSnapshot.docs.find(
+          (doc) => doc.data().postId === postId && doc.data().type === "like"
+        );
+        if (notificationToRemove) {
+          await deleteDoc(doc(notificationRef, notificationToRemove.id));
+        }
       } else {
+        // Add a new like
         await setDoc(likeDocRef, { userId: currentUserId });
         setLiked(true);
         setLikesCount((prevCount) => prevCount + 1);
+
+        // Add the like notification
+        await addLikeNotification();
       }
     } catch (error) {
       console.error("Error handling like:", error);
@@ -328,7 +366,7 @@ const PostPage = () => {
                       style={{
                         marginLeft: "50px",
                         width: "100%",
-                        hegiht: "auto",
+                        height: "auto",
                       }}
                     >
                       {comment.content}

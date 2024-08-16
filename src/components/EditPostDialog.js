@@ -1,10 +1,11 @@
+// EditPostDialog.js
 import React, { useState } from "react";
 import {
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Button,
   TextField,
   FormControl,
   InputLabel,
@@ -15,32 +16,22 @@ import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
-  deleteObject,
   getStorage,
+  deleteObject,
 } from "firebase/storage";
 
-const PostDialog = ({ open, onClose, post, handleUpdatePost }) => {
-  const [content, setContent] = useState(post?.content || "");
-  const [imageUrls, setImageUrls] = useState(post?.imageUrls || []);
-  const [category, setCategory] = useState(post?.category || "");
+const EditPostDialog = ({ open, onClose, post, onSave }) => {
+  const [content, setContent] = useState(post.content || "");
+  const [imageUrls, setImageUrls] = useState(post.imageUrls || []);
+  const [category, setCategory] = useState(post.category || "");
   const [loading, setLoading] = useState(false);
-  const storage = getStorage(); // Initialize Firebase Storage
+
+  const storage = getStorage();
 
   const handleSaveEdit = async () => {
-    if (post) {
-      const updatedPost = {
-        content,
-        imageUrls,
-        category,
-      };
-
-      try {
-        await handleUpdatePost(post.id, updatedPost);
-        onClose();
-      } catch (error) {
-        console.error("Error updating post:", error);
-      }
-    }
+    const updatedPost = { content, imageUrls, category };
+    await onSave(post.id, updatedPost);
+    onClose();
   };
 
   const handleImageUpload = async (event) => {
@@ -48,8 +39,10 @@ const PostDialog = ({ open, onClose, post, handleUpdatePost }) => {
     setLoading(true);
 
     const uploadedUrls = [];
-    for (const file of files) {
-      const imageName = `image${imageUrls.length + 1}`;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const imageName = `image${imageUrls.length + i + 1}`;
       const fileRef = ref(storage, `posts/${post.id}/${imageName}`);
       const uploadTask = uploadBytesResumable(fileRef, file);
 
@@ -57,15 +50,8 @@ const PostDialog = ({ open, onClose, post, handleUpdatePost }) => {
         await new Promise((resolve, reject) => {
           uploadTask.on(
             "state_changed",
-            (snapshot) => {
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log(`Upload is ${progress}% done`);
-            },
-            (error) => {
-              console.error("Error uploading image:", error);
-              reject(error);
-            },
+            null,
+            (error) => reject(error),
             async () => {
               const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
               uploadedUrls.push(downloadURL);
@@ -86,14 +72,13 @@ const PostDialog = ({ open, onClose, post, handleUpdatePost }) => {
 
   const handleRemoveImage = async (index) => {
     const imageUrlToRemove = imageUrls[index];
-    const fileName = imageUrlToRemove.split("/").pop().split("?")[0];
-    const imageRef = ref(storage, `posts/${post.id}/${fileName}`);
+    const imageRef = ref(storage, imageUrlToRemove);
 
     try {
       await deleteObject(imageRef);
       setImageUrls((prev) => prev.filter((_, i) => i !== index));
     } catch (error) {
-      console.error("Error deleting image from Firebase Storage:", error);
+      console.error("Error deleting image:", error);
     }
   };
 
@@ -101,36 +86,24 @@ const PostDialog = ({ open, onClose, post, handleUpdatePost }) => {
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>게시물 수정</DialogTitle>
       <DialogContent>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-          {imageUrls.map((imageUrl, index) => (
-            <div
-              key={index}
-              style={{
-                position: "relative",
-                marginBottom: "10px",
-                flex: "1 0 21%",
-                height: "200px",
-                overflow: "hidden",
-              }}
+        {imageUrls.map((imageUrl, index) => (
+          <div
+            key={index}
+            style={{ position: "relative", marginBottom: "10px" }}
+          >
+            <img
+              src={imageUrl}
+              alt={`image-${index}`}
+              style={{ maxWidth: "100%" }}
+            />
+            <Button
+              onClick={() => handleRemoveImage(index)}
+              style={{ position: "absolute", top: 0, right: 0 }}
             >
-              <img
-                src={imageUrl}
-                alt={`image-${index}`}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-              <Button
-                onClick={() => handleRemoveImage(index)}
-                style={{ position: "absolute", top: 0, right: 0 }}
-              >
-                이미지 삭제
-              </Button>
-            </div>
-          ))}
-        </div>
+              이미지 삭제
+            </Button>
+          </div>
+        ))}
         <input
           type="file"
           accept="image/*"
@@ -156,7 +129,8 @@ const PostDialog = ({ open, onClose, post, handleUpdatePost }) => {
             onChange={(e) => setCategory(e.target.value)}
             label="Category"
           >
-            <MenuItem value="..">그냥</MenuItem>
+            <MenuItem value="">주제 선택</MenuItem>
+            <MenuItem value="그냥">그냥</MenuItem>
             <MenuItem value="여행">여행</MenuItem>
             <MenuItem value="음식">음식</MenuItem>
             <MenuItem value="요리">요리</MenuItem>
@@ -169,12 +143,10 @@ const PostDialog = ({ open, onClose, post, handleUpdatePost }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>취소</Button>
-        <Button onClick={handleSaveEdit} disabled={loading}>
-          저장
-        </Button>
+        <Button onClick={handleSaveEdit}>저장</Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default PostDialog;
+export default EditPostDialog;

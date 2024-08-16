@@ -16,6 +16,7 @@
   margin: 0;
   height: 0;
   color: rgb(185, 185, 185);
+  margin-bottom: 55px;
 }
 
 .topheader {
@@ -36,24 +37,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px;
-  margin-bottom: 5px;
+  height: 60px; /* 헤더 높이 조정 */
+  margin-bottom: 5px; /* 아래쪽 마진 조정 */
   position: fixed;
   width: 100%;
-  background-color: #fff;
+  background-color: #ffffff00;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: top 0.3s;
-  z-index: 1000;
+  z-index: 1000; /* 헤더가 다른 요소 위에 표시되도록 설정 */
 }
 
 .header.hidden {
-  top: -60px;
+  top: -60px; /* 헤더가 숨겨지는 상태의 위치 */
 }
 
 .header.visible {
-  top: 0;
+  top: 0; /* 헤더가 보이는 상태의 위치 */
 }
-
 .header .mainlogo {
   display: flex;
   justify-content: center;
@@ -174,152 +174,64 @@
   font-style: normal;
 }
 
-/* 미디어 쿼리 추가 */
 @media (max-width: 900px) {
   .header {
-    height: 55px;
+    height: 55px; /* 작은 화면에서 헤더 높이 조정 */
   }
 
   .header .Logo {
-    font-size: 22px;
+    font-size: 22px; /* 작은 화면에서 로고 폰트 사이즈 조정 */
   }
 
   .header .menulist .homebt,
   .header .uploadbt {
-    width: 50px;
+    width: 50px; /* 작은 화면에서 버튼 크기 조정 */
     height: 40px;
-    padding: 6px;
   }
 
   .header .menutext {
-    font-size: 14px;
-  }
-
-  .header .imgmenu {
-    height: 45px;
-    padding-left: 12px;
-  }
-
-  .header2 {
-    width: 220px;
-    left: -220px;
-  }
-
-  .header2.open {
-    left: 0;
-  }
-
-  .header2 .logo-image {
-    height: 35px;
-  }
-
-  .header2 .search {
-    max-width: 200px;
-    margin-left: 15px;
-    margin-right: 15px;
-  }
-
-  .header2-menu .menutext {
-    padding: 10px;
+    font-size: 14px; /* 작은 화면에서 텍스트 폰트 사이즈 조정 */
   }
 }
 
 @media (max-width: 720px) {
   .header {
-    height: 50px;
+    height: 50px; /* 더 작은 화면에서 헤더 높이 조정 */
     margin: 0;
   }
 
   .header .Logo {
-    font-size: 20px;
+    font-size: 20px; /* 더 작은 화면에서 로고 폰트 사이즈 조정 */
   }
 
   .header .menulist .homebt,
   .header .uploadbt {
-    width: 45px;
+    width: 45px; /* 더 작은 화면에서 버튼 크기 조정 */
     height: 35px;
-    padding: 5px;
   }
 
   .header .menutext {
-    font-size: 13px;
-  }
-
-  .header .imgmenu {
-    height: 40px;
-    padding-left: 10px;
-  }
-
-  .header2 {
-    width: 200px;
-    left: -200px;
-  }
-
-  .header2.open {
-    left: 0;
-  }
-
-  .header2 .logo-image {
-    height: 30px;
-  }
-
-  .header2 .search {
-    max-width: 180px;
-    margin-left: 10px;
-    margin-right: 10px;
-  }
-
-  .header2-menu .menutext {
-    padding: 8px;
+    font-size: 13px; /* 더 작은 화면에서 텍스트 폰트 사이즈 조정 */
   }
 }
 
 @media (max-width: 500px) {
   .header {
-    height: 45px;
+    height: 45px; /* 가장 작은 화면에서 헤더 높이 조정 */
   }
 
   .header .Logo {
-    font-size: 18px;
+    font-size: 18px; /* 가장 작은 화면에서 로고 폰트 사이즈 조정 */
   }
 
   .header .menulist .homebt,
   .header .uploadbt {
-    width: 40px;
+    width: 40px; /* 가장 작은 화면에서 버튼 크기 조정 */
     height: 30px;
-    padding: 4px;
   }
 
   .header .menutext {
-    font-size: 12px;
-  }
-
-  .header .imgmenu {
-    height: 35px;
-    padding-left: 5px;
-  }
-
-  .header2 {
-    width: 180px;
-    left: -180px;
-  }
-
-  .header2.open {
-    left: 0;
-  }
-
-  .header2 .logo-image {
-    height: 25px;
-  }
-
-  .header2 .search {
-    max-width: 150px;
-    margin-left: 5px;
-    margin-right: 5px;
-  }
-
-  .header2-menu .menutext {
-    padding: 6px;
+    font-size: 12px; /* 가장 작은 화면에서 텍스트 폰트 사이즈 조정 */
   }
 }
 
