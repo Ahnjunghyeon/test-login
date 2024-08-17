@@ -252,15 +252,22 @@ const PostPage = () => {
 
   const handleDeleteComment = async (commentId) => {
     try {
+      // Firebase에서 해당 경로의 댓글을 참조합니다.
       const commentDocRef = doc(
         db,
         `users/${uid}/posts/${postId}/comments`,
         commentId
       );
+
+      // 댓글을 Firebase에서 삭제합니다.
       await deleteDoc(commentDocRef);
+
+      // 댓글 목록을 다시 불러와서 상태를 업데이트합니다.
       fetchComments();
+
+      console.log(`댓글 ID ${commentId}가 성공적으로 삭제되었습니다.`);
     } catch (error) {
-      console.error("Error deleting comment:", error);
+      console.error("댓글 삭제 중 오류 발생:", error);
     }
   };
 
@@ -325,9 +332,7 @@ const PostPage = () => {
                     <Tooltip title="삭제">
                       <IconButton
                         onClick={() => handleDeleteComment(comment.id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                      ></IconButton>
                     </Tooltip>
                   </Box>
                 )}

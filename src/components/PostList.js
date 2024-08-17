@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import {
   getFirestore,
   runTransaction,
@@ -7,15 +7,12 @@ import {
   getDoc,
   collection,
   getDocs,
-  addDoc,
   onSnapshot,
-  deleteDoc,
-  updateDoc,
+  addDoc,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import {
-  FormControl,
-  InputLabel,
-  Select,
   MenuItem,
   Menu,
   Typography,
@@ -23,15 +20,8 @@ import {
   Avatar,
   Collapse,
   Button,
-  TextField,
-  List,
-  ListItem,
-  ListItemText,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Tooltip,
+  TextField,
 } from "@mui/material";
 import {
   CardActions,
@@ -40,14 +30,6 @@ import {
   CardHeader,
   Card,
 } from "@mui/material";
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  getStorage,
-  deleteObject,
-} from "firebase/storage";
-
 import { red } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
@@ -58,6 +40,7 @@ import MapsUgcRoundedIcon from "@mui/icons-material/MapsUgcRounded";
 import FollowersPage from "../pages/FollowersPage";
 import UploadPost from "./UploadPost";
 import ProfileImage from "./ProfileLogo";
+import EditPostDialog from "./EditPostDialog"; // EditPostDialog 임포트
 import "./PostList.css";
 
 const PostList = ({
@@ -68,44 +51,32 @@ const PostList = ({
   handleDeletePost,
   postId,
 }) => {
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [content, setContent] = useState("");
-  const [imageUrls, setImageUrls] = useState([]);
   const [menuAnchorEl, setMenuAnchorEl] = useState({});
   const [expanded, setExpanded] = useState({});
   const [contentExpanded, setContentExpanded] = useState({});
-  const [category, setCategory] = useState("");
   const [followedPosts, setFollowedPosts] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [categoryMenuAnchorEl, setCategoryMenuAnchorEl] = useState(null);
-  const [comments, setComments] = useState({});
-  const [newComment, setNewComment] = useState("");
   const [likedPosts, setLikedPosts] = useState({});
   const [likesCount, setLikesCount] = useState({});
-  const [editComment, setEditComment] = useState(null); // 댓글 수정 상태
-  const [editCommentContent, setEditCommentContent] = useState(""); // 댓글 수정 내용
-  const [showFollowers, setShowFollowers] = useState(false); // 상태 추가
+  const [showFollowers, setShowFollowers] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 869);
-  const [loading, setLoading] = useState(false);
-  const [tempImages, setTempImages] = useState([]);
+  const [newComment, setNewComment] = useState({});
+  const [comments, setComments] = useState({});
+  const [openEditDialog, setOpenEditDialog] = useState(false); // EditPostDialog 열림 상태
+  const [currentPost, setCurrentPost] = useState(null); // 현재 수정할 게시물
 
-  const storage = getStorage();
-
-  const navigate = useNavigate(); // Initialize useNavigate
-
+  const navigate = useNavigate();
   const db = getFirestore();
 
   useEffect(() => {
     if (user) {
       const unsubscribeMap = {};
-
       const followRef = collection(db, `users/${user.uid}/follow`);
       const unsubscribeFollow = onSnapshot(
         followRef,
         async (followSnapshot) => {
           const uids = followSnapshot.docs.map((doc) => doc.id);
-
           Object.values(unsubscribeMap).forEach((unsubscribe) => unsubscribe());
 
           const followedPostsData = [];
@@ -124,7 +95,7 @@ const PostList = ({
                   const userDoc = await getDoc(doc(db, "users", uid));
                   post.userDisplayName = userDoc.exists()
                     ? userDoc.data().displayName
-                    : "Unknown User";
+                    : "알 수 없는 사용자";
                   return post;
                 })
               ).then((postsWithDisplayName) => {
@@ -159,11 +130,7 @@ const PostList = ({
           );
           const likeDoc = await getDoc(doc(likesRef, user.uid));
 
-          if (likeDoc.exists()) {
-            likedPostsData[post.id] = true;
-          } else {
-            likedPostsData[post.id] = false;
-          }
+          likedPostsData[post.id] = likeDoc.exists();
         }
 
         setLikedPosts(likedPostsData);
@@ -171,7 +138,7 @@ const PostList = ({
     };
 
     fetchLikedPosts();
-  }, [user, posts, followedPosts, db]); // 'db' 추가
+  }, [user, posts, followedPosts, db]);
 
   useEffect(() => {
     const fetchLikesCount = async () => {
@@ -188,7 +155,7 @@ const PostList = ({
           likesCounts[post.id] = likesCount;
         } catch (error) {
           console.error(
-            `Error fetching likes count for post ${post.id}:`,
+            `포스트 ${post.id}의 좋아요 수를 가져오는 중 오류 발생:`,
             error
           );
           likesCounts[post.id] = 0;
@@ -198,7 +165,7 @@ const PostList = ({
     };
 
     fetchLikesCount();
-  }, [posts, followedPosts, db]); // 'db' 추가
+  }, [posts, followedPosts, db]);
 
   useEffect(() => {
     const unsubscribeLikes = {};
@@ -222,29 +189,24 @@ const PostList = ({
     };
   }, [posts, followedPosts, db]);
 
+  // 댓글 실시간 업데이트
   useEffect(() => {
     const unsubscribeComments = {};
-
-    for (const post of [...posts, ...followedPosts]) {
+    const allPosts = [...posts, ...followedPosts];
+    allPosts.forEach((post) => {
       const commentsRef = collection(
         db,
         `users/${post.uid}/posts/${post.id}/comments`
       );
-      unsubscribeComments[post.id] = onSnapshot(commentsRef, (snapshot) => {
-        const commentsData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        // Sort comments by createdAt in descending order
-        commentsData.sort((a, b) => b.createdAt - a.createdAt);
-
+      const q = query(commentsRef, orderBy("timestamp"));
+      unsubscribeComments[post.id] = onSnapshot(q, (snapshot) => {
+        const commentsData = snapshot.docs.map((doc) => doc.data());
         setComments((prevComments) => ({
           ...prevComments,
           [post.id]: commentsData,
         }));
       });
-    }
+    });
 
     return () => {
       Object.values(unsubscribeComments).forEach((unsubscribe) =>
@@ -270,152 +232,6 @@ const PostList = ({
       ...prev,
       [postId]: !prev[postId],
     }));
-  };
-
-  const handleOpenEditDialog = (post) => {
-    setSelectedPost(post);
-    setContent(post.content);
-    setImageUrls(post.imageUrls || []);
-    setCategory(post.category || "");
-    setEditDialogOpen(true);
-    handleMenuClose(post);
-  };
-
-  const handleCloseEditDialog = () => {
-    setEditDialogOpen(false);
-    setSelectedPost(null);
-  };
-
-  const handleSaveEdit = async () => {
-    if (selectedPost) {
-      const updatedPost = {
-        content,
-        imageUrls,
-        category,
-      };
-
-      try {
-        await handleUpdatePost(selectedPost.id, updatedPost);
-        handleCloseEditDialog();
-      } catch (error) {
-        console.error("Error updating post:", error);
-      }
-    }
-  };
-
-  const handleImageUpload = async (event) => {
-    const files = Array.from(event.target.files);
-    setLoading(true);
-
-    const uploadedUrls = [];
-
-    // userPostId를 가져와야 합니다. 이 값은 필요에 따라 전달해야 합니다.
-    const userPostId = selectedPost.id; // 적절한 값으로 변경해야 합니다.
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const imageName = `image${imageUrls.length + i + 1}`;
-      // userPostId를 경로에 포함시킵니다.
-      const fileRef = ref(
-        storage,
-        `users/${selectedPost.uid}/posts/${userPostId}/${imageName}`
-      );
-      const uploadTask = uploadBytesResumable(fileRef, file);
-
-      try {
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log(`Upload is ${progress}% done`);
-            },
-            (error) => {
-              console.error("Error uploading image:", error);
-              reject(error);
-            },
-            async () => {
-              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              uploadedUrls.push(downloadURL);
-              resolve();
-            }
-          );
-        });
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        setLoading(false);
-        return;
-      }
-    }
-
-    // 새로운 이미지 URL을 기존 이미지 URL에 추가
-    setImageUrls((prev) => [...prev, ...uploadedUrls]);
-    setLoading(false);
-  };
-
-  const handleRemoveImage = async (index) => {
-    const imageUrlToRemove = imageUrls[index];
-    const imageRef = ref(storage, imageUrlToRemove);
-
-    try {
-      // Firebase Storage에서 이미지를 삭제
-      await deleteObject(imageRef);
-
-      // 상태에서 해당 이미지 URL을 제거
-      setImageUrls((prev) => prev.filter((_, i) => i !== index));
-    } catch (error) {
-      console.error("Error deleting image from Firebase Storage:", error);
-    }
-  };
-
-  // 댓글 입력 핸들러
-  const handleCommentChange = (postId, content) => {
-    setNewComment(content);
-  };
-
-  // 댓글 추가 버튼이나 다른 이벤트 핸들러에서 post 객체를 함께 전달합니다.
-
-  const handleAddComment = async (postId, post) => {
-    if (!post || !post.uid) {
-      console.error("Post object is not valid or UID is missing.");
-      return;
-    }
-
-    if (newComment.trim() === "") return;
-
-    try {
-      const commentId = `${user.uid}${new Date().getTime()}`;
-
-      const commentRef = collection(
-        db,
-        `users/${post.uid}/posts/${postId}/comments`
-      );
-
-      await addDoc(commentRef, {
-        commentsid: commentId,
-        content: newComment,
-        createdAt: new Date(),
-        userId: user.uid,
-        displayName: user.displayName,
-      });
-
-      setNewComment("");
-
-      const commentsSnapshot = await getDocs(commentRef);
-      const updatedComments = commentsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      updatedComments.sort((a, b) => b.createdAt - a.createdAt);
-
-      setComments((prevComments) => ({
-        ...prevComments,
-        [postId]: updatedComments,
-      }));
-    } catch (error) {
-      console.error("Error adding comment:", error);
-    }
   };
 
   const handleLikePost = async (post) => {
@@ -444,7 +260,7 @@ const PostList = ({
         }
       });
     } catch (error) {
-      console.error("Error liking/unliking post:", error);
+      console.error("포스트 좋아요/좋아요 취소 중 오류 발생:", error);
     }
   };
 
@@ -458,7 +274,6 @@ const PostList = ({
   const combinedPosts = [...posts, ...followedPosts].sort(
     (a, b) => b.createdAt - a.createdAt
   );
-
   const filteredPosts = filterPostsByCategory(combinedPosts);
 
   const handleCategoryMenuOpen = (event) => {
@@ -480,10 +295,10 @@ const PostList = ({
       if (postDoc.exists()) {
         navigate(`/posts/${postUid}/${postId}`);
       } else {
-        console.error("Post not found!");
+        console.error("포스트를 찾을 수 없습니다!");
       }
     } catch (error) {
-      console.error("Error fetching post:", error);
+      console.error("포스트를 가져오는 중 오류 발생:", error);
     }
   };
 
@@ -496,126 +311,74 @@ const PostList = ({
           url: `${window.location.origin}/posts/${post.uid}/${post.id}`,
         });
       } else {
-        throw new Error("Web Share API is not supported in this browser.");
+        throw new Error("웹 공유 API가 이 브라우저에서 지원되지 않습니다.");
       }
     } catch (error) {
-      console.error("Error sharing:", error);
-      // Fallback sharing option if navigator.share is not supported
-      // You can implement a custom sharing solution here
+      console.error("공유 중 오류 발생:", error);
     }
   };
 
-  //댓글수정처리함수
-  const handleEditComment = (comment) => {
-    setEditComment(comment);
-    setEditCommentContent(comment.content);
+  const handleResize = () => {
+    setIsLargeScreen(window.innerWidth >= 869);
   };
 
-  const handleSaveCommentEdit = async (commentId) => {
-    const postId = Object.keys(comments).find((postId) =>
-      comments[postId].some((comment) => comment.id === commentId)
-    );
-
-    if (postId) {
-      try {
-        const commentsRef = collection(
-          db,
-          `users/${user.uid}/posts/${postId}/comments`
-        );
-        const commentsSnapshot = await getDocs(commentsRef);
-        const commentDoc = commentsSnapshot.docs.find(
-          (doc) => doc.id === commentId // Firestore 자동 생성 ID 사용
-        );
-
-        if (commentDoc) {
-          const commentRef = doc(
-            db,
-            `users/${user.uid}/posts/${postId}/comments`,
-            commentDoc.id
-          );
-
-          await updateDoc(commentRef, {
-            content: editCommentContent,
-          });
-
-          const updatedComments = comments[postId].map((comment) =>
-            comment.id === commentId
-              ? { ...comment, content: editCommentContent }
-              : comment
-          );
-          setComments((prevComments) => ({
-            ...prevComments,
-            [postId]: updatedComments,
-          }));
-
-          setEditComment(null);
-          setEditCommentContent("");
-        } else {
-          console.error("Comment not found!");
-        }
-      } catch (error) {
-        console.error("Error updating comment:", error);
-      }
-    } else {
-      console.error("Post not found for comment update.");
-    }
-  };
-
-  const handleDeleteComment = async (commentId) => {
-    const postId = Object.keys(comments).find((postId) =>
-      comments[postId].some((comment) => comment.id === commentId)
-    );
-
-    if (postId) {
-      try {
-        const commentsRef = collection(
-          db,
-          `users/${user.uid}/posts/${postId}/comments`
-        );
-        const commentsSnapshot = await getDocs(commentsRef);
-        const commentDoc = commentsSnapshot.docs.find(
-          (doc) => doc.id === commentId // Firestore 자동 생성 ID 사용
-        );
-
-        if (commentDoc) {
-          const commentRef = doc(
-            db,
-            `users/${user.uid}/posts/${postId}/comments`,
-            commentDoc.id
-          );
-
-          await deleteDoc(commentRef);
-
-          const updatedComments = comments[postId].filter(
-            (comment) => comment.id !== commentId
-          );
-          setComments((prevComments) => ({
-            ...prevComments,
-            [postId]: updatedComments,
-          }));
-        } else {
-          console.error("Comment not found!");
-        }
-      } catch (error) {
-        console.error("Error deleting comment:", error);
-      }
-    } else {
-      console.error("Post not found for comment deletion.");
-    }
-  };
-
-  //슬라이드 버튼
   useEffect(() => {
-    const handleResize = () => {
-      setIsLargeScreen(window.innerWidth >= 869);
-    };
-
     window.addEventListener("resize", handleResize);
-
     return () => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  // 댓글 추가 핸들러
+  const handleAddComment = async (postId) => {
+    if (!newComment[postId]) return; // 빈 댓글은 무시
+
+    // 게시물 객체 찾기
+    const post = combinedPosts.find((p) => p.id === postId);
+    if (!post) {
+      console.error("게시물을 찾을 수 없습니다!");
+      return;
+    }
+
+    try {
+      // 사용자 정보를 가져오기
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const displayName = userDoc.exists()
+        ? userDoc.data().displayName
+        : "알 수 없는 사용자";
+
+      // 댓글 추가
+      const commentsRef = collection(
+        db,
+        `users/${post.uid}/posts/${postId}/comments`
+      );
+
+      await addDoc(commentsRef, {
+        content: newComment[postId],
+        displayName: displayName,
+        timestamp: new Date().toISOString(),
+        userId: user.uid,
+      });
+
+      // 댓글 입력 필드 초기화
+      setNewComment((prev) => ({
+        ...prev,
+        [postId]: "",
+      }));
+    } catch (error) {
+      console.error("댓글 추가 중 오류 발생:", error);
+    }
+  };
+
+  const handleEditPostClick = (post) => {
+    setCurrentPost(post); // 현재 수정할 게시물 설정
+    setOpenEditDialog(true); // EditPostDialog 열기
+  };
+
+  const handleEditDialogClose = () => {
+    setOpenEditDialog(false); // EditPostDialog 닫기
+    setCurrentPost(null); // 현재 수정할 게시물 초기화
+  };
 
   return (
     <>
@@ -680,10 +443,11 @@ const PostList = ({
                               onClose={() => handleMenuClose(post)}
                             >
                               <MenuItem
-                                onClick={() => handleOpenEditDialog(post)}
+                                onClick={() => handleEditPostClick(post)}
                               >
                                 글 수정
-                              </MenuItem>
+                              </MenuItem>{" "}
+                              {/* 글 수정 버튼 */}
                               <MenuItem
                                 onClick={() => handleDeletePost(post.id)}
                               >
@@ -738,9 +502,7 @@ const PostList = ({
                           <FavoriteIcon />
                         </Tooltip>
                       </IconButton>
-
                       <Typography>{likesCount[post.id]} </Typography>
-
                       <Typography component="div">
                         <IconButton
                           aria-expanded={expanded[post.id]}
@@ -752,7 +514,6 @@ const PostList = ({
                           </Tooltip>
                         </IconButton>
                       </Typography>
-
                       <IconButton
                         onClick={() => handleMoreClick(post.id, post.uid)}
                       >
@@ -760,7 +521,6 @@ const PostList = ({
                           <NotesIcon />
                         </Tooltip>
                       </IconButton>
-
                       <IconButton
                         aria-label="share"
                         onClick={() => handleShare(post)}
@@ -770,193 +530,46 @@ const PostList = ({
                         </Tooltip>
                       </IconButton>
                     </CardActions>
-
                     <Collapse
                       in={expanded[post.id]}
                       timeout="auto"
                       unmountOnExit
                     >
                       <CardContent>
-                        <Typography>카테고리 {post.category}</Typography>
-                        <Typography variant="subtitle3">
-                          {post.createdAt instanceof Date
-                            ? post.createdAt.toLocaleString()
-                            : new Date(
-                                post.createdAt.seconds * 1000
-                              ).toLocaleString()}
+                        <Typography>카테고리: {post.category}</Typography>
+                        <Typography variant="subtitle2">
+                          {new Date(
+                            post.createdAt.seconds * 1000
+                          ).toLocaleString()}
                         </Typography>
                         <div>
-                          <Typography variant="h6">댓글</Typography>
-                          <List className="comments-list">
-                            {comments[post.id]?.length > 0 ? (
-                              comments[post.id].map((comment) => (
-                                <ListItem
-                                  key={comment.id}
-                                  alignItems="flex-start"
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    padding: "10px 0",
-                                  }}
-                                >
-                                  <div style={{ width: "50px", left: "50px" }}>
-                                    <ProfileImage uid={comment.userId} />
-                                    <div
-                                      className="comments-displayName"
-                                      style={{
-                                        fontWeight: "bold",
-                                      }}
-                                    >
-                                      {comment.displayName}
-                                    </div>
-                                  </div>
-
-                                  <ListItemText
-                                    className="comments-index"
-                                    style={{ display: "flex" }}
-                                    primary={
-                                      <>
-                                        <div
-                                          className="commentedit"
-                                          color="textPrimary"
-                                          style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                          }}
-                                          component="span"
-                                        >
-                                          {editComment &&
-                                          editComment.id === comment.id ? (
-                                            <>
-                                              <TextField
-                                                style={{
-                                                  display: "flex",
-                                                  width: "225px",
-                                                }}
-                                                value={editCommentContent}
-                                                onChange={(e) =>
-                                                  setEditCommentContent(
-                                                    e.target.value
-                                                  )
-                                                }
-                                                multiline
-                                                fullWidth
-                                              />
-                                              <div className="comments-edit-after">
-                                                <Button
-                                                  onClick={() =>
-                                                    handleSaveCommentEdit(
-                                                      comment.id
-                                                    )
-                                                  }
-                                                >
-                                                  저장
-                                                </Button>
-                                                <Button
-                                                  onClick={() =>
-                                                    setEditComment(null)
-                                                  }
-                                                >
-                                                  취소
-                                                </Button>
-                                              </div>
-                                            </>
-                                          ) : (
-                                            <>
-                                              <div>
-                                                <div
-                                                  className="comments-content"
-                                                  style={{
-                                                    marginLeft: "15px",
-                                                    marginTop: "0px",
-                                                    width: "175px",
-                                                  }}
-                                                >
-                                                  {comment.content}
-                                                </div>
-                                              </div>
-                                              <div
-                                                className="comments-editbtn"
-                                                style={{}}
-                                              >
-                                                {user &&
-                                                  comment.userId ===
-                                                    user.uid && (
-                                                    <Button
-                                                      onClick={() =>
-                                                        handleEditComment(
-                                                          comment
-                                                        )
-                                                      }
-                                                      color="primary"
-                                                    >
-                                                      수정
-                                                    </Button>
-                                                  )}
-                                                <div
-                                                  style={{ marginTop: "8px" }}
-                                                >
-                                                  <Button
-                                                    onClick={() =>
-                                                      handleDeleteComment(
-                                                        comment.id
-                                                      )
-                                                    }
-                                                  >
-                                                    삭제
-                                                  </Button>
-                                                </div>
-                                              </div>
-                                            </>
-                                          )}
-                                        </div>
-                                      </>
-                                    }
-                                  />
-                                </ListItem>
-                              ))
-                            ) : (
-                              <Typography variant="body2">
-                                댓글이 없습니다.
+                          {comments[post.id] &&
+                            comments[post.id].map((comment, index) => (
+                              <Typography key={index} variant="body2">
+                                {comment.displayName}: {comment.content}
                               </Typography>
-                            )}
-                          </List>
-
-                          {user && (
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                marginTop: "20px",
-                              }}
-                            >
-                              <TextField
-                                id={`comment-${post.id}`}
-                                label="댓글 추가"
-                                value={newComment}
-                                onChange={(e) =>
-                                  handleCommentChange(post.id, e.target.value)
-                                }
-                                fullWidth
-                                multiline
-                                margin="normal"
-                              />
-
-                              <Button
-                                onClick={() => handleAddComment(post.id, post)}
-                                variant="contained"
-                                style={{
-                                  fontFamily: "BMJUA, sans-serif",
-                                  top: "3px",
-                                  height: "50px",
-                                  color: "#6084e7cc",
-                                }}
-                              >
-                                추가
-                              </Button>
-                            </div>
-                          )}
+                            ))}
                         </div>
+                        <TextField
+                          label="댓글 추가"
+                          variant="outlined"
+                          fullWidth
+                          margin="normal"
+                          value={newComment[post.id] || ""}
+                          onChange={(e) =>
+                            setNewComment((prev) => ({
+                              ...prev,
+                              [post.id]: e.target.value,
+                            }))
+                          }
+                        />
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleAddComment(post.id)}
+                        >
+                          댓글 추가
+                        </Button>
                       </CardContent>
                     </Collapse>
                   </Card>
@@ -981,75 +594,21 @@ const PostList = ({
           {showFollowers ? ">" : "<"}
         </button>
 
-        {/* 슬라이드 메뉴 */}
         <div className={`slide-menu ${showFollowers ? "open" : ""}`}>
           <div className="slidelist">팔로우 리스트</div>
           {showFollowers && !isLargeScreen && <FollowersPage />}
         </div>
       </div>
-      <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
-        <DialogTitle>게시물 수정</DialogTitle>
-        <DialogContent>
-          {imageUrls.map((imageUrl, index) => (
-            <div
-              key={index}
-              style={{ position: "relative", marginBottom: "10px" }}
-            >
-              <img
-                src={imageUrl}
-                alt={`image-${index}`}
-                style={{ maxWidth: "100%" }}
-              />
-              <Button
-                onClick={() => handleRemoveImage(index)}
-                style={{ position: "absolute", top: 0, right: 0 }}
-              >
-                이미지 삭제
-              </Button>
-            </div>
-          ))}
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageUpload}
-            style={{ marginTop: "10px" }}
-          />
-          <TextField
-            margin="dense"
-            id="content"
-            label="내용"
-            type="text"
-            multiline
-            fullWidth
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-          <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
-            <InputLabel id="category-label">주제</InputLabel>
-            <Select
-              labelId="category-label"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              label="Category"
-            >
-              <MenuItem value="">주제 선택</MenuItem>
-              <MenuItem value="그냥">그냥</MenuItem>
-              <MenuItem value="여행">여행</MenuItem>
-              <MenuItem value="음식">음식</MenuItem>
-              <MenuItem value="요리">요리</MenuItem>
-              <MenuItem value="일상">일상</MenuItem>
-              <MenuItem value="게임">게임</MenuItem>
-              <MenuItem value="음악">음악</MenuItem>
-              <MenuItem value="자기계발">자기계발</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions alogActions>
-          <Button onClick={handleCloseEditDialog}>취소</Button>
-          <Button onClick={handleSaveEdit}>저장</Button>
-        </DialogActions>
-      </Dialog>
+
+      {/* EditPostDialog 추가 */}
+      {openEditDialog && currentPost && (
+        <EditPostDialog
+          open={openEditDialog}
+          onClose={handleEditDialogClose}
+          post={currentPost}
+          handleUpdatePost={handleUpdatePost}
+        />
+      )}
     </>
   );
 };
