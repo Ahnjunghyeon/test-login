@@ -11,8 +11,6 @@ import {
   onSnapshot,
   deleteDoc,
   updateDoc,
-  query,
-  where,
 } from "firebase/firestore";
 import {
   FormControl,
@@ -80,6 +78,7 @@ const PostList = ({
   const [category, setCategory] = useState("");
   const [followedPosts, setFollowedPosts] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryMenuAnchorEl, setCategoryMenuAnchorEl] = useState(null);
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState("");
   const [likedPosts, setLikedPosts] = useState({});
@@ -89,6 +88,7 @@ const PostList = ({
   const [showFollowers, setShowFollowers] = useState(false); // 상태 추가
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 869);
   const [loading, setLoading] = useState(false);
+  const [tempImages, setTempImages] = useState([]);
 
   const storage = getStorage();
 
@@ -225,8 +225,7 @@ const PostList = ({
   useEffect(() => {
     const unsubscribeComments = {};
 
-    const allPosts = [...posts, ...followedPosts];
-    allPosts.forEach((post) => {
+    for (const post of [...posts, ...followedPosts]) {
       const commentsRef = collection(
         db,
         `users/${post.uid}/posts/${post.id}/comments`
@@ -245,7 +244,7 @@ const PostList = ({
           [post.id]: commentsData,
         }));
       });
-    });
+    }
 
     return () => {
       Object.values(unsubscribeComments).forEach((unsubscribe) =>
@@ -262,38 +261,8 @@ const PostList = ({
     setMenuAnchorEl((prev) => ({ ...prev, [post.id]: null }));
   };
 
-  //댓글 버튼으로 실시간 업데이트하기
-  const subscribeToComments = (postId) => {
-    const commentsRef = collection(
-      db,
-      `users/${user.uid}/posts/${postId}/comments`
-    );
-    const unsubscribe = onSnapshot(commentsRef, (snapshot) => {
-      const commentsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      commentsData.sort((a, b) => b.createdAt - a.createdAt);
-
-      setComments((prevComments) => ({
-        ...prevComments,
-        [postId]: commentsData,
-      }));
-    });
-
-    return unsubscribe;
-  };
-
   const handleExpandClick = (postId) => {
     setExpanded((prev) => ({ ...prev, [postId]: !prev[postId] }));
-
-    if (!expanded[postId]) {
-      const unsubscribe = subscribeToComments(postId);
-      return () => {
-        unsubscribe();
-      };
-    }
   };
 
   const handleContentExpandClick = (postId) => {
@@ -405,14 +374,22 @@ const PostList = ({
     setNewComment(content);
   };
 
-  const handleAddComment = async (postId) => {
+  // 댓글 추가 버튼이나 다른 이벤트 핸들러에서 post 객체를 함께 전달합니다.
+
+  const handleAddComment = async (postId, post) => {
+    if (!post || !post.uid) {
+      console.error("Post object is not valid or UID is missing.");
+      return;
+    }
+
     if (newComment.trim() === "") return;
 
     try {
       const commentId = `${user.uid}${new Date().getTime()}`;
+
       const commentRef = collection(
         db,
-        `users/${user.uid}/posts/${postId}/comments`
+        `users/${post.uid}/posts/${postId}/comments`
       );
 
       await addDoc(commentRef, {
@@ -423,7 +400,8 @@ const PostList = ({
         displayName: user.displayName,
       });
 
-      // 댓글 입력 후 상태 즉시 업데이트
+      setNewComment("");
+
       const commentsSnapshot = await getDocs(commentRef);
       const updatedComments = commentsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -435,10 +413,38 @@ const PostList = ({
         ...prevComments,
         [postId]: updatedComments,
       }));
-
-      setNewComment("");
     } catch (error) {
-      console.error("댓글 추가 중 오류 발생:", error);
+      console.error("Error adding comment:", error);
+    }
+  };
+
+  const handleLikePost = async (post) => {
+    try {
+      const likesRef = collection(
+        db,
+        `users/${post.uid}/posts/${post.id}/likes`
+      );
+      const likeDocRef = doc(likesRef, user.uid);
+
+      await runTransaction(db, async (transaction) => {
+        const likeDoc = await transaction.get(likeDocRef);
+
+        if (likeDoc.exists()) {
+          transaction.delete(likeDocRef);
+          setLikedPosts((prevLikedPosts) => ({
+            ...prevLikedPosts,
+            [post.id]: false,
+          }));
+        } else {
+          transaction.set(likeDocRef, { userId: user.uid });
+          setLikedPosts((prevLikedPosts) => ({
+            ...prevLikedPosts,
+            [post.id]: true,
+          }));
+        }
+      });
+    } catch (error) {
+      console.error("Error liking/unliking post:", error);
     }
   };
 
@@ -454,6 +460,19 @@ const PostList = ({
   );
 
   const filteredPosts = filterPostsByCategory(combinedPosts);
+
+  const handleCategoryMenuOpen = (event) => {
+    setCategoryMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleCategoryMenuClose = () => {
+    setCategoryMenuAnchorEl(null);
+  };
+
+  const handleCategorySelect = (category) => {
+    setCategoryFilter(category);
+    handleCategoryMenuClose();
+  };
 
   const handleMoreClick = async (postId, postUid) => {
     try {
@@ -598,137 +617,6 @@ const PostList = ({
     };
   }, []);
 
-  // 유저의 displayName을 Firestore에서 가져오는 함수
-  const getUserDisplayName = async (userId) => {
-    try {
-      const userRef = doc(db, `users/${userId}`);
-      const userDoc = await getDoc(userRef);
-
-      if (userDoc.exists()) {
-        return userDoc.data().displayName;
-      } else {
-        console.error("User not found");
-        return "Unknown User";
-      }
-    } catch (error) {
-      console.error("Error getting user displayName:", error);
-      return "Unknown User";
-    }
-  };
-
-  // 좋아요 버튼 핸들러
-  const handleLikePost = async (post) => {
-    try {
-      const likesRef = collection(
-        db,
-        `users/${post.uid}/posts/${post.id}/likes`
-      );
-      const likeDocRef = doc(likesRef, user.uid);
-
-      await runTransaction(db, async (transaction) => {
-        const likeDoc = await transaction.get(likeDocRef);
-
-        if (likeDoc.exists()) {
-          // 좋아요 제거
-          transaction.delete(likeDocRef);
-          setLikedPosts((prevLikedPosts) => ({
-            ...prevLikedPosts,
-            [post.id]: false,
-          }));
-
-          // 좋아요 제거 후 알림 삭제
-          await removeNotification(post.uid, post.id, user.uid);
-        } else {
-          // 좋아요 추가
-          transaction.set(likeDocRef, { userId: user.uid });
-          setLikedPosts((prevLikedPosts) => ({
-            ...prevLikedPosts,
-            [post.id]: true,
-          }));
-
-          // 유저의 displayName 가져오기
-          const displayName = await getUserDisplayName(user.uid);
-
-          // 알림 추가
-          if (post.uid !== user.uid) {
-            await addNotification(post.uid, post.id, user.uid, displayName);
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error liking/unliking post:", error);
-    }
-  };
-
-  // 알림을 Firestore에 추가하는 함수
-  const addNotification = async (userId, postId, likerId, displayName) => {
-    try {
-      const notificationsRef = collection(db, `users/${userId}/notifications`);
-      const docRef = await addDoc(notificationsRef, {
-        message: `사용자 ${displayName}님이 게시물 ${postId}에 좋아요를 눌렀습니다.`,
-        read: false,
-        timestamp: new Date(),
-        type: "like",
-        postId,
-        likerId,
-      });
-
-      // 문서 ID를 반환합니다.
-      return docRef.id;
-    } catch (error) {
-      console.error("Error adding notification:", error);
-      return null;
-    }
-  };
-
-  // 좋아요 취소 시 알림을 삭제하는 함수
-  const removeNotification = async (userId, postId, likerId) => {
-    try {
-      // 알림을 찾기 위한 쿼리
-      const notificationsRef = collection(db, `users/${userId}/notifications`);
-      const q = query(
-        notificationsRef,
-        where("postId", "==", postId),
-        where("likerId", "==", likerId),
-        where("type", "==", "like")
-      );
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach(async (doc) => {
-        await deleteDoc(doc.ref);
-      });
-    } catch (error) {
-      console.error("Error removing notification:", error);
-    }
-  };
-
-  // 댓글 알림을 Firestore에 추가하는 함수
-  const addCommentNotification = async (
-    userId,
-    postId,
-    commenterId,
-    displayName,
-    commentContent
-  ) => {
-    try {
-      const notificationsRef = collection(db, `users/${userId}/notifications`);
-      const docRef = await addDoc(notificationsRef, {
-        message: `사용자 ${displayName}님이 게시물 ${postId}에 댓글을 달았습니다: "${commentContent}"`,
-        read: false,
-        timestamp: new Date(),
-        type: "comment",
-        postId,
-        commenterId,
-      });
-
-      // 문서 ID 반환
-      return docRef.id;
-    } catch (error) {
-      console.error("댓글 알림 추가 중 오류 발생:", error);
-      return null;
-    }
-  };
-
   return (
     <>
       <div className="PostList">
@@ -736,13 +624,40 @@ const PostList = ({
           {user ? (
             <>
               <h2>게시물 목록</h2>
-
+              <Button onClick={handleCategoryMenuOpen}>주제 필터</Button>
+              <Menu
+                anchorEl={categoryMenuAnchorEl}
+                open={Boolean(categoryMenuAnchorEl)}
+                onClose={handleCategoryMenuClose}
+              >
+                <MenuItem onClick={() => handleCategorySelect("")}>
+                  전체
+                </MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("Travel")}>
+                  여행
+                </MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("Food")}>
+                  음식
+                </MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("Cooking")}>
+                  요리
+                </MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("Culture")}>
+                  일상
+                </MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("Games")}>
+                  게임
+                </MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("Music")}>
+                  음악
+                </MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("Study")}>
+                  자기계발
+                </MenuItem>
+              </Menu>
               {filteredPosts.length > 0 ? (
                 filteredPosts.map((post) => (
-                  <Card
-                    key={post.id}
-                    sx={{ maxWidth: 345, marginTop: "100px", marginBottom: 2 }}
-                  >
+                  <Card key={post.id} sx={{ maxWidth: 345, marginBottom: 2 }}>
                     <CardHeader
                       avatar={
                         <Avatar sx={{ bgcolor: red[500] }}>
@@ -1026,14 +941,15 @@ const PostList = ({
                                 multiline
                                 margin="normal"
                               />
+
                               <Button
-                                onClick={() => handleAddComment(post.id)}
+                                onClick={() => handleAddComment(post.id, post)}
                                 variant="contained"
                                 style={{
                                   fontFamily: "BMJUA, sans-serif",
                                   top: "3px",
                                   height: "50px",
-                                  color: "6084e7cc",
+                                  color: "#6084e7cc",
                                 }}
                               >
                                 추가
@@ -1129,7 +1045,7 @@ const PostList = ({
             </Select>
           </FormControl>
         </DialogContent>
-        <DialogActions>
+        <DialogActions alogActions>
           <Button onClick={handleCloseEditDialog}>취소</Button>
           <Button onClick={handleSaveEdit}>저장</Button>
         </DialogActions>
