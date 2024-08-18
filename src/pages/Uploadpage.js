@@ -193,7 +193,7 @@ function Uploadpage() {
         category: category || "Uncategorized",
         createdAt: new Date(),
         uid: user.uid,
-        postId: postId,
+        postId: postId, // 여기에 postId를 추가합니다.
       });
       setContent("");
       setImages([]);

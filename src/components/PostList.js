@@ -11,6 +11,7 @@ import {
   addDoc,
   query,
   orderBy,
+  updateDoc,
 } from "firebase/firestore";
 import {
   MenuItem,
@@ -30,7 +31,6 @@ import {
   CardHeader,
   Card,
 } from "@mui/material";
-import { red } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -41,6 +41,8 @@ import FollowersPage from "../pages/FollowersPage";
 import UploadPost from "./UploadPost";
 import ProfileImage from "./ProfileLogo";
 import EditPostDialog from "./EditPostDialog"; // EditPostDialog 임포트
+import EditCommentDialog from "./EditCommentDialog"; // EditCommentDialog 임포트
+
 import "./PostList.css";
 
 const PostList = ({
@@ -65,6 +67,8 @@ const PostList = ({
   const [comments, setComments] = useState({});
   const [openEditDialog, setOpenEditDialog] = useState(false); // EditPostDialog 열림 상태
   const [currentPost, setCurrentPost] = useState(null); // 현재 수정할 게시물
+  const [openEditCommentDialog, setOpenEditCommentDialog] = useState(false);
+  const [currentComment, setCurrentComment] = useState(null);
 
   const navigate = useNavigate();
   const db = getFirestore();
@@ -200,7 +204,10 @@ const PostList = ({
       );
       const q = query(commentsRef, orderBy("timestamp"));
       unsubscribeComments[post.id] = onSnapshot(q, (snapshot) => {
-        const commentsData = snapshot.docs.map((doc) => doc.data());
+        const commentsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setComments((prevComments) => ({
           ...prevComments,
           [post.id]: commentsData,
@@ -276,12 +283,12 @@ const PostList = ({
   );
   const filteredPosts = filterPostsByCategory(combinedPosts);
 
-  const handleCategoryMenuOpen = (event) => {
-    setCategoryMenuAnchorEl(event.currentTarget);
-  };
-
   const handleCategoryMenuClose = () => {
     setCategoryMenuAnchorEl(null);
+  };
+
+  const handleCategoryMenuOpen = (event) => {
+    setCategoryMenuAnchorEl(event.currentTarget);
   };
 
   const handleCategorySelect = (category) => {
@@ -353,11 +360,17 @@ const PostList = ({
         `users/${post.uid}/posts/${postId}/comments`
       );
 
-      await addDoc(commentsRef, {
+      // Firestore에 댓글 추가
+      const docRef = await addDoc(commentsRef, {
         content: newComment[postId],
         displayName: displayName,
         timestamp: new Date().toISOString(),
         userId: user.uid,
+      });
+
+      // 댓글에 고유 ID를 추가
+      await updateDoc(docRef, {
+        commentId: docRef.id,
       });
 
       // 댓글 입력 필드 초기화
@@ -423,7 +436,7 @@ const PostList = ({
                   <Card key={post.id} sx={{ maxWidth: 345, marginBottom: 2 }}>
                     <CardHeader
                       avatar={
-                        <Avatar sx={{ bgcolor: red[500] }}>
+                        <Avatar>
                           <ProfileImage uid={post.uid} />
                         </Avatar>
                       }
@@ -542,34 +555,51 @@ const PostList = ({
                             post.createdAt.seconds * 1000
                           ).toLocaleString()}
                         </Typography>
-                        <div>
-                          {comments[post.id] &&
-                            comments[post.id].map((comment, index) => (
-                              <Typography key={index} variant="body2">
-                                {comment.displayName}: {comment.content}
-                              </Typography>
-                            ))}
+                        <div className="comments-section">
+                          <div className="comments-list">
+                            {comments[post.id] &&
+                              comments[post.id].map((comment, index) => (
+                                <div key={index} className="comment-item">
+                                  <Avatar className="MuiAvatar-root">
+                                    <ProfileImage uid={comment.userId} />
+                                  </Avatar>
+                                  <div className="comment-content">
+                                    <Typography className="comment-author">
+                                      {comment.displayName}
+                                    </Typography>
+                                    <Typography className="comment-text">
+                                      {comment.content}
+                                    </Typography>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                          <div className="comment-input-section">
+                            <Avatar className="MuiAvatar-root">
+                              <ProfileImage uid={user.uid} />
+                            </Avatar>
+                            <TextField
+                              label="댓글 추가"
+                              variant="outlined"
+                              fullWidth
+                              margin="normal"
+                              value={newComment[post.id] || ""}
+                              onChange={(e) =>
+                                setNewComment((prev) => ({
+                                  ...prev,
+                                  [post.id]: e.target.value,
+                                }))
+                              }
+                            />
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handleAddComment(post.id)}
+                            >
+                              댓글 추가
+                            </Button>
+                          </div>
                         </div>
-                        <TextField
-                          label="댓글 추가"
-                          variant="outlined"
-                          fullWidth
-                          margin="normal"
-                          value={newComment[post.id] || ""}
-                          onChange={(e) =>
-                            setNewComment((prev) => ({
-                              ...prev,
-                              [post.id]: e.target.value,
-                            }))
-                          }
-                        />
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleAddComment(post.id)}
-                        >
-                          댓글 추가
-                        </Button>
                       </CardContent>
                     </Collapse>
                   </Card>
