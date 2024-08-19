@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { db, auth } from "../Firebase/firebase";
-import { collection, onSnapshot, updateDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  updateDoc,
+  getDocs,
+  addDoc,
+  Timestamp,
+} from "firebase/firestore";
 import {
   Container,
   Typography,
@@ -76,6 +83,33 @@ const NotificationsPage = () => {
       setError(
         "알림을 읽음으로 표시하는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요."
       );
+    }
+  };
+
+  const createFollowNotification = async (followerId, followedUserId) => {
+    try {
+      await addDoc(collection(db, `users/${followedUserId}/notifications`), {
+        type: "follow",
+        timestamp: Timestamp.now(),
+        message: `${followerId}님이 당신을 팔로우했습니다.`,
+        read: false,
+      });
+    } catch (error) {
+      console.error("Error creating follow notification: ", error);
+    }
+  };
+
+  const createLikeNotification = async (postId, postOwnerId, likerId) => {
+    try {
+      await addDoc(collection(db, `users/${postOwnerId}/notifications`), {
+        type: "like",
+        postId,
+        timestamp: Timestamp.now(),
+        message: `${likerId}님이 당신의 게시물에 좋아요를 눌렀습니다.`,
+        read: false,
+      });
+    } catch (error) {
+      console.error("Error creating like notification: ", error);
     }
   };
 

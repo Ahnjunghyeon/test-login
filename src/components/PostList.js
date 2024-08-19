@@ -12,6 +12,7 @@ import {
   query,
   orderBy,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import {
   MenuItem,
@@ -35,6 +36,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import NotesIcon from "@mui/icons-material/Notes";
 import MapsUgcRoundedIcon from "@mui/icons-material/MapsUgcRounded";
@@ -48,9 +50,8 @@ import "./PostList.css";
 
 const PostList = ({
   user,
-  posts,
+  posts: initialPosts,
   displayName,
-  handleUpdatePost,
   handleDeletePost,
   postId,
 }) => {
@@ -58,8 +59,6 @@ const PostList = ({
   const [expanded, setExpanded] = useState({});
   const [contentExpanded, setContentExpanded] = useState({});
   const [followedPosts, setFollowedPosts] = useState([]);
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [categoryMenuAnchorEl, setCategoryMenuAnchorEl] = useState(null);
   const [likedPosts, setLikedPosts] = useState({});
   const [likesCount, setLikesCount] = useState({});
   const [showFollowers, setShowFollowers] = useState(false);
@@ -70,6 +69,7 @@ const PostList = ({
   const [currentPost, setCurrentPost] = useState(null); // 현재 수정할 게시물
   const [openEditCommentDialog, setOpenEditCommentDialog] = useState(false);
   const [currentComment, setCurrentComment] = useState(null);
+  const [posts, setPosts] = useState(initialPosts); // 통합된 상태
 
   const navigate = useNavigate();
   const db = getFirestore();
@@ -78,10 +78,13 @@ const PostList = ({
     if (user) {
       const unsubscribeMap = {};
       const followRef = collection(db, `users/${user.uid}/follow`);
+
       const unsubscribeFollow = onSnapshot(
         followRef,
         async (followSnapshot) => {
           const uids = followSnapshot.docs.map((doc) => doc.id);
+
+          // 이전 리스너 제거
           Object.values(unsubscribeMap).forEach((unsubscribe) => unsubscribe());
 
           const followedPostsData = [];
@@ -110,6 +113,7 @@ const PostList = ({
               });
             });
 
+            // 리스너 저장
             unsubscribeMap[uid] = unsubscribePosts;
           }
         }
@@ -121,6 +125,47 @@ const PostList = ({
       };
     }
   }, [user, db]);
+
+  useEffect(() => {
+    if (user) {
+      const fetchFollowedPosts = async () => {
+        try {
+          const followRef = collection(db, `users/${user.uid}/follow`);
+          const followSnapshot = await getDocs(followRef);
+          const uids = followSnapshot.docs.map((doc) => doc.id);
+
+          const postsData = [];
+          for (const uid of uids) {
+            const postsRef = collection(db, `users/${uid}/posts`);
+            const postsSnapshot = await getDocs(postsRef);
+            const postsList = postsSnapshot.docs.map((postDoc) => ({
+              id: postDoc.id,
+              uid,
+              userDisplayName: "",
+              ...postDoc.data(),
+            }));
+            postsData.push(...postsList);
+          }
+          setFollowedPosts(postsData);
+        } catch (error) {
+          console.error("Error fetching followed posts:", error);
+        }
+      };
+
+      fetchFollowedPosts();
+    }
+  }, [user, db]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      if (user) {
+        const allPosts = [...initialPosts, ...followedPosts];
+        setPosts(allPosts);
+      }
+    };
+
+    fetchPosts();
+  }, [user, initialPosts, followedPosts]);
 
   useEffect(() => {
     const fetchLikedPosts = async () => {
@@ -160,7 +205,7 @@ const PostList = ({
           likesCounts[post.id] = likesCount;
         } catch (error) {
           console.error(
-            `포스트 ${post.id}의 좋아요 수를 가져오는 중 오류 발생:`,
+            `Error fetching likes count for post ${post.id}:`,
             error
           );
           likesCounts[post.id] = 0;
@@ -272,30 +317,9 @@ const PostList = ({
     }
   };
 
-  const filterPostsByCategory = (posts) => {
-    if (categoryFilter === "") {
-      return posts;
-    }
-    return posts.filter((post) => post.category === categoryFilter);
-  };
-
   const combinedPosts = [...posts, ...followedPosts].sort(
-    (a, b) => b.createdAt - a.createdAt
+    (a, b) => b.createdAt.seconds - a.createdAt.seconds // Firestore의 Timestamp를 사용하는 경우
   );
-  const filteredPosts = filterPostsByCategory(combinedPosts);
-
-  const handleCategoryMenuClose = () => {
-    setCategoryMenuAnchorEl(null);
-  };
-
-  const handleCategoryMenuOpen = (event) => {
-    setCategoryMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleCategorySelect = (category) => {
-    setCategoryFilter(category);
-    handleCategoryMenuClose();
-  };
 
   const handleMoreClick = async (postId, postUid) => {
     try {
@@ -389,16 +413,12 @@ const PostList = ({
     setOpenEditDialog(true); // EditPostDialog 열기
   };
 
-  const handleEditDialogClose = () => {
-    setOpenEditDialog(false); // EditPostDialog 닫기
-    setCurrentPost(null); // 현재 수정할 게시물 초기화
-  };
-
   const handleEditCommentClick = (postId, comment) => {
     setCurrentComment({ ...comment, postId }); // 현재 수정할 댓글 설정
     setOpenEditCommentDialog(true); // EditCommentDialog 열기
   };
 
+  // 댓글의 수정 함수,
   const handleUpdateComment = async (commentId, postId, updatedContent) => {
     try {
       // 게시물 객체 찾기
@@ -442,6 +462,62 @@ const PostList = ({
     }
   };
 
+  //댓글 제거 함수
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      const post = combinedPosts.find((p) => p.id === postId);
+      if (!post) {
+        console.error("게시물을 찾을 수 없습니다!");
+        throw new Error("게시물이 존재하지 않습니다.");
+      }
+
+      // 댓글 문서 참조 얻기
+      const commentRef = doc(
+        db,
+        `users/${post.uid}/posts/${postId}/comments/${commentId}`
+      );
+
+      // 댓글 문서 삭제
+      await deleteDoc(commentRef);
+
+      // 상태 초기화 (필요에 따라 구현)
+      // 예: 댓글 목록에서 제거하기
+    } catch (error) {
+      console.error("댓글 제거 중 오류 발생:", error);
+    }
+  };
+
+  // 게시물 수정 함수
+
+  const handleSaveEdit = async (postId, updatedPost) => {
+    try {
+      await handleUpdatePost(postId, updatedPost);
+
+      // 게시물 업데이트 후 상태 갱신
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId ? { ...post, ...updatedPost } : post
+        )
+      );
+
+      setOpenEditDialog(false); // 다이얼로그 닫기
+    } catch (error) {
+      console.error("Error saving post:", error);
+    }
+  };
+
+  // Firestore에 게시물 업데이트
+  const handleUpdatePost = async (postId, updatedPost) => {
+    try {
+      // Firestore의 경로를 수정
+      const postRef = doc(db, `users/${user.uid}/posts/${postId}`);
+      await updateDoc(postRef, updatedPost);
+      console.log("Document successfully updated!");
+    } catch (error) {
+      console.error("게시물을 업데이트하지 못했습니다.:", error);
+    }
+  };
+
   return (
     <>
       <div className="PostList">
@@ -449,220 +525,196 @@ const PostList = ({
           {user ? (
             <>
               <h2>게시물 목록</h2>
-              <Button onClick={handleCategoryMenuOpen}>주제 필터</Button>
-              <Menu
-                anchorEl={categoryMenuAnchorEl}
-                open={Boolean(categoryMenuAnchorEl)}
-                onClose={handleCategoryMenuClose}
-              >
-                <MenuItem onClick={() => handleCategorySelect("")}>
-                  전체
-                </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Travel")}>
-                  여행
-                </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Food")}>
-                  음식
-                </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Cooking")}>
-                  요리
-                </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Culture")}>
-                  일상
-                </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Games")}>
-                  게임
-                </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Music")}>
-                  음악
-                </MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("Study")}>
-                  자기계발
-                </MenuItem>
-              </Menu>
-              {filteredPosts.length > 0 ? (
-                filteredPosts.map((post) => (
-                  <Card key={post.id} sx={{ maxWidth: 345, marginBottom: 2 }}>
-                    <CardHeader
-                      avatar={
-                        <Avatar>
-                          <ProfileImage uid={post.uid} />
-                        </Avatar>
-                      }
-                      action={
-                        user &&
-                        post.uid === user.uid && (
-                          <>
-                            <IconButton
-                              aria-label="settings"
-                              onClick={(event) => handleMenuOpen(event, post)}
-                            >
-                              <MoreVertIcon />
-                            </IconButton>
-                            <Menu
-                              anchorEl={menuAnchorEl[post.id]}
-                              open={Boolean(menuAnchorEl[post.id])}
-                              onClose={() => handleMenuClose(post)}
-                            >
-                              <MenuItem
-                                onClick={() => handleEditPostClick(post)}
-                              >
-                                글 수정
-                              </MenuItem>{" "}
-                              {/* 글 수정 버튼 */}
-                              <MenuItem
-                                onClick={() => handleDeletePost(post.id)}
-                              >
-                                글 삭제
-                              </MenuItem>
-                            </Menu>
-                          </>
-                        )
-                      }
-                      title={
-                        <Typography variant="subtitle1">
-                          {post.uid === user.uid
-                            ? user.displayName
-                            : post.userDisplayName}
-                        </Typography>
-                      }
-                    />
-                    <CardMedia>
-                      <div style={{ position: "relative" }}>
-                        <UploadPost
-                          imageUrls={post.imageUrls || []}
-                          style={{ width: "300px" }}
-                        />
-                      </div>
-                    </CardMedia>
-                    <CardContent className="content">
-                      <Typography variant="body2" color="text.secondary">
-                        {post.content.length > 20
-                          ? contentExpanded[post.id]
-                            ? post.content
-                            : `${post.content.slice(0, 20)}...`
-                          : post.content}
+              {posts.map((post) => (
+                <Card key={post.id} sx={{ maxWidth: 345, marginBottom: 2 }}>
+                  <CardHeader
+                    avatar={
+                      <Avatar>
+                        <ProfileImage uid={post.uid} />
+                      </Avatar>
+                    }
+                    action={
+                      user &&
+                      post.uid === user.uid && (
+                        <>
+                          <IconButton
+                            aria-label="settings"
+                            onClick={(event) => handleMenuOpen(event, post)}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                          <Menu
+                            anchorEl={menuAnchorEl[post.id]}
+                            open={Boolean(menuAnchorEl[post.id])}
+                            onClose={() => handleMenuClose(post)}
+                          >
+                            <MenuItem onClick={() => handleEditPostClick(post)}>
+                              글 수정
+                            </MenuItem>
+                            <MenuItem onClick={() => handleDeletePost(post.id)}>
+                              글 삭제
+                            </MenuItem>
+                          </Menu>
+                        </>
+                      )
+                    }
+                    title={
+                      <Typography variant="subtitle1">
+                        {post.uid === user.uid
+                          ? user.displayName
+                          : post.userDisplayName}
                       </Typography>
-                      {post.content.length > 20 && (
-                        <IconButton
-                          aria-expanded={contentExpanded[post.id]}
-                          aria-label="show more"
-                          onClick={() => handleContentExpandClick(post.id)}
-                        >
-                          <ExpandMoreIcon />
-                        </IconButton>
-                      )}
-                    </CardContent>
-                    <CardActions disableSpacing>
+                    }
+                  />
+                  <CardMedia>
+                    <div style={{ position: "relative" }}>
+                      <UploadPost
+                        imageUrls={post.imageUrls || []}
+                        style={{ width: "300px" }}
+                      />
+                    </div>
+                  </CardMedia>
+                  <CardContent className="content">
+                    <Typography variant="body2" color="text.secondary">
+                      {post.content.length > 20
+                        ? contentExpanded[post.id]
+                          ? post.content
+                          : `${post.content.slice(0, 20)}...`
+                        : post.content}
+                    </Typography>
+                    {post.content.length > 20 && (
                       <IconButton
-                        onClick={() => handleLikePost(post)}
-                        style={{
-                          color: likedPosts[post.id] ? "#e57373" : "#858585",
-                        }}
+                        aria-expanded={contentExpanded[post.id]}
+                        aria-label="show more"
+                        onClick={() =>
+                          setContentExpanded((prev) => ({
+                            ...prev,
+                            [post.id]: !prev[post.id],
+                          }))
+                        }
                       >
-                        <Tooltip title="좋아요">
-                          <FavoriteIcon />
-                        </Tooltip>
+                        <ExpandMoreIcon />
                       </IconButton>
-                      <Typography>{likesCount[post.id]} </Typography>
-                      <Typography component="div">
-                        <IconButton
-                          aria-expanded={expanded[post.id]}
-                          aria-label="show more"
-                          onClick={() => handleExpandClick(post.id)}
-                        >
-                          <Tooltip title="댓글">
-                            <MapsUgcRoundedIcon />
-                          </Tooltip>
-                        </IconButton>
-                      </Typography>
-                      <IconButton
-                        onClick={() => handleMoreClick(post.id, post.uid)}
-                      >
-                        <Tooltip title="글보기">
-                          <NotesIcon />
-                        </Tooltip>
-                      </IconButton>
-                      <IconButton
-                        aria-label="share"
-                        onClick={() => handleShare(post)}
-                      >
-                        <Tooltip title="공유">
-                          <ShareIcon />
-                        </Tooltip>
-                      </IconButton>
-                    </CardActions>
-                    <Collapse
-                      in={expanded[post.id]}
-                      timeout="auto"
-                      unmountOnExit
+                    )}
+                  </CardContent>
+                  <CardActions disableSpacing>
+                    <IconButton
+                      onClick={() => handleLikePost(post)}
+                      style={{
+                        color: likedPosts[post.id] ? "#e57373" : "#858585",
+                      }}
                     >
-                      <CardContent>
-                        <Typography>카테고리: {post.category}</Typography>
-                        <Typography variant="subtitle2">
-                          {new Date(
-                            post.createdAt.seconds * 1000
-                          ).toLocaleString()}
-                        </Typography>
-                        <div className="comments-section">
-                          <div className="comments-list">
-                            {comments[post.id] &&
-                              comments[post.id].map((comment, index) => (
-                                <div key={index} className="comment-item">
-                                  <Avatar className="MuiAvatar-root">
-                                    <ProfileImage uid={comment.userId} />
-                                  </Avatar>
-                                  <div className="comment-content">
-                                    <Typography className="comment-author">
-                                      {comment.displayName}
-                                    </Typography>
-                                    <Typography className="comment-text">
-                                      {comment.content}
-                                    </Typography>
-                                  </div>
-                                  <IconButton
-                                    onClick={() =>
-                                      handleEditCommentClick(post.id, comment)
-                                    }
-                                  >
-                                    <EditIcon />
-                                  </IconButton>
+                      <Tooltip title="좋아요">
+                        <FavoriteIcon />
+                      </Tooltip>
+                    </IconButton>
+                    <Typography>{likesCount[post.id]}</Typography>
+                    <IconButton
+                      aria-expanded={expanded[post.id]}
+                      aria-label="show more"
+                      onClick={() =>
+                        setExpanded((prev) => ({
+                          ...prev,
+                          [post.id]: !prev[post.id],
+                        }))
+                      }
+                    >
+                      <Tooltip title="댓글">
+                        <MapsUgcRoundedIcon />
+                      </Tooltip>
+                    </IconButton>
+                    <IconButton onClick={() => navigate(`/posts/${post.id}`)}>
+                      <Tooltip title="글보기">
+                        <NotesIcon />
+                      </Tooltip>
+                    </IconButton>
+                    <IconButton
+                      aria-label="share"
+                      onClick={() => handleShare(post)}
+                    >
+                      <Tooltip title="공유">
+                        <ShareIcon />
+                      </Tooltip>
+                    </IconButton>
+                  </CardActions>
+                  <Collapse in={expanded[post.id]} timeout="auto" unmountOnExit>
+                    <CardContent>
+                      <Typography>카테고리: {post.category}</Typography>
+                      <Typography variant="subtitle2">
+                        {new Date(
+                          post.createdAt.seconds * 1000
+                        ).toLocaleString()}
+                      </Typography>
+                      <div className="comments-section">
+                        <div className="comments-list">
+                          {comments[post.id] &&
+                            comments[post.id].map((comment) => (
+                              <div key={comment.id} className="comment-item">
+                                <Avatar className="MuiAvatar-root">
+                                  <ProfileImage uid={comment.userId} />
+                                </Avatar>
+                                <div className="comment-content">
+                                  <Typography className="comment-author">
+                                    {comment.displayName}
+                                  </Typography>
+                                  <Typography className="comment-text">
+                                    {comment.content}
+                                  </Typography>
                                 </div>
-                              ))}
-                          </div>
-                          <div className="comment-input-section">
-                            <Avatar className="MuiAvatar-root">
-                              <ProfileImage uid={user.uid} />
-                            </Avatar>
-                            <TextField
-                              label="댓글 추가"
-                              variant="outlined"
-                              fullWidth
-                              margin="normal"
-                              value={newComment[post.id] || ""}
-                              onChange={(e) =>
-                                setNewComment((prev) => ({
-                                  ...prev,
-                                  [post.id]: e.target.value,
-                                }))
-                              }
-                            />
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              onClick={() => handleAddComment(post.id)}
-                            >
-                              댓글 추가
-                            </Button>
-                          </div>
+                                {(comment.userId === user.uid ||
+                                  post.uid === user.uid) && (
+                                  <>
+                                    <IconButton
+                                      className="comment-action-buttons"
+                                      onClick={() =>
+                                        handleEditCommentClick(post.id, comment)
+                                      }
+                                    >
+                                      <EditIcon />
+                                    </IconButton>
+                                    <IconButton
+                                      className="comment-action-buttons"
+                                      onClick={() =>
+                                        handleDeleteComment(post.id, comment.id)
+                                      }
+                                    >
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  </>
+                                )}
+                              </div>
+                            ))}
                         </div>
-                      </CardContent>
-                    </Collapse>
-                  </Card>
-                ))
-              ) : (
-                <Typography variant="body1">게시물이 없습니다.</Typography>
-              )}
+                        <div className="comment-input-section">
+                          <Avatar className="MuiAvatar-root">
+                            <ProfileImage uid={user.uid} />
+                          </Avatar>
+                          <TextField
+                            label="댓글 추가"
+                            variant="outlined"
+                            fullWidth
+                            margin="normal"
+                            value={newComment[post.id] || ""}
+                            onChange={(e) =>
+                              setNewComment((prev) => ({
+                                ...prev,
+                                [post.id]: e.target.value,
+                              }))
+                            }
+                          />
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleAddComment(post.id)}
+                          >
+                            댓글 추가
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Collapse>
+                </Card>
+              ))}
             </>
           ) : (
             <Typography variant="body1">로그인 해주세요.</Typography>
@@ -685,6 +737,15 @@ const PostList = ({
           {showFollowers && !isLargeScreen && <FollowersPage />}
         </div>
       </div>
+
+      {openEditDialog && currentPost && (
+        <EditPostDialog
+          open={openEditDialog}
+          onClose={() => setOpenEditDialog(false)}
+          post={currentPost}
+          onSave={handleSaveEdit} // `handleSaveEdit`을 `onSave`으로 전달
+        />
+      )}
 
       {openEditCommentDialog && currentComment && (
         <EditCommentDialog

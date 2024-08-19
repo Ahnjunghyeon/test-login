@@ -30,8 +30,14 @@ const EditPostDialog = ({ open, onClose, post, onSave }) => {
 
   const handleSaveEdit = async () => {
     const updatedPost = { content, imageUrls, category };
-    await onSave(post.id, updatedPost);
-    onClose();
+    try {
+      // 문서 업데이트
+      await onSave(post.id, updatedPost);
+      onClose();
+    } catch (error) {
+      console.error("Error saving post:", error);
+      setLoading(false);
+    }
   };
 
   const handleImageUpload = async (event) => {
@@ -143,7 +149,9 @@ const EditPostDialog = ({ open, onClose, post, onSave }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>취소</Button>
-        <Button onClick={handleSaveEdit}>저장</Button>
+        <Button onClick={handleSaveEdit} disabled={loading}>
+          저장
+        </Button>
       </DialogActions>
     </Dialog>
   );
