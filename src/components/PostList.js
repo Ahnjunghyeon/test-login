@@ -34,6 +34,7 @@ import {
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import EditIcon from "@mui/icons-material/Edit";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import NotesIcon from "@mui/icons-material/Notes";
 import MapsUgcRoundedIcon from "@mui/icons-material/MapsUgcRounded";
@@ -393,6 +394,54 @@ const PostList = ({
     setCurrentPost(null); // 현재 수정할 게시물 초기화
   };
 
+  const handleEditCommentClick = (postId, comment) => {
+    setCurrentComment({ ...comment, postId }); // 현재 수정할 댓글 설정
+    setOpenEditCommentDialog(true); // EditCommentDialog 열기
+  };
+
+  const handleUpdateComment = async (commentId, postId, updatedContent) => {
+    try {
+      // 게시물 객체 찾기
+      const post = combinedPosts.find((p) => p.id === postId);
+      if (!post) {
+        console.error("게시물을 찾을 수 없습니다!");
+        throw new Error("게시물이 존재하지 않습니다.");
+      }
+
+      // 사용자 정보 가져오기
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        console.error("사용자 정보를 찾을 수 없습니다!");
+        throw new Error("사용자 정보가 존재하지 않습니다.");
+      }
+
+      // 댓글 문서 참조 얻기
+      const commentRef = doc(
+        db,
+        `users/${post.uid}/posts/${postId}/comments/${commentId}`
+      );
+
+      // 댓글 문서가 존재하는지 확인
+      const commentDoc = await getDoc(commentRef);
+      if (!commentDoc.exists()) {
+        console.error("댓글이 존재하지 않습니다!");
+        throw new Error("댓글이 존재하지 않습니다.");
+      }
+
+      // 댓글 수정
+      await updateDoc(commentRef, {
+        content: updatedContent,
+        timestamp: new Date().toISOString(),
+      });
+
+      // 상태 초기화
+      setOpenEditCommentDialog(false); // 다이얼로그 닫기
+      setCurrentComment(null); // 현재 수정할 댓글 초기화
+    } catch (error) {
+      console.error("댓글 수정 중 오류 발생:", error);
+    }
+  };
+
   return (
     <>
       <div className="PostList">
@@ -571,6 +620,13 @@ const PostList = ({
                                       {comment.content}
                                     </Typography>
                                   </div>
+                                  <IconButton
+                                    onClick={() =>
+                                      handleEditCommentClick(post.id, comment)
+                                    }
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
                                 </div>
                               ))}
                           </div>
@@ -630,13 +686,12 @@ const PostList = ({
         </div>
       </div>
 
-      {/* EditPostDialog 추가 */}
-      {openEditDialog && currentPost && (
-        <EditPostDialog
-          open={openEditDialog}
-          onClose={handleEditDialogClose}
-          post={currentPost}
-          handleUpdatePost={handleUpdatePost}
+      {openEditCommentDialog && currentComment && (
+        <EditCommentDialog
+          open={openEditCommentDialog}
+          onClose={() => setOpenEditCommentDialog(false)}
+          comment={currentComment}
+          handleUpdateComment={handleUpdateComment}
         />
       )}
     </>
