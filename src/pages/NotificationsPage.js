@@ -6,6 +6,8 @@ import {
   updateDoc,
   getDocs,
   addDoc,
+  deleteDoc, // 삭제 기능을 위한 추가
+  doc,
   Timestamp,
 } from "firebase/firestore";
 import {
@@ -16,9 +18,11 @@ import {
   ListItemText,
   Button,
   CircularProgress,
+  IconButton,
   Snackbar,
   Alert,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete"; // 삭제 아이콘 추가
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -86,30 +90,109 @@ const NotificationsPage = () => {
     }
   };
 
-  const createFollowNotification = async (followerId, followedUserId) => {
+  // 댓글 삭제 함수와 알림 삭제 추가
+  const handleDeleteComment = async (postId, commentId) => {
     try {
-      await addDoc(collection(db, `users/${followedUserId}/notifications`), {
-        type: "follow",
-        timestamp: Timestamp.now(),
-        message: `${followerId}님이 당신을 팔로우했습니다.`,
-        read: false,
-      });
+      // 댓글 삭제
+      await deleteDoc(
+        doc(db, `users/${currentUserId}/posts/${postId}/comments`, commentId)
+      );
+
+      // 관련 알림 삭제
+      const notificationsRef = collection(
+        db,
+        `users/${currentUserId}/notifications`
+      );
+      const snapshot = await getDocs(notificationsRef);
+      const commentNotifications = snapshot.docs.filter(
+        (doc) => doc.data().type === "comment" && doc.data().postId === postId
+      );
+
+      await Promise.all(
+        commentNotifications.map((notification) =>
+          deleteDoc(
+            doc(db, `users/${currentUserId}/notifications`, notification.id)
+          )
+        )
+      );
+
+      setNotifications(
+        notifications.filter(
+          (notification) =>
+            notification.type !== "comment" || notification.postId !== postId
+        )
+      );
+      setSuccessMessage("댓글과 관련된 알림이 삭제되었습니다.");
     } catch (error) {
-      console.error("Error creating follow notification: ", error);
+      console.error("댓글 삭제 중 오류가 발생했습니다:", error);
+      setError("댓글 삭제 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.");
     }
   };
 
-  const createLikeNotification = async (postId, postOwnerId, likerId) => {
+  // 알림 삭제 함수
+  const handleDeleteNotification = async (notificationId) => {
     try {
+      await deleteDoc(
+        doc(db, `users/${currentUserId}/notifications`, notificationId)
+      );
+      setNotifications(
+        notifications.filter(
+          (notification) => notification.id !== notificationId
+        )
+      );
+      setSuccessMessage("알림이 삭제되었습니다.");
+    } catch (error) {
+      console.error("알림을 삭제하는 중 오류가 발생했습니다: ", error);
+      setError(
+        "알림을 삭제하는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요."
+      );
+    }
+  };
+
+  // 좋아요 알림 생성 함수
+  const createLikeNotification = async (
+    postId,
+    postOwnerId,
+    likerDisplayName
+  ) => {
+    try {
+      if (!postId || !postOwnerId || !likerDisplayName) {
+        throw new Error("알림 생성을 위한 필수 정보가 누락되었습니다.");
+      }
+
       await addDoc(collection(db, `users/${postOwnerId}/notifications`), {
         type: "like",
         postId,
         timestamp: Timestamp.now(),
-        message: `${likerId}님이 당신의 게시물에 좋아요를 눌렀습니다.`,
+        message: `${likerDisplayName}님이 당신의 게시물에 좋아요를 눌렀습니다.`,
         read: false,
       });
     } catch (error) {
-      console.error("Error creating like notification: ", error);
+      console.error("좋아요 알림 생성 중 오류가 발생했습니다: ", error);
+    }
+  };
+
+  // 댓글 알림 생성 함수
+  const createCommentNotification = async (
+    postId,
+    postOwnerId,
+    commenterDisplayName,
+    commentText
+  ) => {
+    try {
+      if (!postId || !postOwnerId || !commenterDisplayName || !commentText) {
+        throw new Error("알림 생성을 위한 필수 정보가 누락되었습니다.");
+      }
+
+      await addDoc(collection(db, `users/${postOwnerId}/notifications`), {
+        type: "comment",
+        postId,
+        timestamp: Timestamp.now(),
+        message: `${commenterDisplayName}님이 게시물에 댓글을 남기셨습니다: "${commentText}"`,
+        read: false,
+      });
+    } catch (error) {
+      console.error("댓글 알림 생성 중 오류가 발생했습니다: ", error);
     }
   };
 
@@ -139,6 +222,13 @@ const NotificationsPage = () => {
                   : "시간 없음"
               }
             />
+            {/* 알림 삭제 버튼 */}
+            <IconButton
+              edge="end"
+              onClick={() => handleDeleteNotification(notification.id)}
+            >
+              <DeleteIcon />
+            </IconButton>
           </ListItem>
         ))}
       </List>

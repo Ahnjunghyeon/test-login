@@ -13,6 +13,7 @@ import {
   orderBy,
   updateDoc,
   deleteDoc,
+  Timestamp,
 } from "firebase/firestore";
 import {
   MenuItem,
@@ -70,6 +71,11 @@ const PostList = ({
   const [openEditCommentDialog, setOpenEditCommentDialog] = useState(false);
   const [currentComment, setCurrentComment] = useState(null);
   const [posts, setPosts] = useState(initialPosts); // 통합된 상태
+
+  //알림관련
+  const [successMessage, setSuccessMessage] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
   const db = getFirestore();
@@ -276,17 +282,6 @@ const PostList = ({
     setMenuAnchorEl((prev) => ({ ...prev, [post.id]: null }));
   };
 
-  const handleExpandClick = (postId) => {
-    setExpanded((prev) => ({ ...prev, [postId]: !prev[postId] }));
-  };
-
-  const handleContentExpandClick = (postId) => {
-    setContentExpanded((prev) => ({
-      ...prev,
-      [postId]: !prev[postId],
-    }));
-  };
-
   const handleLikePost = async (post) => {
     try {
       const likesRef = collection(
@@ -299,17 +294,54 @@ const PostList = ({
         const likeDoc = await transaction.get(likeDocRef);
 
         if (likeDoc.exists()) {
+          // 좋아요 취소
           transaction.delete(likeDocRef);
           setLikedPosts((prevLikedPosts) => ({
             ...prevLikedPosts,
             [post.id]: false,
           }));
+
+          // 관련 알림 삭제
+          const notificationsRef = collection(
+            db,
+            `users/${post.uid}/notifications`
+          );
+          const snapshot = await getDocs(notificationsRef);
+          const likeNotifications = snapshot.docs.filter(
+            (doc) => doc.data().type === "like" && doc.data().postId === post.id
+          );
+
+          await Promise.all(
+            likeNotifications.map((notification) =>
+              deleteDoc(
+                doc(db, `users/${post.uid}/notifications`, notification.id)
+              )
+            )
+          );
+
+          setSuccessMessage("좋아요와 관련된 알림이 삭제되었습니다.");
         } else {
-          transaction.set(likeDocRef, { userId: user.uid });
+          // 좋아요 추가
+          transaction.set(likeDocRef, {
+            userId: user.uid,
+            displayName: user.displayName || "익명 사용자",
+            timestamp: Timestamp.now(),
+          });
           setLikedPosts((prevLikedPosts) => ({
             ...prevLikedPosts,
             [post.id]: true,
           }));
+
+          // 좋아요 알림 추가
+          await addDoc(collection(db, `users/${post.uid}/notifications`), {
+            type: "like",
+            postId: post.id,
+            timestamp: Timestamp.now(),
+            message: `${
+              user.displayName || "익명 사용자"
+            }님이 게시물에 좋아요를 추가했습니다.`,
+            read: false,
+          });
         }
       });
     } catch (error) {
@@ -320,19 +352,6 @@ const PostList = ({
   const combinedPosts = [...posts, ...followedPosts].sort(
     (a, b) => b.createdAt.seconds - a.createdAt.seconds // Firestore의 Timestamp를 사용하는 경우
   );
-
-  const handleMoreClick = async (postId, postUid) => {
-    try {
-      const postDoc = await getDoc(doc(db, `users/${postUid}/posts/${postId}`));
-      if (postDoc.exists()) {
-        navigate(`/posts/${postUid}/${postId}`);
-      } else {
-        console.error("포스트를 찾을 수 없습니다!");
-      }
-    } catch (error) {
-      console.error("포스트를 가져오는 중 오류 발생:", error);
-    }
-  };
 
   const handleShare = async (post) => {
     try {
@@ -403,6 +422,15 @@ const PostList = ({
         ...prev,
         [postId]: "",
       }));
+
+      // 댓글 알림 추가
+      await addDoc(collection(db, `users/${post.uid}/notifications`), {
+        type: "comment",
+        postId: postId,
+        timestamp: new Date().toISOString(),
+        message: `${displayName}님이 게시물에 댓글을 남기셨습니다: "${newComment[postId]}"`,
+        read: false,
+      });
     } catch (error) {
       console.error("댓글 추가 중 오류 발생:", error);
     }
@@ -465,6 +493,7 @@ const PostList = ({
   //댓글 제거 함수
   const handleDeleteComment = async (postId, commentId) => {
     try {
+      // 게시물 객체 찾기
       const post = combinedPosts.find((p) => p.id === postId);
       if (!post) {
         console.error("게시물을 찾을 수 없습니다!");
@@ -480,10 +509,34 @@ const PostList = ({
       // 댓글 문서 삭제
       await deleteDoc(commentRef);
 
+      // 관련 알림 삭제
+      const notificationsRef = collection(
+        db,
+        `users/${post.uid}/notifications`
+      );
+      const snapshot = await getDocs(notificationsRef);
+      const commentNotifications = snapshot.docs.filter(
+        (doc) => doc.data().type === "comment" && doc.data().postId === postId
+      );
+
+      if (commentNotifications.length > 0) {
+        await Promise.all(
+          commentNotifications.map((notification) =>
+            deleteDoc(
+              doc(db, `users/${post.uid}/notifications`, notification.id)
+            )
+          )
+        );
+      } else {
+        console.warn("삭제할 알림이 없습니다.");
+      }
+
       // 상태 초기화 (필요에 따라 구현)
       // 예: 댓글 목록에서 제거하기
+      setSuccessMessage("댓글과 관련된 알림이 삭제되었습니다.");
     } catch (error) {
       console.error("댓글 제거 중 오류 발생:", error);
+      setError("댓글 제거 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.");
     }
   };
 
