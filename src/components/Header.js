@@ -4,14 +4,14 @@ import {
   Menu,
   MenuItem,
   Button,
-  Dialog,
-  DialogContent,
+  Typography,
+  Popover,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenRoundedIcon from "@mui/icons-material/MenuOpenRounded";
 import AddHomeRoundedIcon from "@mui/icons-material/AddHomeRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
-import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded"; // 알림 아이콘 추가
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
@@ -25,7 +25,7 @@ import SearchBar from "./SearchBar";
 import ProfileImage from "./ProfileLogo";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
-import NotificationsPage from "../pages/NotificationsPage"; // NotificationsPage import
+import NotificationsPage from "../pages/NotificationsPage"; // Import NotificationsPage
 
 const Header = ({ refreshProfileImage }) => {
   const [user, setUser] = useState(null);
@@ -33,14 +33,59 @@ const Header = ({ refreshProfileImage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false); // 알림 모달 상태
   const [prevScrollPos, setPrevScrollPos] = useState(window.pageYOffset);
   const [isVisible, setIsVisible] = useState(true);
+  const [notificationsAnchorEl, setNotificationsAnchorEl] = useState(null);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const auth = getAuth();
-  const db = getFirestore();
   const navigate = useNavigate();
   const menuRef = useRef(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user || null);
+    });
+
+    return () => unsubscribe();
+  }, [auth, refreshProfileImage]);
+
+  const handleSignup = (email, password) => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        console.log("User signed up:", userCredential.user);
+      })
+      .catch((error) => {
+        console.error("Error signing up:", error);
+      });
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.pageYOffset;
+      setIsVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
+      setPrevScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScrollPos]);
+
+  const handleIconClick = (event) => {
+    event.stopPropagation();
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleClickOutside = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setIsMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -62,61 +107,15 @@ const Header = ({ refreshProfileImage }) => {
       });
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [auth, refreshProfileImage]);
-
-  const handleSignup = (email, password) => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log("User signed up:", user);
-      })
-      .catch((error) => {
-        console.error("Error signing up:", error);
-      });
+  const handleNotificationsOpen = (event) => {
+    setNotificationsAnchorEl(event.currentTarget);
+    setNotificationsOpen(true);
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollPos = window.pageYOffset;
-      const visible = prevScrollPos > currentScrollPos || currentScrollPos < 10;
-      setIsVisible(visible);
-      setPrevScrollPos(currentScrollPos);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [prevScrollPos]);
-
-  const handleIconClick = (event) => {
-    event.stopPropagation();
-    setIsMenuOpen(!isMenuOpen);
+  const handleNotificationsClose = () => {
+    setNotificationsAnchorEl(null);
+    setNotificationsOpen(false);
   };
-
-  const handleClickOutside = (event) => {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setIsMenuOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   return (
     <>
@@ -149,10 +148,7 @@ const Header = ({ refreshProfileImage }) => {
               <div className="uploadbt" onClick={() => navigate("/uploadpage")}>
                 업로드
               </div>
-              <IconButton
-                className="notificationbt" // 스타일 추가
-                onClick={() => setIsNotificationsOpen(true)}
-              >
+              <IconButton onClick={handleNotificationsOpen}>
                 <NotificationsRoundedIcon />
               </IconButton>
             </>
@@ -284,17 +280,11 @@ const Header = ({ refreshProfileImage }) => {
         onSignup={handleSignup}
       />
 
-      {/* 알림 모달 추가 */}
-      <Dialog
-        open={isNotificationsOpen}
-        onClose={() => setIsNotificationsOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogContent>
-          <NotificationsPage />
-        </DialogContent>
-      </Dialog>
+      <NotificationsPage
+        anchorEl={notificationsAnchorEl}
+        open={notificationsOpen}
+        onClose={handleNotificationsClose}
+      />
     </>
   );
 };

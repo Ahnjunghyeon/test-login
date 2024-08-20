@@ -1,0 +1,94 @@
+/* 알림 컨테이너 스타일 */
+.notifications-container {
+  max-height: 400px;
+  width: 340px; /* 약간 넓게 조정 */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff; /* 흰색 배경 */
+  border-radius: 8px; /* 둥근 모서리 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 */
+  padding: 10px;
+  margin-top: 10px; /* 30px 아래로 이동 */
+}
+
+/* 로딩 스피너 스타일 */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+/* 버튼 컨테이너 스타일 */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px; /* 약간 줄이기 */
+}
+
+/* 버튼 스타일 */
+.button-container .MuiButton-contained {
+  border-radius: 20px; /* 둥근 버튼 */
+  text-transform: none; /* 버튼 텍스트 변환 없음 */
+  font-weight: bold;
+  padding: 8px 16px;
+}
+
+/* 읽음으로 표시 버튼 */
+.button-container .MuiButton-containedPrimary {
+  background-color: #0095f6; /* Instagram 파란색 */
+  color: white;
+}
+
+/* 삭제 버튼 */
+.button-container .MuiButton-containedSecondary {
+  background-color: #ff5a5f; /* Instagram 빨간색 */
+  color: white;
+}
+
+/* 알림 아이템 스타일 */
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #efefef;
+  border-radius: 8px; /* 둥근 모서리 */
+  margin-bottom: 8px;
+  transition: background-color 0.2s; /* 부드러운 배경 색상 전환 */
+}
+
+.notification-item:hover {
+  background-color: #f8f8f8; /* 호버 시 배경 색상 변경 */
+}
+
+/* 알림 메시지 스타일 */
+.notification-message {
+  font-size: 14px;
+  color: #262626;
+  font-weight: 500;
+}
+
+/* 읽은 알림에 취소선 스타일 추가 */
+.notification-message.read {
+  text-decoration: line-through; /* 취소선 추가 */
+  color: #999999; /* 색상 변경 */
+}
+
+/* 타임스탬프 스타일 */
+.notification-timestamp {
+  font-size: 12px;
+  color: #b3b3b3;
+}
+
+/* 삭제 아이콘 스타일 */
+.delete-icon {
+  color: #a0a0a0; /* Instagram 빨간색 */
+  cursor: pointer;
+}
+
+/* 성공/오류 메시지 스타일 */
+.snackbar {
+  border-radius: 8px; /* 둥근 모서리 */
+}

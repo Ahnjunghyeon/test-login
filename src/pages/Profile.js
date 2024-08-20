@@ -8,6 +8,8 @@ import {
   setDoc,
   deleteDoc,
   getFirestore,
+  addDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
@@ -27,13 +29,12 @@ import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import CustomNavbar from "../components/Header";
 import Footer from "../components/Footer";
 import UploadPost from "../components/UploadPost";
-import "./Profile.css";
+import NotificationsPage from "../pages/NotificationsPage";
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [profileUser, setProfileUser] = useState(null);
-  const [refreshProfileImage, setRefreshProfileImage] = useState(false);
   const [profileImage, setProfileImage] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
@@ -53,11 +54,10 @@ const Profile = () => {
         const userDoc = await getDoc(doc(db, "users", uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          console.log("Fetched User Data:", userData); // 로깅 추가
           setProfileUser(userData);
-          setDisplayName(userData.displayName || ""); // 기본값 설정
-          setProfileImage(userData.profileImage || ""); // 기본값 설정
-          setUserEmail(userData.email || ""); // 기본값 설정
+          setDisplayName(userData.displayName || "");
+          setProfileImage(userData.profileImage || "");
+          setUserEmail(userData.email || "");
         } else {
           console.log("No such user!");
         }
@@ -74,12 +74,12 @@ const Profile = () => {
           setProfilePosts(userPosts);
         }
       } catch (error) {
-        console.error("Error fetching user profile: ", error);
+        console.error("Error fetching user profile:", error);
       }
     };
 
     fetchUserProfile();
-  }, [uid, db, refreshProfileImage, currentUser]);
+  }, [uid, db, currentUser]);
 
   useEffect(() => {
     if (currentUser) {
@@ -93,11 +93,10 @@ const Profile = () => {
     try {
       const userPostsRef = collection(db, `users/${uid}/posts`);
       const querySnapshot = await getDocs(userPostsRef);
-      const userPosts = querySnapshot.docs.map((doc) => ({
+      return querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      return userPosts;
     } catch (error) {
       console.error("Error fetching user posts:", error);
       return [];
@@ -108,10 +107,25 @@ const Profile = () => {
     if (currentUser) {
       const userFollowRef = doc(db, `users/${currentUser.uid}/follow`, uid);
       try {
+        // 팔로우 추가
         await setDoc(userFollowRef, { uid });
         setIsFollowing(true);
+
+        // 현재 시간을 Timestamp 객체로 생성
+        const currentTime = Timestamp.now();
+
+        if (currentUser.uid !== uid) {
+          await addDoc(collection(db, `users/${uid}/notifications`), {
+            type: "follow",
+            timestamp: currentTime, // Timestamp 객체로 저장
+            message: `${
+              currentUser.displayName || "사용자"
+            }님이 당신을 팔로우했습니다.`,
+            read: false,
+          });
+        }
       } catch (error) {
-        console.error("Error following user: ", error);
+        console.error("Error following user:", error);
       }
     }
   };
@@ -123,7 +137,7 @@ const Profile = () => {
         await deleteDoc(userFollowRef);
         setIsFollowing(false);
       } catch (error) {
-        console.error("Error unfollowing user: ", error);
+        console.error("Error unfollowing user:", error);
       }
     }
   };
@@ -131,32 +145,29 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    updateProfile(currentUser, { displayName })
-      .then(() => {
-        alert("Profile updated successfully");
-        const userRef = doc(db, "users", currentUser.uid);
-        setDoc(userRef, { displayName }, { merge: true })
-          .then(() => {
-            console.log("DisplayName updated successfully in Firestore");
-          })
-          .catch((error) => {
-            console.error("Error updating displayName in Firestore: ", error);
-          });
-      })
-      .catch((error) => {
-        alert("Failed to update profile: " + error.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      await updateProfile(currentUser, { displayName });
+      await setDoc(
+        doc(db, "users", currentUser.uid),
+        { displayName },
+        { merge: true }
+      );
+      alert("프로필이 성공적으로 업데이트되었습니다.");
+    } catch (error) {
+      alert("프로필 업데이트 실패: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleImageUpload = async (event) => {
     if (event.target.files[0]) {
       setUploadingImage(true);
       const file = event.target.files[0];
-      const storageRef = ref(storage, `users/${uid}/profileImages`);
+      const storageRef = ref(
+        storage,
+        `users/${uid}/profileImages/${file.name}`
+      );
       try {
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
@@ -166,10 +177,8 @@ const Profile = () => {
           { merge: true }
         );
         setProfileImage(downloadURL);
-        setRefreshProfileImage(!refreshProfileImage);
         alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
       } catch (error) {
-        console.error("Error uploading profile image: ", error);
         alert("프로필 이미지를 업데이트하는 중에 오류가 발생했습니다.");
       } finally {
         setUploadingImage(false);
@@ -183,129 +192,109 @@ const Profile = () => {
 
   return (
     <>
-      <CustomNavbar refreshProfileImage={refreshProfileImage} />
-      <Container className="Profile">
-        <Box className="ProfileContainer">
-          <Box className="ProfileBox">
-            <Box className="LeftSide">
-              {profileUser && (
-                <>
-                  <Box className="ProfileImageContainer">
-                    <Avatar
-                      src={profileImage || "/default-avatar.png"}
-                      alt={displayName}
-                      sx={{ width: 100, height: 100 }}
-                    />
-                    {currentUser && currentUser.uid === uid && (
-                      <IconButton
-                        style={{
-                          top: "-25px",
-                          left: "30px",
-                          backgroundColor: "white",
-                          color: "purple",
-                        }}
-                        color="primary"
-                        aria-label="upload picture"
-                        component="label"
-                      >
-                        <input
-                          hidden
-                          accept="image/*"
-                          type="file"
-                          onChange={handleImageUpload}
-                        />
-                        <PhotoCamera />
-                      </IconButton>
-                    )}
-                  </Box>
-
-                  {currentUser && currentUser.uid === uid ? (
-                    <form className="Namefield" onSubmit={handleSubmit}>
-                      <TextField
-                        label="Display Name"
-                        variant="outlined"
-                        fullWidth
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        sx={{ marginBottom: 2 }}
-                      />
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        disabled={loading}
-                        style={{
-                          color: "purple",
-                          backgroundColor: "white",
-                        }}
-                      >
-                        {loading ? <CircularProgress size={24} /> : "Update"}
-                      </Button>
-                    </form>
-                  ) : (
-                    <Box className="UserInfo">
-                      <Typography variant="h5">{displayName}</Typography>
-                      <Typography variant="body1">User UID: {uid}</Typography>
-                      <Typography variant="body1">
-                        이메일: {userEmail}
-                      </Typography>
-                    </Box>
-                  )}
-
-                  {currentUser && currentUser.uid !== uid && (
-                    <>
-                      {isFollowing ? (
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={handleUnfollow}
-                        >
-                          언팔로우
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleFollow}
-                        >
-                          팔로우
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-            </Box>
-
-            <Box className="Userpost">
-              <Typography variant="h4">게시물</Typography>
-              <div className="posts-container">
-                {profilePosts.map((post) => (
-                  <div
-                    className="post-card"
-                    key={post.id}
-                    onClick={() => handlePostClick(post.id)}
+      <CustomNavbar />
+      <Container>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            p: 2,
+          }}
+        >
+          {profileUser && (
+            <>
+              <Box sx={{ position: "relative", mb: 2 }}>
+                <Avatar
+                  src={profileImage || "/default-avatar.png"}
+                  alt={displayName}
+                  sx={{ width: 100, height: 100 }}
+                />
+                {currentUser && currentUser.uid === uid && (
+                  <IconButton
+                    component="label"
+                    sx={{
+                      position: "absolute",
+                      top: "70%",
+                      left: "70%",
+                      backgroundColor: "white",
+                      color: "purple",
+                    }}
                   >
-                    <Card className="post-card-content">
-                      <CardContent>
-                        <Typography variant="body2" className="post-category">
-                          {post.category}
-                        </Typography>
-                        {post.imageUrls && post.imageUrls.length > 0 && (
-                          <UploadPost imageUrls={post.imageUrls} />
-                        )}
-                        <Typography variant="body2" className="post-content">
-                          {post.content}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
-              </div>
-            </Box>
+                    <input
+                      hidden
+                      accept="image/*"
+                      type="file"
+                      onChange={handleImageUpload}
+                    />
+                    <PhotoCamera />
+                  </IconButton>
+                )}
+              </Box>
+
+              {currentUser && currentUser.uid === uid ? (
+                <form onSubmit={handleSubmit}>
+                  <TextField
+                    label="Display Name"
+                    variant="outlined"
+                    fullWidth
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    sx={{ mb: 2 }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={loading}
+                    sx={{ color: "purple", backgroundColor: "white" }}
+                  >
+                    {loading ? <CircularProgress size={24} /> : "Update"}
+                  </Button>
+                </form>
+              ) : (
+                <Box>
+                  <Typography variant="h5">{displayName}</Typography>
+                  <Typography variant="body1">User UID: {uid}</Typography>
+                  <Typography variant="body1">이메일: {userEmail}</Typography>
+                </Box>
+              )}
+
+              {currentUser && currentUser.uid !== uid && (
+                <Button
+                  variant="contained"
+                  color={isFollowing ? "secondary" : "primary"}
+                  onClick={isFollowing ? handleUnfollow : handleFollow}
+                >
+                  {isFollowing ? "언팔로우" : "팔로우"}
+                </Button>
+              )}
+            </>
+          )}
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h4">게시물</Typography>
+            <div className="posts-container">
+              {profilePosts.map((post) => (
+                <div
+                  key={post.id}
+                  onClick={() => handlePostClick(post.id)}
+                  style={{ cursor: "pointer", marginBottom: "16px" }}
+                >
+                  <Card>
+                    <CardContent>
+                      <Typography variant="body2">{post.category}</Typography>
+                      {post.imageUrls && post.imageUrls.length > 0 && (
+                        <UploadPost imageUrls={post.imageUrls} />
+                      )}
+                      <Typography variant="body2">{post.content}</Typography>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
           </Box>
         </Box>
+        <NotificationsPage uid={uid} />
       </Container>
-
       <Footer />
     </>
   );

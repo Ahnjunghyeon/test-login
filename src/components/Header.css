@@ -10,6 +10,11 @@
   font-family: "BMJUA";
   font-weight: 500;
   font-style: normal;
+  box-sizing: border-box;
+}
+
+.MuiPopover-paper {
+  overflow: auto;
 }
 
 .topline {
@@ -39,6 +44,7 @@
   align-items: center;
   height: 60px; /* 헤더 높이 조정 */
   margin-bottom: 5px; /* 아래쪽 마진 조정 */
+
   position: fixed;
   width: 100%;
   background-color: #ffffff00;
@@ -69,7 +75,7 @@
 
 .header .menulist {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; /* 오른쪽 정렬 */
   align-items: center;
   margin: 0 10px;
 }
