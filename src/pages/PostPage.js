@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { db, auth } from "../Firebase/firebase";
 import {
   doc,
   getDoc,
   collection,
-  addDoc,
-  deleteDoc,
   getDocs,
+  deleteDoc,
   updateDoc,
+  addDoc,
   setDoc,
 } from "firebase/firestore";
+import { db, auth } from "../Firebase/firebase";
 import {
-  Container,
   Typography,
   CircularProgress,
   Box,
@@ -20,16 +18,15 @@ import {
   TextField,
   Button,
   Tooltip,
+  Dialog,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import UploadPost from "../components/UploadPost";
-import Profilelogo from "../components/ProfileLogo";
+import ProfileLogo from "../components/ProfileLogo";
 import "./PostPage.css";
 
-const PostPage = () => {
-  const { uid, postId } = useParams();
+const PostPage = ({ postId, uid, onClose }) => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
@@ -44,8 +41,6 @@ const PostPage = () => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setCurrentUserId(user.uid);
-      } else {
-        console.error("No user is signed in");
       }
     });
 
@@ -59,10 +54,10 @@ const PostPage = () => {
         if (postDoc.exists()) {
           setPost(postDoc.data());
         } else {
-          console.error("No such document!");
+          console.error("해당 문서가 존재하지 않습니다.");
         }
       } catch (error) {
-        console.error("Error fetching post:", error);
+        console.error("게시물을 가져오는 중 오류 발생:", error);
       } finally {
         setLoading(false);
       }
@@ -83,7 +78,7 @@ const PostPage = () => {
           setLiked(userLikeDoc.exists());
         }
       } catch (error) {
-        console.error("Error fetching likes:", error);
+        console.error("좋아요를 가져오는 중 오류 발생:", error);
       }
     };
 
@@ -108,7 +103,7 @@ const PostPage = () => {
             );
             userProfile = userDoc.exists() ? userDoc.data() : {};
           } catch (error) {
-            console.error("Error fetching user profile:", error);
+            console.error("사용자 프로필을 가져오는 중 오류 발생:", error);
           }
 
           return {
@@ -120,7 +115,7 @@ const PostPage = () => {
       );
       setComments(commentsList);
     } catch (error) {
-      console.error("Error fetching comments:", error);
+      console.error("댓글을 가져오는 중 오류 발생:", error);
     }
   };
 
@@ -135,20 +130,18 @@ const PostPage = () => {
 
       if (postOwnerDoc.exists()) {
         const currentUser = auth.currentUser;
-        const currentUserName = currentUser
-          ? currentUser.displayName || "Unknown User"
-          : "Unknown User";
+        const currentUserName = currentUser?.displayName || "알 수 없는 사용자";
 
         await addDoc(collection(db, `users/${uid}/notifications`), {
           type: "like",
-          message: `${currentUserName} liked your post.`,
-          postId: postId,
+          message: `${currentUserName}님이 당신의 게시물을 좋아합니다.`,
+          postId,
           timestamp: new Date(),
           read: false,
         });
       }
     } catch (error) {
-      console.error("Error adding like notification:", error);
+      console.error("좋아요 알림 추가 중 오류 발생:", error);
     }
   };
 
@@ -159,47 +152,38 @@ const PostPage = () => {
         `users/${uid}/posts/${postId}/likes`,
         currentUserId
       );
-      const notificationRef = collection(db, `users/${uid}/notifications`);
 
       if (liked) {
-        // Remove the like
         await deleteDoc(likeDocRef);
         setLiked(false);
         setLikesCount((prevCount) => prevCount - 1);
 
-        // Remove the like notification
-        const notificationsSnapshot = await getDocs(notificationRef);
+        const notificationsSnapshot = await getDocs(
+          collection(db, `users/${uid}/notifications`)
+        );
         const notificationToRemove = notificationsSnapshot.docs.find(
           (doc) => doc.data().postId === postId && doc.data().type === "like"
         );
         if (notificationToRemove) {
-          await deleteDoc(doc(notificationRef, notificationToRemove.id));
+          await deleteDoc(
+            doc(
+              collection(db, `users/${uid}/notifications`),
+              notificationToRemove.id
+            )
+          );
         }
       } else {
-        // Add a new like
         await setDoc(likeDocRef, { userId: currentUserId });
         setLiked(true);
         setLikesCount((prevCount) => prevCount + 1);
-
-        // Add the like notification
         await addLikeNotification();
       }
     } catch (error) {
-      console.error("Error handling like:", error);
+      console.error("좋아요 처리 중 오류 발생:", error);
     }
   };
 
-  if (loading) {
-    return <CircularProgress />;
-  }
-
-  if (!post) {
-    return <Typography variant="h5">게시물을 찾을 수 없습니다.</Typography>;
-  }
-
-  const handleCommentChange = (event) => {
-    setNewComment(event.target.value);
-  };
+  const handleCommentChange = (event) => setNewComment(event.target.value);
 
   const handleAddComment = async () => {
     if (newComment.trim() === "") return;
@@ -215,22 +199,21 @@ const PostPage = () => {
         await addDoc(commentsRef, {
           content: newComment,
           userId: currentUserId,
-          displayName: user.displayName || "Unknown User", // displayName 추가
+          displayName: user.displayName || "알 수 없는 사용자",
           timestamp: new Date(),
         });
         setNewComment("");
         fetchComments();
       } else {
-        console.error("No user is signed in");
+        console.error("사용자가 로그인되어 있지 않습니다.");
       }
     } catch (error) {
-      console.error("Error adding comment:", error);
+      console.error("댓글 추가 중 오류 발생:", error);
     }
   };
 
-  const handleEditCommentChange = (event) => {
+  const handleEditCommentChange = (event) =>
     setEditCommentContent(event.target.value);
-  };
 
   const handleEditComment = async (commentId) => {
     if (editCommentContent.trim() === "") return;
@@ -246,7 +229,7 @@ const PostPage = () => {
       setEditCommentContent("");
       fetchComments();
     } catch (error) {
-      console.error("Error updating comment:", error);
+      console.error("댓글 수정 중 오류 발생:", error);
     }
   };
 
@@ -259,142 +242,121 @@ const PostPage = () => {
       );
       await deleteDoc(commentDocRef);
       fetchComments();
-      console.log(`댓글 ID ${commentId}가 성공적으로 삭제되었습니다.`);
     } catch (error) {
       console.error("댓글 삭제 중 오류 발생:", error);
     }
   };
 
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (!post) {
+    return <Typography variant="h5">게시물을 찾을 수 없습니다.</Typography>;
+  }
+
   return (
-    <Container className="container" style={{ width: "750px" }}>
-      <Typography variant="h3" className="text">
-        {post.category}
-      </Typography>
-
-      <Box className="upload-post-container">
-        <UploadPost imageUrls={post.imageUrls} />
-      </Box>
-
-      <Typography variant="h5" className="content">
-        {post.content}
-      </Typography>
-
-      <Box className="actions">
-        <IconButton
-          onClick={handleLikePost}
-          style={{ color: liked ? "#e57373" : "#858585" }}
-        >
-          <FavoriteIcon />
-        </IconButton>
-        <Typography className="text">{likesCount} 좋아요</Typography>
-      </Box>
-      <Box className="comments-section">
-        <Typography variant="h6" className="comments-title">
-          댓글
-        </Typography>
-        <Box className="comments-list">
-          {comments.map((comment) => (
-            <Box key={comment.id} className="comment">
-              <Box
-                className="comment-header"
-                style={{ display: "flex", alignItems: "center" }}
-              >
-                <Profilelogo uid={comment.userId} />
-                <Typography
-                  variant="body2"
-                  className="comment-author"
-                  style={{ marginLeft: "10px" }}
-                >
-                  {comment.userProfile.displayName || "Unknown User"}
-                </Typography>
-                {comment.userId === currentUserId && (
-                  <Box
-                    className="comment-actions"
-                    style={{ marginLeft: "auto", display: "flex" }}
-                  >
-                    <Tooltip title="수정">
-                      <IconButton
-                        onClick={() => {
-                          setEditingCommentId(comment.id);
-                          setEditCommentContent(comment.content);
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="삭제">
-                      <IconButton
-                        onClick={() => handleDeleteComment(comment.id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                )}
-              </Box>
-
-              {editingCommentId === comment.id ? (
-                <Box className="edit-comment">
-                  <TextField
-                    variant="outlined"
-                    fullWidth
-                    value={editCommentContent}
-                    onChange={handleEditCommentChange}
-                    placeholder="댓글을 수정하세요"
-                  />
-                  <Button
-                    onClick={() => handleEditComment(comment.id)}
-                    variant="contained"
-                    color="primary"
-                  >
-                    저장
-                  </Button>
-                  <Button
-                    onClick={() => setEditingCommentId(null)}
-                    variant="outlined"
-                    color="secondary"
-                  >
-                    취소
-                  </Button>
+    <Dialog
+      open={true}
+      onClose={onClose}
+      BackdropProps={{
+        style: { backgroundColor: "transparent", widht: "150px" },
+      }}
+    >
+      <div className="container">
+        <Button className="exitbtn" onClick={onClose}>
+          X
+        </Button>
+        <Box className="post-image-container">
+          <img src={post.imageUrls[0]} alt="Post" className="post-image" />
+        </Box>
+        <Typography className="post-displyName">{post.displayName}</Typography>
+        <Typography className="post-content">{post.content}</Typography>
+        <Box className="post-category-liked">
+          <Box className="actions">
+            <IconButton
+              onClick={handleLikePost}
+              className={liked ? "liked" : "not-liked"}
+            >
+              <FavoriteIcon />
+            </IconButton>
+            <Typography>{likesCount} 좋아요</Typography>
+          </Box>
+          <Typography className="post-category">{post.category}</Typography>
+        </Box>
+        <Box className="comments-section">
+          <Typography variant="h6" className="comments-title">
+            댓글
+          </Typography>
+          <Box className="comments-list">
+            {comments.map((comment) => (
+              <Box key={comment.id} className="comment">
+                <Box className="comment-header">
+                  <div className="comment-userinfo">
+                    <ProfileLogo uid={comment.userId} />
+                    <Typography variant="body2" className="comment-author">
+                      {comment.userProfile.displayName || "알 수 없는 사용자"}
+                    </Typography>
+                  </div>
+                  {comment.userId === currentUserId && (
+                    <Box className="comment-actions">
+                      <Tooltip title="수정">
+                        <IconButton
+                          onClick={() => {
+                            setEditingCommentId(comment.id);
+                            setEditCommentContent(comment.content);
+                          }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="삭제">
+                        <IconButton
+                          onClick={() => handleDeleteComment(comment.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
                 </Box>
-              ) : (
-                <div className="post-comment-edit">
-                  <Typography
-                    variant="body1"
-                    className="comment-content"
-                    style={{
-                      marginLeft: "50px",
-                      width: "100%",
-                      height: "auto",
-                    }}
-                  >
+                {editingCommentId === comment.id ? (
+                  <Box className="edit-comment">
+                    <TextField
+                      multiline
+                      value={editCommentContent}
+                      onChange={handleEditCommentChange}
+                    />
+                    <Button onClick={() => handleEditComment(comment.id)}>
+                      저장
+                    </Button>
+                  </Box>
+                ) : (
+                  <Typography variant="body2" className="comment-content">
                     {comment.content}
                   </Typography>
-                </div>
-              )}
-            </Box>
-          ))}
+                )}
+              </Box>
+            ))}
+          </Box>
+          <Box className="add-comment">
+            <TextField
+              multiline
+              value={newComment}
+              onChange={handleCommentChange}
+              placeholder="댓글을 입력하세요"
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAddComment}
+            >
+              댓글 추가
+            </Button>
+          </Box>
         </Box>
-        <Box className="add-comment">
-          <TextField
-            className="text"
-            variant="outlined"
-            fullWidth
-            value={newComment}
-            onChange={handleCommentChange}
-            placeholder="입력"
-          />
-          <Button
-            onClick={handleAddComment}
-            className="cmtaddbtn"
-            variant="contained"
-            color="primary"
-          >
-            추가하기
-          </Button>
-        </Box>
-      </Box>
-    </Container>
+      </div>
+    </Dialog>
   );
 };
 

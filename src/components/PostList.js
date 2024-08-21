@@ -46,6 +46,10 @@ import UploadPost from "./UploadPost";
 import ProfileImage from "./ProfileLogo";
 import EditPostDialog from "./EditPostDialog"; // EditPostDialog 임포트
 import EditCommentDialog from "./EditCommentDialog"; // EditCommentDialog 임포트
+import PostPage from "../pages/PostPage"; // 글보기 다이어로그관련
+import Dialog from "@mui/material/Dialog"; //
+import DialogContent from "@mui/material/DialogContent"; //
+import DialogTitle from "@mui/material/DialogTitle"; //
 
 import "./PostList.css";
 
@@ -71,6 +75,8 @@ const PostList = ({
   const [openEditCommentDialog, setOpenEditCommentDialog] = useState(false);
   const [currentComment, setCurrentComment] = useState(null);
   const [posts, setPosts] = useState(initialPosts); // 통합된 상태
+  const [openDialog, setOpenDialog] = useState(false); // 글보기 다이어로그
+  const [selectedPost, setSelectedPost] = useState(null);
 
   //알림관련
   const [successMessage, setSuccessMessage] = useState("");
@@ -574,6 +580,17 @@ const PostList = ({
     }
   };
 
+  // 글보기 페이지 바로가기
+  const handleOpenDialog = (post) => {
+    setSelectedPost(post);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedPost(null);
+  };
+
   return (
     <>
       <div className="PostList">
@@ -685,11 +702,13 @@ const PostList = ({
                           <MapsUgcRoundedIcon />
                         </Tooltip>
                       </IconButton>
-                      <IconButton onClick={() => navigate(`/posts/${post.id}`)}>
+
+                      <IconButton onClick={() => handleOpenDialog(post)}>
                         <Tooltip title="글보기">
                           <NotesIcon />
                         </Tooltip>
                       </IconButton>
+
                       <IconButton
                         aria-label="share"
                         onClick={() => handleShare(post)}
@@ -828,6 +847,23 @@ const PostList = ({
           handleUpdateComment={handleUpdateComment}
         />
       )}
+
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogContent>
+          {selectedPost && (
+            <PostPage
+              postId={selectedPost.id}
+              uid={selectedPost.uid}
+              onClose={handleCloseDialog}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

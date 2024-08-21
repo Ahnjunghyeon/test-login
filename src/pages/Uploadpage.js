@@ -194,6 +194,7 @@ function Uploadpage() {
         createdAt: new Date(),
         uid: user.uid,
         postId: postId, // 여기에 postId를 추가합니다.
+        displayName: displayName, // displayName을 추가합니다.
       });
       setContent("");
       setImages([]);
