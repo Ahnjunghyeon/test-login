@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { getAuth } from "firebase/auth";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,6 +9,7 @@ import {
   ListItemText,
   Typography,
   Avatar,
+  CircularProgress,
 } from "@mui/material";
 import ProfileImage from "../components/ProfileImage";
 import "./FollowersPage.css";
@@ -16,64 +17,89 @@ import "./FollowersPage.css";
 const FollowersPage = () => {
   const [followers, setFollowers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth();
+  const [user, setUser] = useState(null); // 사용자 상태 관리
   const navigate = useNavigate();
-  const user = auth.currentUser;
+
+  // 사용자 인증 상태 확인
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        navigate("/home");
+      }
+    });
+
+    return () => unsubscribe(); // 컴포넌트 언마운트 시 구독 해제
+  }, [navigate]);
+
+  // 팔로워 가져오기
+  const fetchFollowers = useCallback(async () => {
+    if (!user) return; // 사용자 없음 시 종료
+
+    try {
+      const followsCollection = collection(db, `users/${user.uid}/follow`);
+      const followsSnapshot = await getDocs(followsCollection);
+
+      const followerIds = followsSnapshot.docs.map((doc) => doc.id);
+
+      if (followerIds.length > 0) {
+        const followersCollection = collection(db, "users");
+        const followersQuery = query(
+          followersCollection,
+          where("__name__", "in", followerIds),
+          limit(5) // 가져올 문서 수를 제한
+        );
+        const followersSnapshot = await getDocs(followersQuery);
+
+        // 필드 선택적으로 읽기
+        const followerList = followersSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          displayName: doc.data().displayName || "이름 없음", // default value
+          email: doc.data().email || "이메일 없음", // default value
+        }));
+
+        setFollowers(followerList);
+      } else {
+        setFollowers([]);
+      }
+    } catch (error) {
+      console.error("Error fetching followers: ", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
       fetchFollowers();
-    } else {
-      navigate("/home"); // 로그인 안 되어 있으면 로그인 페이지로 리다이렉트
     }
-  }, [user, navigate]);
-
-  const fetchFollowers = async () => {
-    try {
-      const followsCollection = collection(db, `users/${user.uid}/follow`);
-      const followsSnapshot = await getDocs(followsCollection);
-      const followerList = await Promise.all(
-        followsSnapshot.docs.map(async (followDoc) => {
-          const followerId = followDoc.id;
-          const followerDocRef = doc(db, `users/${followerId}`);
-          const followerDoc = await getDoc(followerDocRef);
-          return { id: followerId, ...followerDoc.data() };
-        })
-      );
-      setFollowers(followerList);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching followers: ", error);
-      setLoading(false);
-    }
-  };
+  }, [user, fetchFollowers]);
 
   const handleProfileClick = (followerId) => {
-    navigate(`/profile/${followerId}`); // 해당 팔로워의 프로필 페이지로 이동
+    navigate(`/profile/${followerId}`);
   };
 
   if (loading) {
-    return <Typography>로딩중...</Typography>;
+    return <CircularProgress />;
   }
 
   return (
-    <div className="followers" style={{ fontFamily: "BMJUA" }}>
+    <div className="followers">
       <List>
-        <ListItem onClick={() => navigate(`/profile/${user.uid}`)}>
-          <Avatar>
-            <ProfileImage uid={user.uid} />
-          </Avatar>
-          <ListItemText
-            primary={user.displayName}
-            secondary={user.email}
-            className="text"
-            style={{ fontFamily: "BMJUA", marginLeft: "5px" }}
-          />
-        </ListItem>
+        {user && (
+          <ListItem onClick={() => navigate(`/profile/${user.uid}`)}>
+            <Avatar>
+              <ProfileImage uid={user.uid} />
+            </Avatar>
+            <ListItemText primary={user.displayName} secondary={user.email} />
+          </ListItem>
+        )}
         {followers.length === 0 ? (
-          <Typography className="text"> </Typography>
+          <Typography>팔로워가 없습니다.</Typography>
         ) : (
-          followers.slice(0, 5).map((follower) => (
+          followers.map((follower) => (
             <ListItem
               key={follower.id}
               onClick={() => handleProfileClick(follower.id)}
@@ -84,7 +110,6 @@ const FollowersPage = () => {
               <ListItemText
                 primary={follower.displayName}
                 secondary={follower.email}
-                style={{ fontFamily: "BMJUA", marginLeft: "5px" }}
               />
             </ListItem>
           ))

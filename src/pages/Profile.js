@@ -193,7 +193,7 @@ const Profile = () => {
   return (
     <>
       <CustomNavbar />
-      <Container>
+      <Container className="profiepage">
         <Box
           sx={{
             display: "flex",

@@ -276,9 +276,13 @@ const PostPage = ({ postId, uid, onClose }) => {
           <Box className="actions">
             <IconButton
               onClick={handleLikePost}
-              className={liked ? "liked" : "not-liked"}
+              style={{
+                color: liked ? "#e57373" : "#858585", // 색상 변경
+              }}
             >
-              <FavoriteIcon />
+              <Tooltip title="좋아요">
+                <FavoriteIcon />
+              </Tooltip>
             </IconButton>
             <Typography>{likesCount} 좋아요</Typography>
           </Box>

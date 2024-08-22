@@ -1,0 +1,123 @@
+/* DirectMessagesPage.css */
+
+.directpage {
+  max-width: 800px;
+  margin: 50px auto;
+  margin-top: 30px;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2);
+  height: 80vh;
+}
+
+.direct-messages {
+  display: flex;
+  height: 100%;
+}
+
+.followers-list {
+  flex: 0 0 250px;
+  overflow-y: auto;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.followers-list .MuiListItem-root {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.followers-list .MuiListItem-root:hover {
+  background-color: #e0e0e0;
+}
+
+.followers-list .MuiListItem-root.Mui-selected {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}
+
+.messages-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background-color: #fff;
+}
+
+.selected-follower-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.messages-list .MuiListItem-root {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.messages-list .MuiListItem-root.mine {
+  justify-content: flex-end;
+}
+
+.messages-list .MuiListItem-root.theirs {
+  justify-content: flex-start;
+}
+
+.messages-list .MuiListItem-root .avatar-profile {
+  margin-right: 10px;
+}
+
+.messages-list .MuiListItem-root.mine .avatar-profile {
+  margin-left: 10px;
+}
+
+.messages-list .MuiListItem-root.theirs .avatar-profile {
+  margin-right: 10px;
+}
+
+.messages-list .MuiListItem-root .MuiListItemText-root {
+  max-width: 70%;
+  word-wrap: break-word;
+  background-color: #f1f0f0;
+  padding: 8px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-wrap: break-word;
+}
+
+.message-input {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  background-color: #fff;
+}
+
+.message-input .MuiTextField-root {
+  margin-right: 10px;
+  flex: 1;
+}
+
+.avatar-profile {
+  width: 40px;
+  height: 40px;
+}
+
+.avatar-profile .avatar-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+}

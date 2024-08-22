@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getFunctions } from "firebase/functions";
 
@@ -18,8 +18,18 @@ const firebaseConfig = {
 // Firebase 초기화 (이미 초기화된 앱이 있는지 확인)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const storage = getStorage(app);
-const db = getFirestore(app); // Firestore 초기화
+const db = getFirestore(app);
+
+// Firestore 오프라인 캐시 활성화
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code === "failed-precondition") {
+    console.error("Firestore persistence failed: Multiple tabs open.");
+  } else if (err.code === "unimplemented") {
+    console.error("Firestore persistence failed: IndexedDB not available.");
+  }
+});
+
 const auth = getAuth(app);
 const functions = getFunctions(app);
 
-export { auth, storage, db, functions }; // 필요한 모듈들을 export
+export { auth, storage, db, functions };

@@ -1,31 +1,47 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { Avatar } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const ProfileImage = ({ uid }) => {
   const [photoURL, setPhotoURL] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const db = getFirestore();
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const userDoc = await getDoc(doc(db, "users", uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setPhotoURL(userData.profileImage || null); // 기본 이미지로 null 설정
-        } else {
-          console.log("No such user!");
-        }
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
+  const fetchUserProfile = useCallback(async () => {
+    if (!uid) return;
 
-    if (uid) {
-      fetchUserProfile();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setPhotoURL(userData.profileImage || null);
+      } else {
+        console.log("No such user!");
+        setPhotoURL(null); // 사용자 데이터가 없을 때 null로 설정
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      setError(error.message); // 오류 메시지를 상태로 저장
+    } finally {
+      setLoading(false);
     }
   }, [uid, db]);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
+
+  if (loading)
+    return (
+      <Avatar sx={{ width: 40, height: 40, backgroundColor: "#e0e0e0" }} />
+    );
+
+  if (error) return <div>Error loading profile image</div>;
 
   return (
     <div>
@@ -34,8 +50,8 @@ const ProfileImage = ({ uid }) => {
           src={photoURL || ""}
           alt="Profile"
           sx={{
-            width: 90,
-            height: 90,
+            width: 40,
+            height: 40,
             backgroundColor: photoURL ? "transparent" : "#e0e0e0",
           }}
         >

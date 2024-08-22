@@ -20,8 +20,8 @@
   align-items: center; /* 수직 중앙 정렬 */
   justify-content: center; /* 수평 중앙 정렬 */
   position: absolute; /* 절대 위치 지정 */
-  top: 20px; /* 상단에서 30px 떨어지게 설정 */
-  right: 0px; /* 오른쪽에서 0px 떨어지게 설정 */
+  top: 30px; /* 상단에서 10px 떨어지게 설정 */
+  right: 10px; /* 오른쪽에서 10px 떨어지게 설정 */
   transition: background-color 0.3s, color 0.3s; /* 배경색과 글자색의 전환 효과 */
 }
 
@@ -40,12 +40,20 @@
 
 /* 컨테이너 스타일 */
 .container {
+  justify-content: center;
+  align-items: center;
+  max-width: 70vw;
+  height: 90vh;
+  margin: auto;
+  margin-top: 20px;
+  padding: 20px;
   background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   font-family: Arial, sans-serif;
 }
 
-/* 이미지 컨테이너 스타일 */
+/* 기본 이미지 컨테이너 및 이미지 스타일 */
 .post-image-container {
   display: flex;
   justify-content: center;
@@ -55,8 +63,9 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* 이미지 스타일 */
 .post-image {
-  max-width: 50%;
+  width: 100%;
   height: auto;
   object-fit: cover;
 }
@@ -90,18 +99,33 @@
   align-items: center;
 }
 
-/* 좋아요 버튼 색상 */
-.liked .MuiIconButton-root {
-  color: #e1306c;
+/* 기본 스타일 */
+.MuiIconButton-root {
+  color: #858585; /* 기본 색상: 회색 */
+  transition: color 0.3s; /* 색상 전환 효과 */
 }
 
-.not-liked .MuiIconButton-root {
-  color: #8e8e8e;
+/* 좋아요 버튼 클릭 시 색상 변경 */
+.liked .MuiIconButton-root {
+  color: #e57373; /* 사용자가 좋아요를 눌렀을 때 색상: 핑크색 */
+}
+
+/* 마우스 오버 시 색상 변경 */
+.MuiIconButton-root:hover {
+  color: #e57373; /* 마우스 오버 시 색상: 핑크색 */
 }
 
 /* 댓글 섹션 스타일 */
 .comments-section {
   margin-top: 20px;
+  max-height: 60vh; /* 최대 높이 설정 */
+  overflow-y: auto; /* 수직 스크롤 가능하게 설정 */
+}
+
+/* 댓글 리스트 스타일 */
+.comments-list {
+  margin-bottom: 20px;
+  padding-right: 10px; /* 스크롤 바가 있는 경우 공간 확보 */
 }
 
 .comments-title {
@@ -109,10 +133,6 @@
   font-weight: bold;
   margin-bottom: 10px;
   color: #333;
-}
-
-.comments-list {
-  margin-bottom: 20px;
 }
 
 /* 댓글 스타일 */
@@ -158,9 +178,17 @@
   gap: 10px; /* 액션 버튼 간의 간격 */
 }
 
-/* 댓글 수정 및 추가 스타일 */
-.edit-comment,
+/* 댓글 추가 섹션 스타일 */
 .add-comment {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding-bottom: 20px; /* 버튼이 잘리지 않도록 하단 패딩 추가 */
+}
+
+/* 댓글 수정 및 추가 스타일 */
+.edit-comment {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -170,151 +198,136 @@
 /* 댓글 추가 버튼 스타일 */
 .add-comment .MuiButton-root {
   min-width: 80px;
-  background-color: #e1306c;
-  color: #fff;
+  background-color: #e1306c; /* 기본 배경 색상 */
+  color: #fff; /* 기본 글자 색상 */
   padding: 10px;
   text-align: center;
+  border: none; /* 버튼의 기본 테두리 제거 */
+  border-radius: 4px; /* 버튼의 모서리 둥글게 */
+  transition: background-color 0.3s, color 0.3s; /* 색상 전환 효과 */
 }
 
-/* 댓글 추가 텍스트 필드 스타일 */
-.add-comment .MuiTextField-root {
-  width: 100%;
+/* 댓글 추가 버튼 hover 상태 */
+.add-comment .MuiButton-root:hover {
+  background-color: #d6a6b9c7; /* hover 시 배경 색상 */
+  color: #ffffff; /* hover 시 글자 색상 */
 }
 
-/* 반응형 디자인 */
+/* 반응형 디자인 - 1000px 이상에서 적용 */
+@media (min-width: 1000px) {
+  .post-image-container {
+    max-width: 700px; /* 최대 너비 설정 */
+    max-height: 400px; /* 최대 높이 설정 */
+  }
+
+  .post-image {
+    min-width: 600px; /* 최소 너비 설정 */
+    min-height: 300px; /* 최소 높이 설정 */
+  }
+}
+
+/* 반응형 디자인 - 1000px 미만에서 적용 */
 @media (max-width: 1000px) {
-  .container {
-    padding: 15px;
-    max-width: 90%;
-  }
-
   .post-image-container {
-    margin-bottom: 15px;
+    max-width: 80vw; /* 화면 너비의 90%로 조정 */
+    max-height: 40vh; /* 화면 높이의 50%로 조정 */
   }
 
   .post-image {
-    max-width: 70%;
-  }
-
-  .post-content {
-    font-size: 1.1rem;
-  }
-
-  .post-category {
-    font-size: 0.9rem;
-  }
-
-  .comments-title {
-    font-size: 1.3rem;
-  }
-
-  .comment {
-    font-size: 0.95rem;
-    padding: 14px;
-  }
-
-  .comment-header {
-    flex-direction: row; /* 한 줄에 유지 */
-    gap: 10px; /* 간격 조정 */
-  }
-
-  .comment-author {
-    margin-top: 0; /* 위쪽 여백 제거 */
+    min-width: 100%; /* 최소 너비를 컨테이너의 100%로 설정 */
+    min-height: auto; /* 최소 높이를 자동으로 설정 */
   }
 }
 
+/* 반응형 디자인 - 700px 미만에서 적용 */
 @media (max-width: 700px) {
-  .container {
-    padding: 10px;
-    max-width: 100%;
-  }
-
   .post-image-container {
-    margin-bottom: 10px;
+    max-width: 80vw; /* 화면 너비의 80%로 조정 */
+    max-height: 40vh; /* 화면 높이의 40%로 조정 */
   }
 
   .post-image {
-    max-width: 80%;
-  }
-
-  .post-content {
-    font-size: 1rem;
-  }
-
-  .post-category {
-    font-size: 0.8rem;
-  }
-
-  .comments-title {
-    font-size: 1.2rem;
-  }
-
-  .comment {
-    font-size: 0.9rem;
-    padding: 12px;
+    min-width: 100%; /* 최소 너비를 컨테이너의 100%로 설정 */
+    min-height: auto; /* 최소 높이를 자동으로 설정 */
   }
 }
 
+/* 반응형 디자인 - 500px 미만에서 적용 */
 @media (max-width: 500px) {
   .container {
-    padding: 8px;
-    max-width: 100%;
+    max-height: 85vh;
   }
 
   .post-image-container {
-    margin-bottom: 8px;
+    max-width: 70vw; /* 화면 너비의 70%로 조정 */
+    max-height: 45vh; /* 화면 높이의 30%로 조정 */
   }
 
   .post-image {
-    max-width: 90%;
-  }
-
-  .post-content {
-    font-size: 0.9rem;
-  }
-
-  .post-category {
-    font-size: 0.7rem;
-  }
-
-  .comments-title {
-    font-size: 1.1rem;
-  }
-
-  .comment {
-    font-size: 0.85rem;
-    padding: 10px;
+    min-width: 100%; /* 최소 너비를 컨테이너의 100%로 설정 */
+    min-height: auto; /* 최소 높이를 자동으로 설정 */
   }
 }
 
+/* 반응형 디자인 - 400px 미만에서 적용 */
 @media (max-width: 400px) {
   .container {
-    padding: 5px;
-    max-width: 100%;
+    max-height: 70vh;
   }
 
   .post-image-container {
-    margin-bottom: 5px;
+    max-width: 60vw; /* 화면 너비의 60%로 조정 */
+    max-height: 25vh; /* 화면 높이의 25%로 조정 */
   }
 
   .post-image {
-    max-width: 100%;
+    min-width: 100%; /* 최소 너비를 컨테이너의 100%로 설정 */
+    min-height: auto; /* 최소 높이를 자동으로 설정 */
   }
+}
 
-  .post-content {
-    font-size: 0.8rem;
-  }
+/* 댓글 스타일 - 반응형 디자인 */
+.comment {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #fafafa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 1rem; /* 기본 폰트 크기 설정 */
+}
 
-  .post-category {
-    font-size: 0.6rem;
-  }
-
-  .comments-title {
-    font-size: 1rem;
-  }
-
+/* 댓글 폰트 크기 및 패딩 조정 - 1000px 미만 */
+@media (max-width: 1000px) {
   .comment {
-    font-size: 0.8rem;
-    padding: 8px;
+    font-size: 0.95rem; /* 기본 폰트 크기를 조금 줄임 */
+    padding: 14px; /* 패딩 조정 */
+  }
+}
+
+/* 댓글 폰트 크기 및 패딩 조정 - 700px 미만 */
+@media (max-width: 700px) {
+  .comment {
+    font-size: 0.9rem; /* 기본 폰트 크기를 더 줄임 */
+    padding: 12px; /* 패딩 조정 */
+  }
+}
+
+/* 댓글 폰트 크기 및 패딩 조정 - 500px 미만 */
+@media (max-width: 500px) {
+  .comment {
+    font-size: 0.85rem; /* 기본 폰트 크기를 더욱 줄임 */
+    padding: 10px; /* 패딩 조정 */
+  }
+}
+
+/* 댓글 폰트 크기 및 패딩 조정 - 400px 미만 */
+@media (max-width: 400px) {
+  .comment {
+    font-size: 0.8rem; /* 기본 폰트 크기를 최소화 */
+    padding: 8px; /* 패딩 조정 */
   }
 }

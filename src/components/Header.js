@@ -12,6 +12,7 @@ import MenuOpenRoundedIcon from "@mui/icons-material/MenuOpenRounded";
 import AddHomeRoundedIcon from "@mui/icons-material/AddHomeRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
+import MessageRoundedIcon from "@mui/icons-material/MessageRounded"; // 다이렉트 메시지 아이콘 추가
 import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
@@ -150,6 +151,11 @@ const Header = ({ refreshProfileImage }) => {
               </div>
               <IconButton onClick={handleNotificationsOpen}>
                 <NotificationsRoundedIcon />
+              </IconButton>
+              <IconButton
+                onClick={() => navigate(`/direct-messages/${user.uid}`)}
+              >
+                <MessageRoundedIcon /> {/* 다이렉트 메시지 아이콘 */}
               </IconButton>
             </>
           )}

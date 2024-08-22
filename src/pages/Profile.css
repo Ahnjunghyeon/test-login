@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+.profiepage {
+  margin-top: 30px;
+}
+
 .Profile {
   display: flex;
   align-items: center;
@@ -16,7 +20,7 @@
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-  margin: 10px auto; /* 중앙 정렬을 위해 auto 설정 */
+  margin-top: 30px;
 }
 
 .Profile .ProfileContainer {
