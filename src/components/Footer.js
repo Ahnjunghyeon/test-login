@@ -11,7 +11,7 @@ const Footer = () => {
   return (
     <footer className="footer" id="contact">
       <div className="footer-content">
-        <p style={{ fontFamily: "BMJUA" }}>&copy; 2024. 08. 04 업데이트</p>
+        <p style={{ fontFamily: "BMJUA" }}>&copy; 2024. 08. 업데이트</p>
       </div>
     </footer>
   );

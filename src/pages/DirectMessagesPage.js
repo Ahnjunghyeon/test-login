@@ -65,7 +65,7 @@ const DirectMessagesPage = () => {
       );
       const messagesQuery = query(
         myMessagesRef,
-        orderBy("timestamp", "desc"),
+        orderBy("timestamp", "asc"), // 오름차순 정렬
         limit(50)
       );
       const snapshot = await getDocs(messagesQuery);

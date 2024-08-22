@@ -117,7 +117,7 @@ const EditPostDialog = ({ open, onClose, post, onSave }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>게시물 수정</DialogTitle>
-      <DialogContent className="dialog-content">
+      <div className="dialog-content">
         {imageUrls.length > 0 && (
           <div className="image-gallery">
             <Button
@@ -190,7 +190,7 @@ const EditPostDialog = ({ open, onClose, post, onSave }) => {
             <MenuItem value="자기계발">자기계발</MenuItem>
           </Select>
         </FormControl>
-      </DialogContent>
+      </div>
       <DialogActions className="dialog-actions">
         <Button onClick={onClose}>취소</Button>
         <Button onClick={handleSaveEdit} disabled={loading}>

@@ -30,7 +30,6 @@ body {
   height: 600px;
   background-image: url("../img/water.jpg");
   opacity: 0.7; /* 투명도 설정 (0은 완전히 투명, 1은 불투명) */
-  /* z-index: -1; 레이어를 뒤로 보내기 */
   background-size: cover;
   background-position: center;
   color: #ffffff;
@@ -48,8 +47,6 @@ body {
 
 .hero-title {
   font-size: 3rem;
-
-  font-family: "";
   margin-bottom: 20px;
   font-weight: bold;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
@@ -88,19 +85,20 @@ body {
 
 .section-title {
   font-size: 2.5rem;
-
   text-align: center;
-  margin-bottom: 40px;
+  margin-top: 40px;
   color: #333;
 }
 
 .container {
   max-width: 1200px;
-  margin: 0 auto;
+  height: auto;
+  margin-top: 50px;
   padding: 0 20px;
 }
 
 .feature-box {
+  margin-top: 30px;
   display: flex;
   justify-content: space-between;
   gap: 20px;
@@ -113,12 +111,16 @@ body {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  opacity: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
   text-align: center;
 }
 
-.feature-item-text {
+.feature-item.in-view {
+  opacity: 1;
+  transform: translateY(0);
 }
+
 .feature-item:hover {
   transform: translateY(-10px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);

@@ -599,7 +599,7 @@ const PostList = ({
             <>
               <h2>게시물 목록</h2>
               {posts
-                .sort((a, b) => b.createdAt.seconds - a.createdAt.seconds) // 시간순서대로 정렬 (최신 게시물이 위로 오도록)
+                .sort((a, b) => b.createdAt.seconds - a.createdAt.seconds) // 시간순서대로 정렬
                 .map((post) => (
                   <Card key={post.id} sx={{ maxWidth: 345, marginBottom: 2 }}>
                     <CardHeader
@@ -749,28 +749,33 @@ const PostList = ({
                                   {(comment.userId === user.uid ||
                                     post.uid === user.uid) && (
                                     <>
-                                      <IconButton
-                                        className="comment-action-buttons"
-                                        onClick={() =>
-                                          handleEditCommentClick(
-                                            post.id,
-                                            comment
-                                          )
-                                        }
-                                      >
-                                        <EditIcon />
-                                      </IconButton>
-                                      <IconButton
-                                        className="comment-action-buttons"
-                                        onClick={() =>
-                                          handleDeleteComment(
-                                            post.id,
-                                            comment.id
-                                          )
-                                        }
-                                      >
-                                        <DeleteIcon />
-                                      </IconButton>
+                                      {comment.userId === user.uid && (
+                                        <IconButton
+                                          className="comment-action-buttons"
+                                          onClick={() =>
+                                            handleEditCommentClick(
+                                              post.id,
+                                              comment
+                                            )
+                                          }
+                                        >
+                                          <EditIcon />
+                                        </IconButton>
+                                      )}
+                                      {(comment.userId === user.uid ||
+                                        post.uid === user.uid) && (
+                                        <IconButton
+                                          className="comment-action-buttons"
+                                          onClick={() =>
+                                            handleDeleteComment(
+                                              post.id,
+                                              comment.id
+                                            )
+                                          }
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      )}
                                     </>
                                   )}
                                 </div>

@@ -200,6 +200,7 @@ const Profile = () => {
       <Container className="profile-page">
         <Box
           sx={{
+            marginTop: "100px",
             display: "grid",
             gridTemplateColumns: "1fr 3fr",
             gap: 2,
