@@ -86,24 +86,6 @@ const Logopage = () => {
         <h2 className="section-title">미리보기</h2>
         <ImageSlideshow />
       </section>
-
-      <section className="navigation-buttons">
-        <h2 className="section-title">Explore More</h2>
-        <div className="button-container">
-          <Link to="/notifications" className="nav-button">
-            알림
-          </Link>
-          <Link to="/stories" className="nav-button">
-            스토리
-          </Link>
-          <Link to="/messages" className="nav-button">
-            다이렉트 메시지
-          </Link>
-          <Link to="/explore" className="nav-button">
-            발견
-          </Link>
-        </div>
-      </section>
     </div>
   );
 };

@@ -29,7 +29,6 @@ import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import CustomNavbar from "../components/Header";
 import Footer from "../components/Footer";
 import UploadPost from "../components/UploadPost";
-import NotificationsPage from "../pages/NotificationsPage";
 
 const Profile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -50,6 +49,7 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      setLoading(true); // 데이터 로딩 시작
       try {
         const userDoc = await getDoc(doc(db, "users", uid));
         if (userDoc.exists()) {
@@ -75,6 +75,8 @@ const Profile = () => {
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
+      } finally {
+        setLoading(false); // 데이터 로딩 종료
       }
     };
 
@@ -107,25 +109,22 @@ const Profile = () => {
     if (currentUser) {
       const userFollowRef = doc(db, `users/${currentUser.uid}/follow`, uid);
       try {
-        // 팔로우 추가
         await setDoc(userFollowRef, { uid });
         setIsFollowing(true);
 
-        // 현재 시간을 Timestamp 객체로 생성
         const currentTime = Timestamp.now();
 
         if (currentUser.uid !== uid) {
           await addDoc(collection(db, `users/${uid}/notifications`), {
             type: "follow",
-            timestamp: currentTime, // Timestamp 객체로 저장
-            message: `${
-              currentUser.displayName || "사용자"
-            }님이 당신을 팔로우했습니다.`,
+            timestamp: currentTime,
+            message: `${currentUser.displayName || "User"} followed you.`,
             read: false,
           });
         }
       } catch (error) {
         console.error("Error following user:", error);
+        alert("Failed to follow user. Please try again later.");
       }
     }
   };
@@ -138,6 +137,7 @@ const Profile = () => {
         setIsFollowing(false);
       } catch (error) {
         console.error("Error unfollowing user:", error);
+        alert("Failed to unfollow user. Please try again later.");
       }
     }
   };
@@ -152,9 +152,9 @@ const Profile = () => {
         { displayName },
         { merge: true }
       );
-      alert("프로필이 성공적으로 업데이트되었습니다.");
+      alert("Profile updated successfully.");
     } catch (error) {
-      alert("프로필 업데이트 실패: " + error.message);
+      alert("Failed to update profile: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -177,9 +177,9 @@ const Profile = () => {
           { merge: true }
         );
         setProfileImage(downloadURL);
-        alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
+        alert("Profile image updated successfully.");
       } catch (error) {
-        alert("프로필 이미지를 업데이트하는 중에 오류가 발생했습니다.");
+        alert("Failed to update profile image.");
       } finally {
         setUploadingImage(false);
       }
@@ -187,91 +187,110 @@ const Profile = () => {
   };
 
   const handlePostClick = (postId) => {
-    navigate(`/posts/${uid}/${postId}`);
+    navigate(`/home/`);
   };
+
+  if (loading) {
+    return <CircularProgress />;
+  }
 
   return (
     <>
       <CustomNavbar />
-      <Container className="profiepage">
+      <Container className="profile-page">
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            display: "grid",
+            gridTemplateColumns: "1fr 3fr",
+            gap: 2,
             p: 2,
           }}
         >
-          {profileUser && (
-            <>
-              <Box sx={{ position: "relative", mb: 2 }}>
-                <Avatar
-                  src={profileImage || "/default-avatar.png"}
-                  alt={displayName}
-                  sx={{ width: 100, height: 100 }}
-                />
-                {currentUser && currentUser.uid === uid && (
-                  <IconButton
-                    component="label"
-                    sx={{
-                      position: "absolute",
-                      top: "70%",
-                      left: "70%",
-                      backgroundColor: "white",
-                      color: "purple",
-                    }}
-                  >
-                    <input
-                      hidden
-                      accept="image/*"
-                      type="file"
-                      onChange={handleImageUpload}
-                    />
-                    <PhotoCamera />
-                  </IconButton>
-                )}
-              </Box>
-
-              {currentUser && currentUser.uid === uid ? (
-                <form onSubmit={handleSubmit}>
-                  <TextField
-                    label="Display Name"
-                    variant="outlined"
-                    fullWidth
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    sx={{ mb: 2 }}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              p: 2,
+              borderRight: "1px solid #ddd",
+            }}
+          >
+            {profileUser && (
+              <>
+                <Box sx={{ position: "relative", mb: 2 }}>
+                  <Avatar
+                    src={profileImage || "/default-avatar.png"}
+                    alt={displayName}
+                    sx={{ width: 120, height: 120 }}
                   />
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={loading}
-                    sx={{ color: "purple", backgroundColor: "white" }}
-                  >
-                    {loading ? <CircularProgress size={24} /> : "Update"}
-                  </Button>
-                </form>
-              ) : (
-                <Box>
-                  <Typography variant="h5">{displayName}</Typography>
-                  <Typography variant="body1">User UID: {uid}</Typography>
-                  <Typography variant="body1">이메일: {userEmail}</Typography>
+                  {currentUser && currentUser.uid === uid && (
+                    <IconButton
+                      component="label"
+                      sx={{
+                        position: "absolute",
+                        top: "75%",
+                        left: "75%",
+                        backgroundColor: "white",
+                        color: "purple",
+                      }}
+                    >
+                      <input
+                        hidden
+                        accept="image/*"
+                        type="file"
+                        onChange={handleImageUpload}
+                      />
+                      <PhotoCamera />
+                    </IconButton>
+                  )}
                 </Box>
-              )}
 
-              {currentUser && currentUser.uid !== uid && (
-                <Button
-                  variant="contained"
-                  color={isFollowing ? "secondary" : "primary"}
-                  onClick={isFollowing ? handleUnfollow : handleFollow}
-                >
-                  {isFollowing ? "언팔로우" : "팔로우"}
-                </Button>
-              )}
-            </>
-          )}
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h4">게시물</Typography>
+                {currentUser && currentUser.uid === uid ? (
+                  <form onSubmit={handleSubmit}>
+                    <TextField
+                      label="Display Name"
+                      variant="outlined"
+                      fullWidth
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      sx={{ mb: 2 }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={loading}
+                      sx={{ color: "purple", backgroundColor: "white" }}
+                    >
+                      {loading ? <CircularProgress size={24} /> : "Update"}
+                    </Button>
+                  </form>
+                ) : (
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                      {displayName}
+                    </Typography>
+                    <Typography variant="body1">User UID: {uid}</Typography>
+                    <Typography variant="body1">Email: {userEmail}</Typography>
+                    {currentUser && currentUser.uid !== uid && (
+                      <Button
+                        variant="contained"
+                        color={isFollowing ? "secondary" : "primary"}
+                        onClick={isFollowing ? handleUnfollow : handleFollow}
+                        sx={{ mt: 2 }}
+                      >
+                        {isFollowing ? "Unfollow" : "Follow"}
+                      </Button>
+                    )}
+                  </Box>
+                )}
+              </>
+            )}
+          </Box>
+
+          <Box sx={{ p: 2 }}>
+            <Typography variant="h4" sx={{ mb: 2 }}>
+              Posts
+            </Typography>
             <div className="posts-container">
               {profilePosts.map((post) => (
                 <div
@@ -279,9 +298,21 @@ const Profile = () => {
                   onClick={() => handlePostClick(post.id)}
                   style={{ cursor: "pointer", marginBottom: "16px" }}
                 >
-                  <Card>
+                  <Card
+                    sx={{
+                      maxWidth: 345,
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
                     <CardContent>
-                      <Typography variant="body2">{post.category}</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ marginBottom: "8px", fontWeight: "bold" }}
+                      >
+                        {post.category}
+                      </Typography>
                       {post.imageUrls && post.imageUrls.length > 0 && (
                         <UploadPost imageUrls={post.imageUrls} />
                       )}
@@ -293,7 +324,6 @@ const Profile = () => {
             </div>
           </Box>
         </Box>
-        <NotificationsPage uid={uid} />
       </Container>
       <Footer />
     </>

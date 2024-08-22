@@ -1,3 +1,4 @@
+// src/Firebase/firebase.js
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";

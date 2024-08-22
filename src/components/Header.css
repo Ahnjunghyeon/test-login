@@ -47,7 +47,7 @@
 
   position: fixed;
   width: 100%;
-  background-color: #ffffff00;
+  background-color: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: top 0.3s;
   z-index: 1000; /* 헤더가 다른 요소 위에 표시되도록 설정 */

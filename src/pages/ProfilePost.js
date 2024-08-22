@@ -18,16 +18,18 @@ import {
   TextField,
   Button,
   Tooltip,
-  Dialog,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ProfileLogo from "../components/ProfileLogo";
 import { db } from "../Firebase/firebase";
+import { useLocation } from "react-router-dom";
 import "./PostPage.css";
 
-const PostPage = ({ postId, uid, onClose }) => {
+const ProfilePost = () => {
+  const { state } = useLocation();
+  const { uid, postId } = state || {};
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
@@ -264,114 +266,103 @@ const PostPage = ({ postId, uid, onClose }) => {
   }
 
   return (
-    <Dialog
-      open={true}
-      onClose={onClose}
-      BackdropProps={{
-        style: { backgroundColor: "transparent" },
-      }}
-    >
-      <div className="container">
-        <Button className="exitbtn" onClick={onClose}>
-          X
-        </Button>
-        <Box className="post-image-container">
-          {post.imageUrls && post.imageUrls[0] && (
-            <img src={post.imageUrls[0]} alt="Post" className="post-image" />
-          )}
+    <div className="container">
+      <Button className="exitbtn" onClick={() => window.history.back()}>
+        X
+      </Button>
+      <Box className="post-image-container">
+        {post.imageUrls && post.imageUrls[0] && (
+          <img src={post.imageUrls[0]} alt="Post" className="post-image" />
+        )}
+      </Box>
+      <Typography className="post-displyName">{post.displayName}</Typography>
+      <Typography className="post-content">{post.content}</Typography>
+      <Box className="post-category-liked">
+        <Box className="actions">
+          <IconButton
+            onClick={handleLikePost}
+            style={{
+              color: liked ? "#e57373" : "#858585",
+            }}
+          >
+            <Tooltip title="좋아요">
+              <FavoriteIcon />
+            </Tooltip>
+          </IconButton>
+          <Typography>{likesCount} 좋아요</Typography>
         </Box>
-        <Typography className="post-displyName">{post.displayName}</Typography>
-        <Typography className="post-content">{post.content}</Typography>
-        <Box className="post-category-liked">
-          <Box className="actions">
-            <IconButton
-              onClick={handleLikePost}
+        <Typography className="post-category">{post.category}</Typography>
+      </Box>
+      <Box className="comments-section">
+        <Typography variant="h6" className="comments-title">
+          댓글
+        </Typography>
+        <Box className="comments-list">
+          {comments.map((comment) => (
+            <Box
+              key={comment.id}
+              className="comment"
               style={{
-                color: liked ? "#e57373" : "#858585",
+                border:
+                  currentUserId === comment.userId ? "1px solid #000" : "",
               }}
             >
-              <Tooltip title="좋아요">
-                <FavoriteIcon />
-              </Tooltip>
-            </IconButton>
-            <Typography>{likesCount} 좋아요</Typography>
-          </Box>
-          <Typography className="post-category">{post.category}</Typography>
-        </Box>
-        <Box className="comments-section">
-          <Typography variant="h6" className="comments-title">
-            댓글
-          </Typography>
-          <Box className="comments-list">
-            {comments.map((comment) => (
-              <Box key={comment.id} className="comment">
-                <Box className="comment-header">
-                  <div className="comment-userinfo">
-                    <ProfileLogo uid={comment.userId} />
-                    <Typography variant="body2" className="comment-author">
-                      {comment.userProfile.displayName || "알 수 없는 사용자"}
-                    </Typography>
-                  </div>
-                  {comment.userId === currentUserId && (
-                    <Box className="comment-actions">
-                      <Tooltip title="수정">
-                        <IconButton
-                          onClick={() => {
-                            setEditingCommentId(comment.id);
-                            setEditCommentContent(comment.content);
-                          }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="삭제">
-                        <IconButton
-                          onClick={() => handleDeleteComment(comment.id)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  )}
+              <ProfileLogo userId={comment.userId} />
+              <Typography className="comment-username">
+                {comment.displayName}
+              </Typography>
+              {editingCommentId === comment.id ? (
+                <Box className="edit-comment-form">
+                  <TextField
+                    value={editCommentContent}
+                    onChange={handleEditCommentChange}
+                    fullWidth
+                  />
+                  <Button
+                    onClick={() => handleEditComment(comment.id)}
+                    variant="contained"
+                  >
+                    수정
+                  </Button>
                 </Box>
-                {editingCommentId === comment.id ? (
-                  <Box className="edit-comment">
-                    <TextField
-                      multiline
-                      value={editCommentContent}
-                      onChange={handleEditCommentChange}
-                    />
-                    <Button onClick={() => handleEditComment(comment.id)}>
-                      저장
-                    </Button>
-                  </Box>
-                ) : (
-                  <Typography variant="body2" className="comment-content">
-                    {comment.content}
-                  </Typography>
-                )}
-              </Box>
-            ))}
-          </Box>
-          <Box className="add-comment">
-            <TextField
-              multiline
-              value={newComment}
-              onChange={handleCommentChange}
-              placeholder="댓글을 입력하세요"
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAddComment}
-            >
-              댓글 추가
-            </Button>
-          </Box>
+              ) : (
+                <Typography className="comment-content">
+                  {comment.content}
+                </Typography>
+              )}
+              {currentUserId === comment.userId && (
+                <Box className="comment-actions">
+                  <IconButton
+                    onClick={() =>
+                      setEditingCommentId(
+                        editingCommentId === comment.id ? null : comment.id
+                      )
+                    }
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton onClick={() => handleDeleteComment(comment.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              )}
+            </Box>
+          ))}
         </Box>
-      </div>
-    </Dialog>
+        <Box className="add-comment-form">
+          <TextField
+            value={newComment}
+            onChange={handleCommentChange}
+            fullWidth
+            placeholder="댓글을 작성하세요"
+          />
+          <Button onClick={handleAddComment} variant="contained">
+            추가
+          </Button>
+        </Box>
+      </Box>
+    </div>
   );
 };
 
-export default PostPage;
+export default ProfilePost;

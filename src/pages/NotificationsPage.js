@@ -146,9 +146,23 @@ const NotificationsPage = ({ anchorEl, open, onClose }) => {
 
   if (loading) {
     return (
-      <div className="loading-spinner">
-        <CircularProgress />
-      </div>
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        style={{ marginTop: "13px" }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "right" }}
+        PaperProps={{
+          style: {
+            marginTop: "30px", // Popover의 위치를 아래로 이동
+          },
+        }}
+      >
+        <div className="loading-spinner">
+          <CircularProgress />
+        </div>
+      </Popover>
     );
   }
 
@@ -163,6 +177,7 @@ const NotificationsPage = ({ anchorEl, open, onClose }) => {
       PaperProps={{
         style: {
           marginTop: "30px", // Popover의 위치를 아래로 이동
+          maxWidth: "400px", // 최대 너비 설정
         },
       }}
     >
@@ -172,6 +187,7 @@ const NotificationsPage = ({ anchorEl, open, onClose }) => {
             onClick={handleMarkAllAsRead}
             color="primary"
             variant="contained"
+            style={{ marginRight: "8px" }}
           >
             모두 읽음으로 표시
           </Button>

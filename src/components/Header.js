@@ -20,7 +20,6 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 import "./Header.css";
 import SearchBar from "./SearchBar";
 import ProfileImage from "./ProfileLogo";
@@ -290,6 +289,7 @@ const Header = ({ refreshProfileImage }) => {
         anchorEl={notificationsAnchorEl}
         open={notificationsOpen}
         onClose={handleNotificationsClose}
+        uid={user ? user.uid : ""} // user가 null일 경우 빈 문자열을 전달
       />
     </>
   );

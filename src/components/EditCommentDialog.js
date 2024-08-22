@@ -28,7 +28,7 @@ const EditCommentDialog = ({ open, onClose, comment, handleUpdateComment }) => {
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>댓글 수정</DialogTitle>
-      <DialogContent>
+      <div style={{ padding: "30px" }}>
         <TextField
           autoFocus
           margin="dense"
@@ -40,7 +40,7 @@ const EditCommentDialog = ({ open, onClose, comment, handleUpdateComment }) => {
           value={updatedContent}
           onChange={(e) => setUpdatedContent(e.target.value)}
         />
-      </DialogContent>
+      </div>
       <DialogActions>
         <Button onClick={onClose} color="primary">
           취소

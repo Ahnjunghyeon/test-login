@@ -10,15 +10,14 @@ const ImageContainer = styled(Box)({
   position: "relative",
   maxWidth: "800px",
   maxHeight: "600px",
+  overflow: "hidden", // 이미지가 컨테이너를 넘지 않도록 설정
 });
 
 const StyledCardMedia = styled(CardMedia)({
   width: "100%",
   height: "auto",
-  maxHeight: "500px",
-  objectFit: "contain", // 수정된 부분: 비율을 유지하며 이미지가 영역 내에 맞추어지도록 설정
-  alignItems: "center",
-  justifyContent: "center",
+  maxHeight: "100%", // 컨테이너에 맞게 최대 높이 조정
+  objectFit: "contain", // 비율을 유지하며 이미지가 영역 내에 맞추어지도록 설정
 });
 
 const NavigationButton = styled(IconButton)({
@@ -26,12 +25,12 @@ const NavigationButton = styled(IconButton)({
   top: "50%",
   transform: "translateY(-50%)",
   color: "white",
+  zIndex: 10, // 버튼이 이미지 위에 표시되도록 설정
 });
 
 function UploadPost({ imageUrls }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // imageUrls가 변경될 때마다 새로운 이미지 목록으로 currentImageIndex를 초기화
   useEffect(() => {
     if (Array.isArray(imageUrls) && imageUrls.length > 0) {
       setCurrentImageIndex(0);
@@ -63,10 +62,10 @@ function UploadPost({ imageUrls }) {
       />
       {imageUrls.length > 1 && (
         <>
-          <NavigationButton style={{ left: 0 }} onClick={handlePrevImage}>
+          <NavigationButton style={{ left: 10 }} onClick={handlePrevImage}>
             <ChevronLeftIcon />
           </NavigationButton>
-          <NavigationButton style={{ right: 0 }} onClick={handleNextImage}>
+          <NavigationButton style={{ right: 10 }} onClick={handleNextImage}>
             <ChevronRightIcon />
           </NavigationButton>
         </>
